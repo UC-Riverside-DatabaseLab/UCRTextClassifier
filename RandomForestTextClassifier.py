@@ -2,8 +2,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 class RandomForestTextClassifier(object):
-    def __init__(self, stringAttributeIndex):
-        self.stringAttributeIndex = stringAttributeIndex
+    def __init__(self):
         self.randomForest = RandomForestClassifier()
         self.vectorizer = TfidfVectorizer()
     
@@ -12,9 +11,9 @@ class RandomForestTextClassifier(object):
         trainingLabels = []
         trainingWeights = []
         
-        for instance in data.instances:
-            trainingData.append(instance.values[self.stringAttributeIndex])
-            trainingLabels.append(instance.values[data.classIndex])
+        for instance in data:
+            trainingData.append(instance.text)
+            trainingLabels.append(instance.classValue)
             trainingWeights.append(instance.weight)
         
         self.randomForest.fit(self.vectorizer.fit_transform(trainingData), trainingLabels, trainingWeights)
@@ -23,7 +22,7 @@ class RandomForestTextClassifier(object):
         testData = []
         distribution = {}
         
-        testData.append(instance.values[self.stringAttributeIndex])
+        testData.append(instance.text)
         
         orderedDistribution = self.randomForest.predict_proba(self.vectorizer.transform(testData))
         

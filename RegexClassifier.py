@@ -19,7 +19,7 @@ class RegexRule(object):
         return self.regex.match(s)
 
 class RegexClassifier(object):
-    def __init__(self, stringAttributeIndex):
+    def __init__(self):
         self.regexPrefix = "(^|^.* )"
         self.regexSuffix = "($| .*$)"
         self.gap = " (\\S+ )"
@@ -28,11 +28,8 @@ class RegexClassifier(object):
         self.jumpLength = 2
         self.scoreThreshold = 1
         self.scoringMethod = ScoringMethod.accuracy
-        self.stringAttributeIndex = stringAttributeIndex
-        self.classIndex = -1
     
     def train(self, data):
-        self.classIndex = data.classIndex
         self.regexRules = []
         prefixes = set()
         suffixes = set()
@@ -80,7 +77,7 @@ class RegexClassifier(object):
     
     def classify(self, instance):
         for regexRule in self.regexRules:
-            if regexRule.matches(instance.values[self.stringAttributeIndex]):
+            if regexRule.matches(instance.text):
                 return regexRule.distribution
         
         return {}
@@ -94,24 +91,24 @@ class RegexClassifier(object):
         maxValue = 0
         total = 0
         
-        for instance in data.instances:
+        for instance in data:
             matched = False
             
             for regexRule in self.regexRules:
-                if regexRule.matches(instance.values[self.stringAttributeIndex]):
+                if regexRule.matches(instance.text):
                     matched = True
 
             if not matched:
-                if instance.values[self.classIndex] in distribution:
-                    distribution[instance.values[self.classIndex]] = distribution[instance.values[self.classIndex]] + instance.weight
+                if instance.classValue in distribution:
+                    distribution[instance.classValue] = distribution[instance.classValue] + instance.weight
                 else:
-                    distribution[instance.values[self.classIndex]] = instance.weight
+                    distribution[instance.classValue] = instance.weight
                 
                 total = total + instance.weight
                 
-                if distribution[instance.values[self.classIndex]] > maxValue:
-                    maxValue = distribution[instance.values[self.classIndex]]
-                    maxClass = instance.values[self.classIndex]
+                if distribution[instance.classValue] > maxValue:
+                    maxValue = distribution[instance.classValue]
+                    maxClass = instance.classValue
         
         for cValue, count in distribution.items():
             distribution[cValue] = count / total
@@ -126,18 +123,18 @@ class RegexClassifier(object):
         regex = re.compile(self.regexPrefix + self.__formatRegex(phrase) + self.regexSuffix)
         matched = []
         
-        for instance in data.instances:
-            if regex.match(instance.values[self.stringAttributeIndex]):
+        for instance in data:
+            if regex.match(instance.text):
                 total = total + instance.weight
                 
-                if instance.values[self.classIndex] in distribution:
-                    distribution[instance.values[self.classIndex]] = distribution[instance.values[self.classIndex]] + instance.weight
+                if instance.classValue in distribution:
+                    distribution[instance.classValue] = distribution[instance.classValue] + instance.weight
                 else:
-                    distribution[instance.values[self.classIndex]] = instance.weight
+                    distribution[instance.classValue] = instance.weight
                 
-                if distribution[instance.values[self.classIndex]] > numCorrect:
-                    numCorrect = distribution[instance.values[self.classIndex]]
-                    classValue = instance.values[self.classIndex]
+                if distribution[instance.classValue] > numCorrect:
+                    numCorrect = distribution[instance.classValue]
+                    classValue = instance.classValue
                 
                 matched.append(instance)
         
@@ -172,7 +169,7 @@ class RegexClassifier(object):
         suffixes.clear()
 
         for instance in data:
-            sentence = regexRule.partialRegex.sub(self.matchedPattern, instance.values[self.classIndex])
+            sentence = regexRule.partialRegex.sub(self.matchedPattern, instance.text)
             
             while self.matchedPattern in sentence:
                 partialSentence = sentence[0:sentence.index(self.matchedPattern)].strip().split(" ")
@@ -192,15 +189,15 @@ class RegexClassifier(object):
         words = {}
         wordAccuracy = {}
         
-        for instance in data.instances:
-            for word in instance.values[self.stringAttributeIndex].split(" "):
+        for instance in data:
+            for word in instance.text.split(" "):
                 if word in words:
-                    if instance.values[self.classIndex] in words[word]:
-                        words[word][instance.values[self.classIndex]] = words[word][instance.values[self.classIndex]] + instance.weight
+                    if instance.classValue in words[word]:
+                        words[word][instance.classValue] = words[word][instance.classValue] + instance.weight
                     else:
-                        words[word][instance.values[self.classIndex]] = instance.weight
+                        words[word][instance.classValue] = instance.weight
                 else:
-                    words[word] = {instance.values[self.classIndex] : instance.weight}
+                    words[word] = {instance.classValue : instance.weight}
         
         for word, distribution in words.items():
             maxCount = 0
