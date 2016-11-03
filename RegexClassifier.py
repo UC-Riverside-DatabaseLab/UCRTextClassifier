@@ -19,14 +19,16 @@ class RegexRule(object):
         return self.regex.match(s)
 
 class RegexClassifier(object):
-    def __init__(self):
+    def __init__(self, jumpLength = 2, scoreThreshold = 1, rootWords = 1, minRootWordFrequency = "auto"):
         self.regexPrefix = "(^|^.* )"
         self.regexSuffix = "($| .*$)"
         self.gap = " (\\S+ )"
         self.matchedPattern = "MATCHED_PATTERN"
         self.regexTokens = [".", "^", "$", "(", ")", "[", "]", "{", "}", "?", "+", "|", "*"]
-        self.jumpLength = 2
-        self.scoreThreshold = 1
+        self.jumpLength = max(0, jumpLength)
+        self.scoreThreshold = scoreThreshold
+        self.rootWords = max(1, rootWords)
+        self.minRootWordFrequency = minRootWordFrequency
         self.scoringMethod = ScoringMethod.accuracy
     
     def train(self, data):
@@ -35,10 +37,9 @@ class RegexClassifier(object):
         suffixes = set()
         currentRegexRules = []
         newRegexRules = []
-        jumpLength = max(0, self.jumpLength)
         improved = False
         
-        for word in self.__findTopWords(data, 1):
+        for word in self.__findTopWords(data):
             currentRegexRules.append(self.__createRegexRule(word, data))
             
             while len(currentRegexRules) > 0:
@@ -51,7 +52,7 @@ class RegexClassifier(object):
                     improved = False
                     candidates = []
                     
-                    for i in range(0, jumpLength + 1):
+                    for i in range(0, self.jumpLength + 1):
                         self.__findPrefixesAndSuffixes(regexRule, regexRule.matched, prefixes, suffixes, i)
                         self.__expandRegex(regexRule.phrase, candidates, prefixes, regexRule.matched, True, i)
                         self.__expandRegex(regexRule.phrase, candidates, suffixes, regexRule.matched, False, i)
@@ -81,6 +82,75 @@ class RegexClassifier(object):
                 return regexRule.distribution
         
         return {}
+    
+    def evaluate(self, testSet):
+        correct = 0
+        weightedCorrect = 0
+        weightedTotal = 0
+        confusionMatrix = {}
+        columnWidth = {}
+        
+        for instance in testSet:
+            maxClass = None
+            maxProbability = 0
+            weightedTotal = weightedTotal + instance.weight
+            
+            for classValue, probability in self.classify(instance).items():
+                if probability > maxProbability:
+                    maxClass = classValue
+                    maxProbability = probability
+            
+            if maxClass == instance.classValue:
+                correct = correct + 1
+                weightedCorrect = weightedCorrect + instance.weight
+            
+            if instance.classValue not in confusionMatrix:
+                confusionMatrix[instance.classValue] = {}
+            
+            for classValue, distribution in confusionMatrix.items():
+                if instance.classValue not in distribution:
+                    confusionMatrix[classValue][instance.classValue] = 0
+            
+            if maxClass in confusionMatrix[instance.classValue]:
+                confusionMatrix[instance.classValue][maxClass] = confusionMatrix[instance.classValue][maxClass] + 1
+            else:
+                confusionMatrix[instance.classValue][maxClass] = 1
+            
+            if instance.classValue not in columnWidth:
+                columnWidth[instance.classValue] = len(instance.classValue)
+        
+        accuracy = correct / len(testSet)
+        weightedAccuracy = weightedCorrect / weightedTotal
+        
+        print(("Accuracy: %0.2f" % (100 * accuracy)) + "%\n" + ("Weighted Accuracy: %0.2f" % (100 * weightedAccuracy)) + "%\nConfusion Matrix:")
+        
+        for classValue, distribution in confusionMatrix.items():
+            for prediction, count in distribution.items():
+                if prediction not in columnWidth or (prediction in columnWidth and len(str(count)) > columnWidth[prediction]):
+                    columnWidth[prediction] = len(str(count))
+        
+        for classValue, distribution in confusionMatrix.items():
+            row = ""
+            
+            for prediction, count in distribution.items():
+                for i in range(0, columnWidth[prediction] - len(str(prediction)) + 1):
+                    row = row + " "
+                
+                row = row + prediction
+            
+            print(row + " <- Classified As")
+            break
+        
+        for classValue, distribution in confusionMatrix.items():
+            row = ""
+            
+            for prediction, count in distribution.items():
+                for i in range(0, columnWidth[prediction] - len(str(count)) + 1):
+                    row = row + " "
+                
+                row = row + str(confusionMatrix[classValue][prediction])
+            
+            print(row + " " + classValue)
     
     def setScoreThreshold(self, scoreThreshold):
         self.scoreThreshold = scoreThreshold
@@ -167,27 +237,32 @@ class RegexClassifier(object):
     def __findPrefixesAndSuffixes(self, regexRule, data, prefixes, suffixes, gapSize):
         prefixes.clear()
         suffixes.clear()
-
+        
         for instance in data:
-            sentence = regexRule.partialRegex.sub(self.matchedPattern, instance.text)
+            text = regexRule.partialRegex.sub(self.matchedPattern, instance.text)
             
-            while self.matchedPattern in sentence:
-                partialSentence = sentence[0:sentence.index(self.matchedPattern)].strip().split(" ")
-                partialSentenceLength = len(partialSentence)
+            while self.matchedPattern in text:
+                partialText = text[0:text.index(self.matchedPattern)].strip().split(" ")
+                partialTextLength = len(partialText)
                 
-                if gapSize < partialSentenceLength:
-                    prefixes.add(partialSentence[partialSentenceLength - 1 - gapSize])
+                if gapSize < partialTextLength:
+                    prefixes.add(partialText[partialTextLength - 1 - gapSize])
                 
-                sentence = sentence[sentence.index(self.matchedPattern) + len(self.matchedPattern)].strip()
-                partialSentence = sentence.split(" ")
-
-                if gapSize < len(partialSentence):
-                    suffixes.add(partialSentence[gapSize])
+                text = text[text.index(self.matchedPattern) + len(self.matchedPattern):len(text)].strip()
+                partialText = text.split(" ")
+                
+                if gapSize < len(partialText):
+                    suffixes.add(partialText[gapSize])
     
-    def __findTopWords(self, data, numWords):
+    def __findTopWords(self, data):
         topWords = []
         words = {}
         wordAccuracy = {}
+        
+        if self.minRootWordFrequency == "auto":
+            minRootWordFrequency = len(data) / 2
+        else:
+            minRootWordFrequency = max(1, self.minRootWordFrequency)
         
         for instance in data:
             for word in instance.text.split(" "):
@@ -209,9 +284,11 @@ class RegexClassifier(object):
                 if count > maxCount:
                     maxCount = count
             
-            wordAccuracy[word] = {"accuracy" : maxCount / total, "count" : maxCount}
+            
+            if total > minRootWordFrequency:
+                wordAccuracy[word] = {"accuracy" : maxCount / total, "count" : maxCount}
         
-        for i in range(0, numWords):
+        for i in range(0, self.rootWords):
             maxWord = ""
             maxAccuracy = 0
             maxCount = 0
@@ -223,7 +300,7 @@ class RegexClassifier(object):
                     maxCount = stats["count"]
             
             topWords.append(maxWord)
-            del wordAccuracy[word]
+            del wordAccuracy[maxWord]
         
         return topWords
     
@@ -233,7 +310,7 @@ class RegexClassifier(object):
             gapStringLength = len(self.gap)
             gapLength = phrase[gapIndex + gapStringLength + 1:gapIndex + gapStringLength + 2]
             prefix = self.__formatRegex(phrase[0:gapIndex])
-            suffix = self.__formatRegex(phrase[gapIndex + gapStringLength + 3])
+            suffix = self.__formatRegex(phrase[gapIndex + gapStringLength + 3:len(phrase)])
 
             return prefix + self.gap + "{" + gapLength + "}" + suffix
         
