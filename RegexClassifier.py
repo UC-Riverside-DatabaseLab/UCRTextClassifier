@@ -12,6 +12,7 @@ class RegexRule(object):
         self.phrase = phrase
         self.matched = matched
         self.distribution = distribution
+        self.classValue = classValue
         self.numCorrect = numCorrect
         self.score = score
     
@@ -19,7 +20,7 @@ class RegexRule(object):
         return self.regex.match(s)
 
 class RegexClassifier(object):
-    def __init__(self, jumpLength = 2, scoreThreshold = 1, rootWords = 1, minRootWordFrequency = "auto"):
+    def __init__(self, scoringMethod = ScoringMethod.accuracy, scoreThreshold = 1, jumpLength = 2, rootWords = 1, minRootWordFrequency = "auto"):
         self.regexPrefix = "(^|^.* )"
         self.regexSuffix = "($| .*$)"
         self.gap = " (\\S+ )"
@@ -29,7 +30,7 @@ class RegexClassifier(object):
         self.scoreThreshold = scoreThreshold
         self.rootWords = max(1, rootWords)
         self.minRootWordFrequency = minRootWordFrequency
-        self.scoringMethod = ScoringMethod.accuracy
+        self.scoringMethod = scoringMethod
     
     def train(self, data):
         self.regexRules = []
@@ -82,75 +83,6 @@ class RegexClassifier(object):
                 return regexRule.distribution
         
         return {}
-    
-    def evaluate(self, testSet):
-        correct = 0
-        weightedCorrect = 0
-        weightedTotal = 0
-        confusionMatrix = {}
-        columnWidth = {}
-        
-        for instance in testSet:
-            maxClass = None
-            maxProbability = 0
-            weightedTotal = weightedTotal + instance.weight
-            
-            for classValue, probability in self.classify(instance).items():
-                if probability > maxProbability:
-                    maxClass = classValue
-                    maxProbability = probability
-            
-            if maxClass == instance.classValue:
-                correct = correct + 1
-                weightedCorrect = weightedCorrect + instance.weight
-            
-            if instance.classValue not in confusionMatrix:
-                confusionMatrix[instance.classValue] = {}
-            
-            for classValue, distribution in confusionMatrix.items():
-                if instance.classValue not in distribution:
-                    confusionMatrix[classValue][instance.classValue] = 0
-            
-            if maxClass in confusionMatrix[instance.classValue]:
-                confusionMatrix[instance.classValue][maxClass] = confusionMatrix[instance.classValue][maxClass] + 1
-            else:
-                confusionMatrix[instance.classValue][maxClass] = 1
-            
-            if instance.classValue not in columnWidth:
-                columnWidth[instance.classValue] = len(instance.classValue)
-        
-        accuracy = correct / len(testSet)
-        weightedAccuracy = weightedCorrect / weightedTotal
-        
-        print(("Accuracy: %0.2f" % (100 * accuracy)) + "%\n" + ("Weighted Accuracy: %0.2f" % (100 * weightedAccuracy)) + "%\nConfusion Matrix:")
-        
-        for classValue, distribution in confusionMatrix.items():
-            for prediction, count in distribution.items():
-                if prediction not in columnWidth or (prediction in columnWidth and len(str(count)) > columnWidth[prediction]):
-                    columnWidth[prediction] = len(str(count))
-        
-        for classValue, distribution in confusionMatrix.items():
-            row = ""
-            
-            for prediction, count in distribution.items():
-                for i in range(0, columnWidth[prediction] - len(str(prediction)) + 1):
-                    row = row + " "
-                
-                row = row + prediction
-            
-            print(row + " <- Classified As")
-            break
-        
-        for classValue, distribution in confusionMatrix.items():
-            row = ""
-            
-            for prediction, count in distribution.items():
-                for i in range(0, columnWidth[prediction] - len(str(count)) + 1):
-                    row = row + " "
-                
-                row = row + str(confusionMatrix[classValue][prediction])
-            
-            print(row + " " + classValue)
     
     def setScoreThreshold(self, scoreThreshold):
         self.scoreThreshold = scoreThreshold
@@ -266,6 +198,9 @@ class RegexClassifier(object):
         
         for instance in data:
             for word in instance.text.split(" "):
+                if word == "":
+                    continue
+                
                 if word in words:
                     if instance.classValue in words[word]:
                         words[word][instance.classValue] = words[word][instance.classValue] + instance.weight
@@ -289,7 +224,7 @@ class RegexClassifier(object):
                 wordAccuracy[word] = {"accuracy" : maxCount / total, "count" : maxCount}
         
         for i in range(0, self.rootWords):
-            maxWord = ""
+            maxWord = None
             maxAccuracy = 0
             maxCount = 0
             
@@ -299,8 +234,9 @@ class RegexClassifier(object):
                     maxAccuracy = stats["accuracy"]
                     maxCount = stats["count"]
             
-            topWords.append(maxWord)
-            del wordAccuracy[maxWord]
+            if maxWord != None:
+                topWords.append(maxWord)
+                del wordAccuracy[maxWord]
         
         return topWords
     
