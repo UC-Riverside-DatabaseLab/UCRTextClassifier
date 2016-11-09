@@ -1,5 +1,6 @@
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction.text import TfidfVectorizer
+import numpy as np
 
 class RandomForestTextClassifier(object):
     def __init__(self, numTrees = 10, criterion = "gini", maxDepth = None, minSamplesSplit = 2, minSamplesLeaf = 1, minWeightFractionLeaf = 0.0, maxFeatures = "auto",
@@ -19,7 +20,7 @@ class RandomForestTextClassifier(object):
             trainingLabels.append(instance.classValue)
             trainingWeights.append(instance.weight)
         
-        self.randomForest.fit(self.vectorizer.fit_transform(trainingData), trainingLabels, trainingWeights)
+        self.randomForest.fit(self.vectorizer.fit_transform(trainingData), np.array(trainingLabels), np.array(trainingWeights))
     
     def classify(self, instance):
         testData = []

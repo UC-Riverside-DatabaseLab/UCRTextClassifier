@@ -84,3 +84,4 @@ class TextDatasetFileParser(object):
                     text = text[1:len(text) - 1]
                 
                 dataset.append(Instance(text, classValue, 1))
+	return dataset
