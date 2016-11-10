@@ -1,86 +1,95 @@
 class Instance(object):
-    def __init__(self, text, classValue, weight):
+    def __init__(self, text, class_value, weight):
         self.text = text
-        self.classValue = classValue
+        self.class_value = class_value
         self.weight = weight
 
 class TextDatasetFileParser(object):
-    def __init__(self, verbose = False):
+    def __init__(self, verbose=False):
         self.verbose = verbose
-    
+
     def parse(self, filename):
         file = open(filename, 'r')
         dataset = []
-        
+
         if filename.endswith(".arff"):
-            dataset = self.__parseARFFFile(file)
+            dataset = self.__parse_arff_file(file)
         elif filename.endswith(".csv"):
-            dataset = self.__parseCSVFile(file)
-        
+            dataset = self.__parse_csv_file(file)
+
         file.close()
         return dataset
-    
-    def __parseARFFFile(self, file):
-        dataTag = "@DATA"
-        parsingData = False
+
+    def __parse_arff_file(self, file):
+        parsing_data = False
         dataset = []
-        
+
         while True:
             line = file.readline()
 
             if line == "":
                 break
-            elif line.startswith(dataTag) and not parsingData:
-                parsingData = True
-            elif parsingData:
+            elif line.startswith("@DATA") and not parsing_data:
+                parsing_data = True
+            elif parsing_data:
                 line = line[0:len(line) - 1]
-                            
+
                 if self.verbose:
                     print(line)
-                
+
                 weight = 1
-                lastCommaIndex = line.rfind(",")
-                lastColumn = line[lastCommaIndex + 1:len(line)]
-                
-                if lastColumn.startswith("{") and lastColumn.endswith("}"):
-                    weight = float(lastColumn[1:len(lastColumn) - 1])
-                    line = line[0:lastCommaIndex]
-                    lastCommaIndex = line.rfind(",")
-                    lastColumn = line[lastCommaIndex + 1:len(line)]
-                
-                classValue = lastColumn
-                text = line[0:lastCommaIndex]
-                
-                if (text.startswith("'") and text.endswith("'")) or (text.startswith('"') and text.endswith('"')):
+                last_comma_index = line.rfind(",")
+                last_column = line[last_comma_index + 1:]
+
+                if last_column.startswith("{") and last_column.endswith("}"):
+                    weight = float(last_column[1:len(last_column) - 1])
+                    line = line[0:last_comma_index]
+                    last_comma_index = line.rfind(",")
+                    last_column = line[last_comma_index + 1:]
+
+                class_value = last_column
+                text = line[0:last_comma_index]
+
+                if (text.startswith("'") and text.endswith("'")) or (text.startswith('"')
+                                                                     and text.endswith('"')):
                     text = text[1:len(text) - 1]
-                
-                dataset.append(Instance(text, classValue, weight))
+
+                dataset.append(Instance(text, class_value, weight))
             elif line == "\n":
                 continue
-        
+
         return dataset
-    
-    def __parseCSVFile(self, file):
+
+    def __parse_csv_file(self, file):
         dataset = []
-        
-        while(True):
+
+        while True:
             line = file.readline()
-            
+
             if line == "":
                 break
             elif line == "\n":
                 continue
             else:
                 line = line[0:len(line) - 1]
-                
+
                 if self.verbose:
                     print(line)
-                
-                lastCommaIndex = line.rfind(",")
-                classValue = line[lastCommaIndex + 1:len(line)]
-                text = line[0:lastCommaIndex]
-                
-                if (text.startswith("'") and text.endswith("'")) or (text.startswith('"') and text.endswith('"')):
+
+                last_comma_index = line.rfind(",")
+                class_value = line[last_comma_index + 1:]
+                text = line[0:last_comma_index]
+
+                if (text.startswith("'") and text.endswith("'")) or (text.startswith('"')
+                                                                     and text.endswith('"')):
                     text = text[1:len(text) - 1]
+
+                if (class_value.startswith("'")
+                    and class_value.endswith("'")) or (class_value.startswith('"')
+                                                       and class_value.endswith('"')):
+                    class_value = class_value[1:len(class_value) - 1]
+
+                dataset.append(Instance(text, class_value, 1))
+
+        return dataset
                 
-                dataset.append(Instance(text, classValue, 1))

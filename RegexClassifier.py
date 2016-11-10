@@ -1,256 +1,270 @@
-from enum import Enum
 import re
+from enum import Enum
 
 class ScoringMethod(Enum):
     accuracy = 1
     informationGain = 2
 
 class RegexRule(object):
-    def __init__(self, regex, phrase, matched, distribution, classValue, numCorrect, score):
+    def __init__(self, regex, phrase, matched, distribution, class_value, num_correct, score):
         self.regex = regex
-        self.partialRegex = re.compile(regex.pattern.replace("(^|^.* )", "").replace("($| .*$)", ""))
+        self.partial_regex = re.compile(regex.pattern.replace("(^|^.* )", "").replace("($| .*$)",
+                                                                                      ""))
         self.phrase = phrase
         self.matched = matched
         self.distribution = distribution
-        self.classValue = classValue
-        self.numCorrect = numCorrect
+        self.class_value = class_value
+        self.num_correct = num_correct
         self.score = score
-    
-    def matches(self, s):
-        return self.regex.match(s)
+
+    def matches(self, text):
+        return self.regex.match(text)
 
 class RegexClassifier(object):
-    def __init__(self, scoringMethod = ScoringMethod.accuracy, scoreThreshold = 1, jumpLength = 2, rootWords = 1, minRootWordFrequency = "auto"):
-        self.regexPrefix = "(^|^.* )"
-        self.regexSuffix = "($| .*$)"
+    def __init__(self, scoring_method=ScoringMethod.accuracy, score_threshold=1, jump_length=2,
+                 root_words=1, min_root_word_frequency="auto"):
+        self.regex_prefix = "(^|^.* )"
+        self.regex_suffix = "($| .*$)"
         self.gap = " (\\S+ )"
-        self.matchedPattern = "MATCHED_PATTERN"
-        self.regexTokens = [".", "^", "$", "(", ")", "[", "]", "{", "}", "?", "+", "|", "*"]
-        self.jumpLength = max(0, jumpLength)
-        self.scoreThreshold = scoreThreshold
-        self.rootWords = max(1, rootWords)
-        self.minRootWordFrequency = minRootWordFrequency
-        self.scoringMethod = scoringMethod
-    
+        self.matched_pattern = "MATCHED_PATTERN"
+        self.regex_tokens = [".", "^", "$", "(", ")", "[", "]", "{", "}", "?", "+", "|", "*"]
+        self.jump_length = max(0, jump_length)
+        self.score_threshold = score_threshold
+        self.root_words = max(1, root_words)
+        self.min_root_word_frequency = min_root_word_frequency
+        self.scoring_method = scoring_method
+        self.regex_rules = []
+
     def train(self, data):
-        self.regexRules = []
+        self.regex_rules = []
         prefixes = set()
         suffixes = set()
-        currentRegexRules = []
-        newRegexRules = []
+        current_regex_rules = []
+        new_regex_rules = []
         improved = False
-        
-        for word in self.__findTopWords(data):
-            currentRegexRules.append(self.__createRegexRule(word, data))
-            
-            while len(currentRegexRules) > 0:
-                newRegexRules.clear()
 
-                for regexRule in currentRegexRules:
-                    if regexRule == None or regexRule.phrase == None:
+        for word in self.__find_top_words(data):
+            current_regex_rules.append(self.__create_regex_rule(word, data))
+
+            while len(current_regex_rules) > 0:
+                new_regex_rules.clear()
+
+                for regex_rule in current_regex_rules:
+                    if regex_rule is None or regex_rule.phrase is None:
                         continue
-                    
+
                     improved = False
                     candidates = []
-                    
-                    for i in range(0, self.jumpLength + 1):
-                        self.__findPrefixesAndSuffixes(regexRule, regexRule.matched, prefixes, suffixes, i)
-                        self.__expandRegex(regexRule.phrase, candidates, prefixes, regexRule.matched, True, i)
-                        self.__expandRegex(regexRule.phrase, candidates, suffixes, regexRule.matched, False, i)
-                    
-                    for newRegexRule in candidates:
-                        newScore = newRegexRule.score
-                        score = regexRule.score
-                        
-                        if newScore > score or (newScore == score and newRegexRule.numCorrect > regexRule.numCorrect):
-                            newRegexRules.append(newRegexRule)
-                            
+
+                    for i in range(0, self.jump_length + 1):
+                        self.__find_prefixes_and_suffixes(regex_rule, regex_rule.matched, prefixes,
+                                                          suffixes, i)
+                        self.__expand_regex(regex_rule.phrase, candidates, prefixes,
+                                            regex_rule.matched, True, i)
+                        self.__expand_regex(regex_rule.phrase, candidates, suffixes,
+                                            regex_rule.matched, False, i)
+
+                    for new_regex_rule in candidates:
+                        new_score = new_regex_rule.score
+                        score = regex_rule.score
+
+                        if new_score > score or (new_score == score and new_regex_rule.num_correct
+                                                 > regex_rule.num_correct):
+                            new_regex_rules.append(new_regex_rule)
+
                             improved = True
-                    
-                    if not improved and regexRule.score >= self.scoreThreshold:
-                        self.regexRules.append(regexRule)
-                
-                currentRegexRules = newRegexRules.copy()
-        
-        for regexRule in self.regexRules:
-            regexRule.matched = None
-        
-        self.__createDefaultRegexRule(data)
-    
+
+                    if not improved and regex_rule.score >= self.score_threshold:
+                        self.regex_rules.append(regex_rule)
+
+                current_regex_rules = new_regex_rules.copy()
+
+        for regex_rule in self.regex_rules:
+            regex_rule.matched = None
+
+        self.__create_default_regex_rule(data)
+
     def classify(self, instance):
-        for regexRule in self.regexRules:
-            if regexRule.matches(instance.text):
-                return regexRule.distribution
-        
+        for regex_rule in self.regex_rules:
+            if regex_rule.matches(instance.text):
+                return regex_rule.distribution
+
         return {}
-    
-    def setScoreThreshold(self, scoreThreshold):
-        self.scoreThreshold = scoreThreshold
-    
-    def __createDefaultRegexRule(self, data):
+
+    def set_score_threshold(self, score_threshold):
+        self.score_threshold = score_threshold
+
+    def __create_default_regex_rule(self, data):
         distribution = {}
-        maxClass = None
-        maxValue = 0
+        max_class = None
+        max_value = 0
         total = 0
-        
+
         for instance in data:
             matched = False
-            
-            for regexRule in self.regexRules:
-                if regexRule.matches(instance.text):
+            inst_class = instance.class_value
+
+            for regex_rule in self.regex_rules:
+                if regex_rule.matches(instance.text):
                     matched = True
 
             if not matched:
-                if instance.classValue in distribution:
-                    distribution[instance.classValue] = distribution[instance.classValue] + instance.weight
+                if instance.class_value in distribution:
+                    distribution[inst_class] = distribution[inst_class] + instance.weight
                 else:
-                    distribution[instance.classValue] = instance.weight
-                
+                    distribution[inst_class] = instance.weight
+
                 total = total + instance.weight
-                
-                if distribution[instance.classValue] > maxValue:
-                    maxValue = distribution[instance.classValue]
-                    maxClass = instance.classValue
-        
-        for cValue, count in distribution.items():
-            distribution[cValue] = count / total
-              
-        self.regexRules.append(RegexRule(re.compile(".*"), ".*", None, distribution, maxClass, maxValue, distribution[maxClass]))
-    
-    def __createRegexRule(self, phrase, data):
+
+                if distribution[inst_class] > max_value:
+                    max_value = distribution[inst_class]
+                    max_class = inst_class
+
+        for c_value, count in distribution.items():
+            distribution[c_value] = count / total
+
+        self.regex_rules.append(RegexRule(re.compile(".*"), ".*", None, distribution, max_class,
+                                          max_value, distribution[max_class]))
+
+    def __create_regex_rule(self, phrase, data):
         distribution = {}
         total = 0
-        numCorrect = 0
-        classValue = None
-        regex = re.compile(self.regexPrefix + self.__formatRegex(phrase) + self.regexSuffix)
+        num_correct = 0
+        class_value = None
+        regex = re.compile(self.regex_prefix + self.__format_regex(phrase) + self.regex_suffix)
         matched = []
-        
+
         for instance in data:
+            inst_class = instance.class_value
+
             if regex.match(instance.text):
                 total = total + instance.weight
-                
-                if instance.classValue in distribution:
-                    distribution[instance.classValue] = distribution[instance.classValue] + instance.weight
+
+                if inst_class in distribution:
+                    distribution[inst_class] = distribution[inst_class] + instance.weight
                 else:
-                    distribution[instance.classValue] = instance.weight
-                
-                if distribution[instance.classValue] > numCorrect:
-                    numCorrect = distribution[instance.classValue]
-                    classValue = instance.classValue
-                
+                    distribution[inst_class] = instance.weight
+
+                if distribution[inst_class] > num_correct:
+                    num_correct = distribution[inst_class]
+                    class_value = inst_class
+
                 matched.append(instance)
-        
+
         if total > 0:
-            for cValue, count in distribution.items():
-                distribution[cValue] = count / total
-            
-            return RegexRule(regex, phrase, matched, distribution, classValue, numCorrect, distribution[cValue])
-        
+            for c_value, count in distribution.items():
+                distribution[c_value] = count / total
+
+            return RegexRule(regex, phrase, matched, distribution, class_value, num_correct,
+                             distribution[class_value])
+
         return None
-    
-    def __expandRegex(self, phrase, candidates, affixes, data, usePrefixes, gapSize):
-        formattedGap = " "
-        regexRule = None
-        
-        if gapSize > 0:
-            formattedGap = self.gap + "{" + str(gapSize) + "}"
-        
+
+    def __expand_regex(self, phrase, candidates, affixes, data, use_prefixes, gap_size):
+        formatted_gap = " "
+        regex_rule = None
+
+        if gap_size > 0:
+            formatted_gap = self.gap + "{" + str(gap_size) + "}"
+
         for affix in affixes:
-            if usePrefixes:
-                regexRule = self.__createRegexRule(affix + formattedGap + phrase, data)
+            if use_prefixes:
+                regex_rule = self.__create_regex_rule(affix + formatted_gap + phrase, data)
             else:
-                regexRule = self.__createRegexRule(phrase + formattedGap + affix, data)
-            
-            if regexRule != None:
-                candidates.append(regexRule)
-        
+                regex_rule = self.__create_regex_rule(phrase + formatted_gap + affix, data)
+
+            if regex_rule != None:
+                candidates.append(regex_rule)
+
         return candidates
-    
-    def __findPrefixesAndSuffixes(self, regexRule, data, prefixes, suffixes, gapSize):
+
+    def __find_prefixes_and_suffixes(self, regex_rule, data, prefixes, suffixes, gap_size):
         prefixes.clear()
         suffixes.clear()
-        
+
         for instance in data:
-            text = regexRule.partialRegex.sub(self.matchedPattern, instance.text)
-            
-            while self.matchedPattern in text:
-                partialText = text[0:text.index(self.matchedPattern)].strip().split(" ")
-                partialTextLength = len(partialText)
-                
-                if gapSize < partialTextLength:
-                    prefixes.add(partialText[partialTextLength - 1 - gapSize])
-                
-                text = text[text.index(self.matchedPattern) + len(self.matchedPattern):len(text)].strip()
-                partialText = text.split(" ")
-                
-                if gapSize < len(partialText):
-                    suffixes.add(partialText[gapSize])
-    
-    def __findTopWords(self, data):
-        topWords = []
+            text = regex_rule.partial_regex.sub(self.matched_pattern, instance.text)
+
+            while self.matched_pattern in text:
+                partial_text = text[0:text.index(self.matched_pattern)].strip().split(" ")
+                partial_text_length = len(partial_text)
+
+                if gap_size < partial_text_length:
+                    prefixes.add(partial_text[partial_text_length - 1 - gap_size])
+
+                text = text[text.index(self.matched_pattern) + len(self.matched_pattern):].strip()
+                partial_text = text.split(" ")
+
+                if gap_size < len(partial_text):
+                    suffixes.add(partial_text[gap_size])
+
+    def __find_top_words(self, data):
+        top_words = []
         words = {}
-        wordAccuracy = {}
-        
-        if self.minRootWordFrequency == "auto":
-            minRootWordFrequency = len(data) / 2
+        word_accuracy = {}
+
+        if self.min_root_word_frequency == "auto":
+            min_root_word_frequency = len(data) / 2
         else:
-            minRootWordFrequency = max(1, self.minRootWordFrequency)
-        
+            min_root_word_frequency = max(1, self.min_root_word_frequency)
+
         for instance in data:
+            inst_class = instance.class_value
+
             for word in instance.text.split(" "):
                 if word == "":
                     continue
-                
-                if word in words:
-                    if instance.classValue in words[word]:
-                        words[word][instance.classValue] = words[word][instance.classValue] + instance.weight
-                    else:
-                        words[word][instance.classValue] = instance.weight
-                else:
-                    words[word] = {instance.classValue : instance.weight}
-        
-        for word, distribution in words.items():
-            maxCount = 0
-            total = 0
-            
-            for classValue, count in distribution.items():
-                total = total + count
-                
-                if count > maxCount:
-                    maxCount = count
-            
-            
-            if total > minRootWordFrequency:
-                wordAccuracy[word] = {"accuracy" : maxCount / total, "count" : maxCount}
-        
-        for i in range(0, self.rootWords):
-            maxWord = None
-            maxAccuracy = 0
-            maxCount = 0
-            
-            for word, stats in wordAccuracy.items():
-                if stats["accuracy"] > maxAccuracy or (stats["accuracy"] == maxAccuracy and stats["count"] > maxCount):
-                    maxWord = word
-                    maxAccuracy = stats["accuracy"]
-                    maxCount = stats["count"]
-            
-            if maxWord != None:
-                topWords.append(maxWord)
-                del wordAccuracy[maxWord]
-        
-        return topWords
-    
-    def __formatRegex(self, phrase):
-        if self.gap in phrase:
-            gapIndex = phrase.index(self.gap)
-            gapStringLength = len(self.gap)
-            gapLength = phrase[gapIndex + gapStringLength + 1:gapIndex + gapStringLength + 2]
-            prefix = self.__formatRegex(phrase[0:gapIndex])
-            suffix = self.__formatRegex(phrase[gapIndex + gapStringLength + 3:len(phrase)])
 
-            return prefix + self.gap + "{" + gapLength + "}" + suffix
-        
-        for token in self.regexTokens:
+                if word in words:
+                    if inst_class in words[word]:
+                        words[word][inst_class] = words[word][inst_class] + instance.weight
+                    else:
+                        words[word][inst_class] = instance.weight
+                else:
+                    words[word] = {inst_class : instance.weight}
+
+        for word, distribution in words.items():
+            max_count = 0
+            total = 0
+
+            for class_value, count in distribution.items():
+                total = total + count
+
+                if count > max_count:
+                    max_count = count
+
+            if total > min_root_word_frequency:
+                word_accuracy[word] = {"accuracy" : max_count / total, "count" : max_count}
+
+        for i in range(0, self.root_words):
+            max_word = None
+            max_accuracy = 0
+            max_count = 0
+
+            for word, stats in word_accuracy.items():
+                if stats["accuracy"] > max_accuracy or (stats["accuracy"] == max_accuracy
+                                                        and stats["count"] > max_count):
+                    max_word = word
+                    max_accuracy = stats["accuracy"]
+                    max_count = stats["count"]
+
+            if max_word != None:
+                top_words.append(max_word)
+                del word_accuracy[max_word]
+
+        return top_words
+
+    def __format_regex(self, phrase):
+        if self.gap in phrase:
+            gap_index = phrase.index(self.gap)
+            gap_string_length = len(self.gap)
+            gap_length = phrase[gap_index + gap_string_length + 1:gap_index + gap_string_length + 2]
+            prefix = self.__format_regex(phrase[0:gap_index])
+            suffix = self.__format_regex(phrase[gap_index + gap_string_length + 3:])
+
+            return prefix + self.gap + "{" + gap_length + "}" + suffix
+
+        for token in self.regex_tokens:
             phrase = phrase.replace(token, "\\" + token).replace("\\\\", "\\")
-        
+
         return phrase
