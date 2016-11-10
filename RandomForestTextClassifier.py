@@ -21,42 +21,20 @@ class RandomForestTextClassifier(object):
         training_weights = []
 
         for instance in data:
-<<<<<<< HEAD
             training_data.append(instance.text)
             training_labels.append(instance.class_value)
             training_weights.append(instance.weight)
 
-        self.random_forest.fit(self.vectorizer.fit_transform(training_data), training_labels,
-                               training_weights)
+        self.random_forest.fit(self.vectorizer.fit_transform(training_data),
+                               np.array(training_labels), np.array(training_weights))
 
-=======
-            trainingData.append(instance.text)
-            trainingLabels.append(instance.classValue)
-            trainingWeights.append(instance.weight)
-        
-        self.randomForest.fit(self.vectorizer.fit_transform(trainingData), np.array(trainingLabels), np.array(trainingWeights))
-    
->>>>>>> origin/master
     def classify(self, instance):
-        test_data = [instance.text]
         distribution = {}
-<<<<<<< HEAD
-        test_data = self.vectorizer.transform(test_data)
+        test_data = self.vectorizer.transform([instance.text])
         ordered_distribution = self.random_forest.predict_proba(test_data)
 
         for i in range(0, len(ordered_distribution[0])):
             if ordered_distribution[0, i] > 0:
                 distribution[self.random_forest.classes_[i]] = ordered_distribution[0, i]
 
-=======
-        
-        testData.append(instance.text)
-        
-        orderedDistribution = self.randomForest.predict_proba(self.vectorizer.transform(testData))
-        
-        for i in range(0, len(orderedDistribution[0])):
-            if orderedDistribution[0, i] > 0:
-                distribution[self.randomForest.classes_[i]] = orderedDistribution[0, i]
-        
->>>>>>> origin/master
         return distribution
