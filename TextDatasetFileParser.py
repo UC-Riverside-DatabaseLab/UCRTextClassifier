@@ -83,6 +83,7 @@ class TextDatasetFileParser(object):
                 if (text.startswith("'") and text.endswith("'")) or (text.startswith('"')
                                                                      and text.endswith('"')):
                     text = text[1:len(text) - 1]
+<<<<<<< HEAD
 
                 if (class_value.startswith("'")
                     and class_value.endswith("'")) or (class_value.startswith('"')
@@ -93,3 +94,8 @@ class TextDatasetFileParser(object):
 
         return dataset
                 
+=======
+                
+                dataset.append(Instance(text, classValue, 1))
+	return dataset
+>>>>>>> origin/master
