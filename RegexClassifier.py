@@ -1,5 +1,6 @@
 import re
 from enum import Enum
+from AbstractTextClassifier import AbstractTextClassifier
 
 class ScoringMethod(Enum):
     accuracy = 1
@@ -20,7 +21,7 @@ class RegexRule(object):
     def matches(self, text):
         return self.regex.match(text)
 
-class RegexClassifier(object):
+class RegexClassifier(AbstractTextClassifier):
     def __init__(self, scoring_method=ScoringMethod.accuracy, score_threshold=1, jump_length=2,
                  root_words=1, min_root_word_frequency="auto"):
         self.regex_prefix = "(^|^.* )"
