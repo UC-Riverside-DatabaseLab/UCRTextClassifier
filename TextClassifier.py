@@ -9,10 +9,11 @@ from RandomForestTextClassifier import RandomForestTextClassifier
 from RegexClassifier import RegexClassifier
 
 class VotingMethod(Enum):
-    majority = 1
-    average = 2
-    median = 3
-    product = 4
+    average = 1
+    majority = 2
+    maximum = 3
+    median = 4
+    product = 5
 
 class ClassifierThread(Thread):
     def __init__(self, classifier, data):
@@ -25,9 +26,14 @@ class ClassifierThread(Thread):
         self.classifier.train(data)
 
 class TextClassifier(AbstractTextClassifier):
-    def __init__(self, voting_method=VotingMethod.majority):
+    def __init__(self, voting_method=VotingMethod.majority, use_weights=True):
         self.classifiers = [RandomForestTextClassifier(), RegexClassifier()]
+        self.classifier_weights = []
         self.voting_method = voting_method
+        self.use_weights = use_weights
+
+        while len(self.classifier_weights) < len(self.classifiers):
+            self.classifier_weights.append(1)
 
     def train(self, data):
         self.classes = set()
@@ -36,6 +42,11 @@ class TextClassifier(AbstractTextClassifier):
         for instance in data:
             self.classes.add(instance.class_value)
 
+        if self.use_weights:
+            training_set_size = int(0.9 * len(data))
+            validation_set = data[training_set_size:]
+            data = data[0:training_set_size]
+
         for classifier in self.classifiers:
             threads.append(ClassifierThread(classifier, data))
             threads[len(threads) - 1].start()
@@ -43,11 +54,18 @@ class TextClassifier(AbstractTextClassifier):
         for thread in threads:
             thread.join()
 
+        if self.use_weights:
+            for i in range(0, len(self.classifiers)):
+                accuracy = self.classifiers[i].evaluate(validation_set)["weightedaccuracy"]
+                self.classifier_weights[i] = accuracy
+
     def classify(self, instance):
-        if self.voting_method == VotingMethod.majority:
-            return self.__majority(instance)
-        elif self.voting_method == VotingMethod.average:
+        if self.voting_method == VotingMethod.average:
             return self.__average(instance)
+        elif self.voting_method == VotingMethod.majority:
+            return self.__majority(instance)
+        elif self.voting_method == VotingMethod.maximum:
+            return self.__maximum(instance)
         elif self.voting_method == VotingMethod.median:
             return self.__median(instance)
         elif self.voting_method == VotingMethod.product:
@@ -56,14 +74,14 @@ class TextClassifier(AbstractTextClassifier):
     def __average(self, instance):
         distribution = {}
 
-        for classifier in self.classifiers:
-            predictions = self.__check_distribution(classifier.classify(instance))
+        for i in range(0, len(self.classifiers)):
+            predictions = self.__check_distribution(self.classifiers[i].classify(instance))
 
             for prediction, probability in predictions.items():
                 if prediction not in distribution:
                     distribution[prediction] = []
 
-                distribution[prediction].append(probability)
+                distribution[prediction].append(probability * self.classifier_weights[i])
 
         for prediction, probabilities in distribution.items():
             distribution[prediction] = mean(probabilities)
@@ -73,36 +91,57 @@ class TextClassifier(AbstractTextClassifier):
     def __majority(self, instance):
         distribution = {}
 
-        for classifier in self.classifiers:
+        for i in range(0, len(self.classifiers)):
             max_class = None
             max_probability = 0
-            predictions = self.__check_distribution(classifier.classify(instance))
+            predictions = self.__check_distribution(self.classifiers[i].classify(instance))
 
             for prediction, probability in predictions.items():
                 if probability > max_probability:
                     max_class = prediction
                     max_probability = probability
-                elif probability == max_probability:
-                    max_class = None
 
             if max_class not in distribution:
                 distribution[max_class] = 0
 
-            distribution[max_class] = distribution[max_class] + 1
+            distribution[max_class] = distribution[max_class] + self.classifier_weights[i]
+
+        return self.__normalize_distribution(distribution)
+
+    def __maximum(self, instance):
+        distribution = {}
+
+        for i in range(0, len(self.classifiers)):
+            max_class = None
+            max_probability = 0
+            predictions = self.__check_distribution(self.classifiers[i].classify(instance))
+
+            for prediction, probability in predictions.items():
+                if probability > max_probability:
+                    max_class = prediction
+                    max_probability = probability
+
+            if max_class not in distribution:
+                distribution[max_class] = 0
+
+            max_probability = max_probability * self.classifier_weights[i]
+
+            if max_probability > distribution[max_class]:
+                distribution[max_class] = max_probability
 
         return self.__normalize_distribution(distribution)
 
     def __median(self, instance):
         distribution = {}
 
-        for classifier in self.classifiers:
-            predictions = self.__check_distribution(classifier.classify(instance))
+        for i in range(0, len(self.classifiers)):
+            predictions = self.__check_distribution(self.classifiers[i].classify(instance))
 
             for prediction, probability in predictions.items():
                 if prediction not in distribution:
                     distribution[prediction] = []
 
-                distribution[prediction].append(probability)
+                distribution[prediction].append(probability * self.classifier_weights[i])
 
         for prediction, probabilities in distribution.items():
             distribution[prediction] = median(probabilities)
@@ -112,14 +151,15 @@ class TextClassifier(AbstractTextClassifier):
     def __product(self, instance):
         distribution = {}
 
-        for classifier in self.classifiers:
-            predictions = self.__check_distribution(classifier.classify(instance))
+        for i in range(0, len(self.classifiers)):
+            predictions = self.__check_distribution(self.classifiers[i].classify(instance))
 
             for prediction, probability in predictions.items():
                 if prediction not in distribution:
                     distribution[prediction] = 1
 
                 distribution[prediction] = distribution[prediction] * probability
+                distribution[prediction] = distribution[prediction] * self.classifier_weights[i]
 
         return self.__normalize_distribution(distribution)
 
@@ -145,7 +185,7 @@ if len(sys.argv) < 2:
     sys.exit()
 
 data = TextDatasetFileParser().parse(sys.argv[1])
-text_classifier = TextClassifier(VotingMethod.product)
+text_classifier = TextClassifier(VotingMethod.maximum)
 training_set_ratio = 0.9
 test_set = data[int(len(data) * training_set_ratio):]
 classifiers = ["Random Forest", "Regular Expression Classifier"]
