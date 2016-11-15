@@ -112,22 +112,13 @@ class TextClassifier(AbstractTextClassifier):
         distribution = {}
 
         for i in range(0, len(self.classifiers)):
-            max_class = None
-            max_probability = 0
             predictions = self.__check_distribution(self.classifiers[i].classify(instance))
 
             for prediction, probability in predictions.items():
-                if probability > max_probability:
-                    max_class = prediction
-                    max_probability = probability
+                probability = probability * self.classifier_weights[i]
 
-            if max_class not in distribution:
-                distribution[max_class] = 0
-
-            max_probability = max_probability * self.classifier_weights[i]
-
-            if max_probability > distribution[max_class]:
-                distribution[max_class] = max_probability
+                if prediction not in distribution or probability > distribution[prediction]:
+                    distribution[prediction] = probability
 
         return self.__normalize_distribution(distribution)
 
