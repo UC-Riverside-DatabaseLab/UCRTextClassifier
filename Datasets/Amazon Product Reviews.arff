@@ -1,0 +1,1006 @@
+@RELATION 'Amazon Product Reviews'
+
+@ATTRIBUTE sentence STRING 
+@ATTRIBUTE classAttribute {Positive,Negative}
+
+@DATA
+'I\'ve dropped my phone more times than I can say, even on concrete and my phone is still great (knock on wood!).',Positive
+'Oh and I forgot to also mention the weird color effect it has on your phone.',Negative
+'Reception is terrible and full of static.',Negative
+'Easy to use.',Positive
+'I don\'t think it would hold it too securly on your belt.',Negative
+'Very wind-resistant.',Positive
+'It was a great phone.',Positive
+'none of the new ones have ever quite worked properly.',Negative
+'Talk about USELESS customer service.',Negative
+'Items stated as included from the description ARE NOT INCLUDED.',Negative
+'Can\'t store anything but phone numbers to SIM.',Negative
+'I would highly recommend this product.',Positive
+'Also its slim enough to fit into my alarm clock docking station without removing the case.',Positive
+'I own a Jabra Earset and was very happy with it, but the sound quality, especially outgoing, on this is better.',Positive
+'Very unreliable service from T-mobile !',Negative
+'Thanks again to Amazon for having the things I need for a good price!',Positive
+'The voice recognition thru the handset is excellent.',Positive
+'T-Mobile has the best customer service anywhere.',Positive
+'The pleather case doesn\'t fit.',Negative
+'I\'m still infatuated with this phone.',Positive
+Disappointed!.,Negative
+'Comfortable in my hand.',Positive
+'You never know if you pushed it hard enough or the right number of times for the function you want or not.',Negative
+'The text messaging feature is really tricky to use.',Negative
+'The sound quality is good and functionality is awesome.',Positive
+'It felt too light and "tinny.".',Negative
+'Thank you for wasting my money.',Negative
+'I would recommend this.',Positive
+'Worked very well paired with a Treo 700w and as a Skype headset on my PC (using a USB Bluetooth transceiver).',Positive
+'I bought this phone as a replacement for my StarTac and have regretted it since.',Negative
+'I only hear garbage for audio.',Negative
+'I have yet to run this new battery below two bars and that\'s three days without charging.',Positive
+'I wear it everyday and it holds up very well.',Positive
+'Battery life is real good.',Positive
+'It definitely was not as good as my S11.',Positive
+'Highly recommend for any one who has a blue tooth phone.',Positive
+'Battery life still not long enough in Motorola Razor V3i.',Negative
+'They made this case too small and is very difficult to install.',Negative
+'These are fabulous!',Positive
+'You can not answer calls with the unit, never worked once!',Negative
+'Overall, I would recommend this phone over the new Walkman.',Positive
+'WORST PHONE EVER.',Negative
+'It\'s a great item.',Positive
+'If you like a loud buzzing to override all your conversations, then this phone is for you!',Negative
+'The replacement died in a few weeks.',Negative
+'I\'ve missed numerous calls because of this reason.',Negative
+'I would definitely recommend the Jabra BT250v for those who are looking for comfort, clarity and a great price!',Positive
+'This case has passed the one year mark and while it shows signs of wear, it is 100% functional.',Positive
+'Disapointing Results.',Negative
+'Definitely a bargain.',Positive
+'Excellent dual-purpose headset.',Positive
+'I great reception all the time.',Positive
+'Great Earpiece.',Positive
+'It is a joy to use.',Positive
+'What possesed me to get this junk, I have no idea...',Negative
+'REALLY UGLY.',Negative
+'That company is a joke.',Negative
+'Crisp and Clear.',Positive
+'Problem is that the ear loops are made of weak material and break easily.',Negative
+'Very disappointing.',Negative
+'Buttons are too small.',Negative
+'A lot of websites have been rating this a very good phone and so do I.',Positive
+'I have a Verizon LG phone and they work well together, good reception and range that exceeds 20 feet line of sight.',Positive
+'They do not last forever, but is not overly expensive to replace.Easy to operate and the sound is much better than others I have tried.',Positive
+'So I basically threw my money out the window for nothing.',Negative
+'The commercials are the most misleading.',Negative
+'All it took was one drop from about 6 inches above the kitchen counter and it was cracked.I am not impressed and I am not laughing.',Negative
+'Returned 8 hours later.',Negative
+'Very good quality though',Positive
+'Adapter does not provide enough charging current.',Negative
+'My only complaint is the standard sound volume is a little low even when turned up to 5(of 5)',Negative
+'I get absolutely horrible reception in my apartment, where with other phones I have not had this problem.',Negative
+'This product is clearly not ready for prime time, I don\'t care how cool it looks, if you can\'t tell a call is coming in it\'s worthless.',Negative
+'Great Phone.',Positive
+'The biggest complaint I have is, the battery drains superfast.',Negative
+'There\'s a horrible tick sound in the background on all my calls that I have never experienced before.',Negative
+'Lousy product.',Negative
+'I received it quickly and it works great!!',Positive
+'Excellent product for the price.',Positive
+'Works well.',Positive
+'Rip off---- Over charge shipping.',Negative
+'No shifting, no bubbling, no peeling, not even a scratch, NOTHING!I couldn\'t be more happier with my new one for the Droid.',Positive
+'Not as good as I had hoped.',Negative
+'I received my supposedly new motorola 375 and apparently there was not a match between the phone and the charger.',Negative
+'If you like a loud buzzing to override all your conversations, then this phone is for you!',Negative
+'It\'s kind of embarrassing to use because of how it looks and mostly it\'s embarrassing how child-like the company is.',Negative
+'I am pairing this with my iphone, and I could not be happier with it so far.',Positive
+'Avoid this one if you can.',Negative
+'Everything worked on the first try.The device was certainly engineered in a clever way and the construction feels good.',Positive
+'I love this cable - it allows me to connect any mini-USB device to my PC.',Positive
+'We received a WHITE colored battery that goes DEAD after a couple hoursTHe original used to last a week - but still lasts longer than thereplacement',Negative
+'Those phones are working just fine now.',Positive
+'Excellent Phone.',Positive
+'This battery is an excellent bargain!',Positive
+'the only VERY DISAPPOINTING thing was there was NO SPEAKERPHONE!!!!',Negative
+'The color is even prettier than I thought it would be, and the graphics are incredibly sharp.',Positive
+'!I definitly recommend!!',Positive
+'It only recognizes the Phone as its storage device.',Negative
+'It\'s so stupid to have to keep buying new chargers, car chargers, cradles, headphones and car kits every time a new phone comes out.',Negative
+'It is the best charger I have seen on the market yet.',Positive
+'Nice Sound.',Positive
+'Truly awful.',Negative
+'Design Flaw?.',Negative
+'Great Product.',Positive
+'AMAZON SUCKS.',Negative
+'Plus, I seriously do not believe it is worth its steep price point.',Negative
+'Nice headset priced right.',Positive
+'This device is great in several situations:1.)',Positive
+'O my gosh the best phone I have ever had.',Positive
+'Internet is excrutiatingly slow.',Negative
+'Portable and it works.',Positive
+'The headset fulfills my requirements so I am happy with my purchase.',Positive
+'This is simply the BEST bluetooth headset for sound quality!',Positive
+'This BlueAnt Supertooth hands-free phone speaker is AWESOME.',Positive
+'Lasted one day and then blew up.',Negative
+'Good audio quality.',Positive
+'The file browser offers all the options that one needs.Handsfree is great.',Positive
+'Small, sleek, impressive looking, practical setup with ample storage in place.',Positive
+'Great Phone.',Positive
+'The design is very odd, as the ear "clip" is not very comfortable at all.',Negative
+'After receiving and using the product for just 2 days it broke.',Negative
+'This phone is slim and light and the display is beautiful.',Positive
+'The one big drawback of the MP3 player is that the buttons on the phone\'s front cover that let you pause and skip songs lock out after a few seconds.',Negative
+'Works great, when my cat attacked the phone he scratched the protective strip instead of destroying the screen.',Positive
+'The speaker is of low quality so as making the ring tones sound very cheap.',Negative
+'NOT WHAT I WANTED.',Negative
+'Worst software ever used.... If I could give this zero stars I would.',Negative
+'BT50 battery junk!.',Negative
+'No real improvement.',Negative
+'This is infuriating.',Negative
+'I have been very satisfied with this cell phone from day one.',Positive
+'The phone crashed completely and now I have to get it replaced.',Negative
+'Was not happy.',Negative
+'This PDA rocks.',Positive
+'Don\'t buy this product - It fails!.',Negative
+'Buyer--Be Very Careful!!!!!.',Negative
+'Gets a signal when other Verizon phones won\'t.',Positive
+'Yet Plantronincs continues to use the same flawed charger design.',Negative
+'Nice quality build, unlike some cheap s*** out there.',Positive
+'Light weight, I hardly notice it is there.',Positive
+'Don\'t buy it.',Negative
+'I could not recommend these more.',Negative
+'Obviously there is a problem with the adhesive.',Negative
+'I found this product to be waaay too big.',Negative
+'The plastic breaks really easy on this clip.',Negative
+'The calls drop, the phone comes on and off at will, the screen goes black and the worst of all it stops ringing intermittently.',Negative
+'Trying to make a call on these is an exercise in frustration.',Negative
+'A good quality bargain.. I bought this after I bought a cheapy from Big Lots that sounded awful and people on the other end couldn\'t hear me.',Positive
+'The camera on the phone may be used as a dustpan when indoors... I\'d rather be using a disposable then this.',Negative
+'The holster that arrived did not match the photo in the ad.',Negative
+'Dont waste your money...',Negative
+'I got the car charger and not even after a week the charger was broken...I went to plug it in and it started smoking.',Negative
+'I exchanged the sony ericson z500a for this and I\'m pretty happy with that decision.',Positive
+'You also cannot take pictures with it in the case because the lense is covered.',Negative
+'If you are looking for a good quality Motorola Headset keep looking, this isn\'t it.',Negative
+'How stupid is that?',Negative
+'Headset works great & was packaged nicely to avoid any damage.',Positive
+'I contacted the company and they told me that, although the unit was still under warranty, if I couldn\'t produce my receipt I was out of luck.',Negative
+Incredible!.,Positive
+'This product is ideal for people like me whose ears are very sensitive.',Positive
+'Good price.',Positive
+'An Awesome New Look For Fall 2000!.',Positive
+'This is a good battery, and it got here really fast.',Positive
+'clipping this to your belt will deffinitely make you feel like 50 cent\'s up-and-coming.',Positive
+'Timely shipment and quality product.',Positive
+'It didn\'t work, people can not hear me when I talk.',Negative
+'But now that it is "out of warranty" the same problems reoccure.Bottom line... put your money somewhere else... Cingular will not support it.',Negative
+'I\'m using it with an iriver SPINN (with case) and it fits fine.',Positive
+'Piece of Junk.',Negative
+'The iGo chargers and tips are really great.',Positive
+'Not worth it.',Negative
+'Cant get the software to work with my computer.',Negative
+'Don\'t waste your $$$ on this one.',Negative
+'There was so much hype over this phone that I assumed it was the best, my mistake.',Negative
+'Obviously they have a terrible customer service, so you get what you pay for.',Negative
+'I have bought this Nokia cell phone a few weeks ago and it was a nightmare.',Negative
+'I highly recommend this modest priced cellular phone.',Positive
+'All three broke within two months of use.',Negative
+'It doesn\'t make you look cool.',Negative
+'Poor sound quality.',Negative
+'good protection and does not make phone too bulky.',Positive
+'I have purchased these for both family and friends, and all enjoy their clarity and ease of use',Positive
+'I advise EVERYONE DO NOT BE FOOLED!',Negative
+'Don\'t make the same mistake that I did and please don\'t buy this phone.',Negative
+'However-the riingtones are not the best, and neither are the games.',Negative
+'I\'ve owned this phone for 7 months now and can say that it\'s the best mobile phone I\'ve had.',Positive
+'The phone gets EXTREMELY HOT!',Negative
+'Buy a different phone - but not this.',Negative
+'There\'s really nothing bad I can say about this headset.',Negative
+'Kind of flops around.',Negative
+'Stay Away From the Q!.',Negative
+'If I take a picture, the battery drops a bar, and starts beeping, letting me know its dieing.',Negative
+'The cutouts and buttons are placed perfectly.',Positive
+'It\'s pretty easy.',Positive
+'VERY DISAPPOINTED.',Negative
+'Bluetooth does not work, phone locks up, screens just flash up and now it just makes calls randomly while in my pocket locked.',Negative
+'The real killer is the volume, and of course it breaking.',Negative
+'This phone works great.',Positive
+'Looks good in the picture, but this case was a huge disappointment!!',Negative
+'The Ngage is still lacking in earbuds.',Negative
+'This is a VERY average phone with bad battery life that operates on a weak network.',Negative
+'This is a great phone!.',Positive
+'I even dropped this phone into a stream and it was submerged for 15 seconds and it still works great!',Positive
+'cool phone.',Positive
+'Terrible phone holder.',Negative
+'That\'s a huge design flaw (unless I\'m not using it correctly, which I don\'t think is the case).',Negative
+'I\'m returning them.',Negative
+'Love this headset!',Positive
+'Do not make the same mistake as me.',Negative
+'This is an excellent tool, especially when paired with your phone\'s auto-answer.',Positive
+'Works like a charm.. Works as advertised.',Positive
+'My Sanyo has survived dozens of drops on blacktop without ill effect.',Positive
+'SWEETEST PHONE!!!',Positive
+'Worst ever.',Negative
+'This is a great deal.',Positive
+'This item is great, installed it, let it charged up overnite and it has been working good every since with no problems',Positive
+'Really good product.',Positive
+'Good , works fine.',Positive
+'I want my money back.',Negative
+'Then I had to continue pairing it periodically since it somehow kept dropping.',Negative
+'Great phone.',Positive
+'I wear glasses and it fits fine with them.',Positive
+'I still maintain that monkeys shouldn\'t make headphones, we just obviously don\'t share enough DNA to copy the design over to humans.',Negative
+'Clear crisp sound.',Positive
+'Not good enough for the price.',Negative
+'The construction of the headsets is poor.',Negative
+'every thing on phone work perfectly, she like it.',Positive
+'I\'ve bought $5 wired headphones that sound better than these.',Negative
+'Then a few days later the a puff of smoke came out of the phone while in use.',Negative
+'It clicks into place in a way that makes you wonder how long that mechanism would last.',Negative
+'very good product, well made.',Positive
+'But, in any case, the best part is, you can download these pictures to your laptop using IR, or even send pictures from your laptop to the phone.',Positive
+'Everything about it is fine and reasonable for the price i.e.',Positive
+'Customer service was terrible.',Negative
+'great...no problems at all!.',Positive
+'After trying many many handsfree gadgets this is the one that finally works well.',Positive
+'It\'s very convenient and simple to use - gets job done & makes the car ride so much smoother.',Positive
+'The noise shield is incrediable.',Positive
+'I\'ll be drivng along, and my headset starts ringing for no reason.',Negative
+'Great Hands Free Device.',Positive
+'Great sound and service.',Positive
+'Uncomfortable In the Ear, Don\'t use with LG VX9900 (EnV).',Negative
+'You get what you pay for I guess.',Negative
+'Treo and T-Mobile refused to replace it again and forced me to buy another phone without any kind of upgrade discount.',Negative
+'Very well made and fits my Surefire GX2 perfectly.',Positive
+'I plugged it in only to find out not a darn thing worked.',Negative
+'After charging overnight, these batteries work great.',Positive
+'I\'m trying to return it for a refund.',Negative
+'I would recommend purchasing the Jabra JX-10 series 2 which works flawlessly with my Moto Q, go figure.',Positive
+'I highly recommend this device to everyone!',Positive
+'Finally, after three or four times the spring of the latch broke and I could not use it any longer on the visor.',Negative
+'Too bad you have to pay up to $$$ a month for the service!',Negative
+'poor quality and service.',Negative
+'All in all, I\'d expected a better consumer experience from Motorola.',Negative
+'This particular model would not work with my Motorola Q smartphone.',Negative
+'So far it has worked like a charm.',Positive
+'Unfortunately it\'s easy to accidentally activate them with the gentle-touch buttons if you accidentally touch the phone to your face while listening.',Negative
+'I have read other\'s reviews here but I haven\'t had any problem with it.',Positive
+'I had to purchase a different case.',Negative
+'The sound is clear and the people I talk to on it are amazed at the quality too.',Positive
+'What a waste of time!',Negative
+'Very much disappointed with this company.',Negative
+'much better than the hard plastic cases.',Positive
+'I don\'t like this Nokia either.',Negative
+'If you are Razr owner...you must have this!',Positive
+'Excellent product, I am very satisfied with the purchase.',Positive
+'Save your money.... I\'ve had this item for 11 months now.',Negative
+'Not a good bargain.',Negative
+'I came over from Verizon because cingulair has nicer cell phones.... the first thing I noticed was the really bad service.',Negative
+'My colleague & I now get great reception.A little expensive, but performance is great.',Positive
+'All I can do is whine on the Internet, so here it goes.The more I use the thing the less I like it.',Negative
+'The screen size is big, key pad lit well enough, and the camera quality is excellent for a camera phone.',Positive
+'This is hands down the best phone I\'ve ever had.',Positive
+'Reversible plug works great.',Positive
+'If you plan to use this in a car forget about it.',Negative
+'Doesn\'t work at all.. I bougth it for my L7c and its not working.',Negative
+'Does not charge the Cingular (ATT) 8525 phone.',Negative
+'These headphones were a great find - and I think they are perhaps the best purchase I\'ve made in the last several years - seriously.',Positive
+'This item worked great, but it broke after 6 months of use.',Negative
+'However, BT headsets are currently not good for real time games like first-person shooters since the audio delay messes me up.',Negative
+'The phone is sturdy and waterproof.',Positive
+'Just reading on the specs alone makes you say WOW.',Positive
+'Fantastic earphones.',Positive
+'The instructions didn\'t explain that a microphone jack could be used.',Negative
+'Beautiful styling though.',Positive
+'The buttons for on and off are bad.',Negative
+'Not only did the software do a great job of this, I could also make my own ringtones form my existing CDs without an internet connection.',Positive
+'i\'m glad i found this product on amazon it is hard to find, it wasn\'t high priced.',Positive
+'It works great with a car charger, especially if you cannot plug in two adapters at the same time.',Positive
+'This case seems well made.',Positive
+'I\'ve also had problems with the phone reading the memory card in which I always turn it on and then off again.',Negative
+'It feels more comfortable than most headsets because I wear glasses and that gets in the way sometimes.',Positive
+'I love being able to use one headset for both by land-line and cell.',Positive
+'I have used several phone in two years, but this one is the best.',Positive
+'the phone was unusable and was not new.',Negative
+'And I just love the colors!',Positive
+'And the sound quality is great.',Positive
+'Please dont waste your money.',Negative
+'I really recommend this faceplates since it looks very nice, elegant and cool.',Positive
+'Easy to pair with my Samsung Cell.',Positive
+'The design might be ergonomic in theory but I could not stand having these in my ear.',Negative
+'I love the camera, it\'s really pretty good quality.',Positive
+'Plantronics Bluetooth Excelent Buy.',Positive
+'I didn\'t want the clip going over the top of my ear, causing discomfort.',Negative
+'This is a simple little phone to use, but the breakage is unacceptible.',Negative
+'Made very sturdy.',Positive
+'Chinese Forgeries Abound!.',Negative
+'I am more than happy with this product.',Positive
+'The battery is unreliable as well as the service use antena.',Negative
+'My phone doesn\'t slide around my car now and the grip prevents my phone from slipping out of my hand.',Positive
+'I have tried these cables with my computer and my iPod and it works just fine.',Positive
+'All in all, I\'m quite satisfied with this purchase.',Positive
+'I have had this phone for over a year now, and I will tell you, its not that great.',Negative
+'Couldn\'t figure it out',Negative
+'Improper description.... I had to return it.',Negative
+'I bought this battery with a coupon from Amazon and I\'m very happy with my purchase.',Positive
+'Great it was new packaged nice works good, no problems and it came in less time then I expected!!!!',Positive
+'It dit not work most of the time with my Nokia 5320.',Negative
+'It seems completely secure, both holding on to my belt, and keeping the iPhone inside.',Positive
+'Worth every penny.',Positive
+'You need two hands to operate the screen.This software interface is decade old and cannot compete with new software designs.',Negative
+'I gave it 5 stars because of the sound quality.',Positive
+'I would highly recommend this.',Positive
+'Saggy, floppy piece of junk.',Negative
+'Reaching for the bottom row is uncomfortable, and the send and end keys are not where I expect them to be.3.',Negative
+'I wish I could return the unit and get back my money.',Negative
+'I am very happy',Positive
+'I recently had problems where I could not stay connected for more than 10 minutes before being disconnected.',Negative
+'Mobile Phone Tools are a must have.',Positive
+'I like design and look of Jabra behing the ear headsets and 5020 is pretty comfortible to wear 24 hours a day without pain in the ear.',Positive
+'Would not reccommend.',Negative
+'Bad Reception.',Negative
+'Its not user friendly.',Negative
+'The only thing that disappoint me is the infra red port (irda).',Negative
+'stay away from this store, be careful.',Negative
+'It doesn\'t work in Europe or Asia.',Negative
+'poor voice clarity.',Negative
+'Great for the jawbone.',Positive
+'As I said above....PRETTY USELESS!',Negative
+'Don\'t make the same mistake I did.',Negative
+'dont buy it.',Negative
+'So just beware.',Negative
+'sucked, most of the stuff does not work with my phone.',Negative
+'I was very pleased to see that I could replace my well travled swivel holster for my Blackberry flip.',Positive
+'The camera, although rated at an impressive 1.3 megapixels, renders images that fall well below expectations of such a relatively high resolution.',Negative
+'I ended up sliding it on the edge of my pants or back pockets instead.',Positive
+'Does everything it should and more.',Positive
+'What a piece of junk.. I lose more calls on this phone.',Negative
+'very disappointed.',Negative
+'The sound quality for the device is unacceptable.Unless you are in a really quiet area, you almost hear nothing.',Negative
+'Who in their right mind is gonna buy this battery?.',Negative
+'Excellent bluetooth headset.',Positive
+'I bought these hoping I could make my Bluetooth headset fit better but these things made it impossible to wear.',Negative
+'This pair of headphones is the worst that I have ever had sound-wise.',Negative
+'I am going to have to be the first to negatively review this product.',Negative
+'in addition it feels &amp; looks as if the phone is all lightweight cheap plastic.',Negative
+'Better Than New.',Positive
+'The headsets are easy to use and everyone loves them.',Positive
+'Great choice!',Positive
+'How can that be?The audio quality is poor.',Negative
+'Soyo technology sucks.',Negative
+'The seller is very understanding and patient, I would definitely buy from them again.',Positive
+'Bought mainly for the charger, which broke soon after purchasing.',Negative
+'Good product - incredible value.',Positive
+'Nice solid keyboard.',Positive
+'What a big waste of time.',Negative
+'Perhaps my phone is defective, but people cannot hear me when I use this.',Negative
+'The ear buds only play music in one ear.',Negative
+'Sounds good reasonably priced and effective, Its that simple !',Positive
+'I ordered this for sony Ericsson W810i but I think it only worked once (thats when I first used it).',Negative
+'I would recommend it.',Positive
+'I\'m a bit disappointed.',Negative
+'All the other cases I\'ve tried normally fall apart after a few months but this one seems to be in for the long haul.',Positive
+'It is well made, easy to access the phone and has a handy, detachable belt clip.',Positive
+'My headset works just peachy-keen.',Positive
+'I also didn\'t like the "on" button, it felt like it would crack with use.',Negative
+'This is a great little item.',Positive
+'It is light, easy to use, and has very clear reception and transmission.',Positive
+'The phone takes FOREVER to charge like 2 to 5 hours literally.',Negative
+'I recommend iGo to anyone with different brand cell phones/mp3 players in the family.',Positive
+'WARNING - DO NOT BUY!!.',Negative
+'Case was more or less an extra that I originally put on but later discarded because it scratched my ear.',Negative
+'Not nearly as good looking as the AMAZON picture makes it look.',Negative
+'I kept catching the cable on the seat and I had to pull the phone out to turn it on an off.',Negative
+'The tracfonewebsite is user friendly and makes it easy toactivate, etc.',Positive
+'2 thumbs up to this seller',Positive
+'Battery lasts only a few hours.',Negative
+'I give Wirefly 1 star.I will contact Cingular/AT&T; and inform them of this practice.',Negative
+'however, my girl was complain that some time the phone doesn\'t wake up like normal phone does.',Negative
+'The internet access was fine, it the rare instance that it worked.',Negative
+'This company charge me a restocking fee and still not given me my refund back.',Negative
+'The reception through this headset is excellent.',Positive
+'I was very impressed with the price of the cases.',Positive
+'For the price this was a great deal.',Positive
+'Doesn\'t hold charge.',Negative
+'Really pleased with this product so far.',Positive
+'Having trouble with volume.',Negative
+'First off the reception sucks, I have never had more than 2 bars, ever.',Negative
+'I received my headset in good time and was happy with it.',Positive
+'Appears to actually outperform the original battery from China that came with my V325i.',Positive
+'The microphone also works well, but (according to people I have called) it applifies everything.',Positive
+'Unfortunately it will not recharge my iPhone 4s, despite connecting it from multiple power sources (iMac, external battery, wall outlet, etc).',Negative
+'Att is not clear, sound is very distorted and you have to yell when you talk.',Negative
+'useless phone, simply deaf.',Negative
+'Authentic leather with nice shine and comfort .I recommend you this case !!',Positive
+'Nice headphones for the price and they work great!',Positive
+'Very pleased with this headset.',Positive
+'Its a total package.',Positive
+'Does not fit.',Negative
+'It is so small and you don\'t even realize that it is there after a while of getting used to it.',Positive
+'I have only had it for a few weeks, but so far, so good.',Positive
+'It\'s A PIECE OF CRAP!',Negative
+'Works great.',Positive
+'It\'s fits like a glove and is strong, secure, and durable.',Positive
+'Great software for Motorolas.',Positive
+'Cumbersome design.',Negative
+'It\'s uncomfortable and the sound quality is quite poor compared with the phone (Razr) or with my previous wired headset (that plugged into an LG).',Negative
+'I usually don\'t like headbands but this one is very lightweight & doesn\'t mess up my hair.',Positive
+'Horrible phone.',Negative
+'The bottowm line...another worthless, cheap gimmick from Sprint.',Negative
+'It\'s not what it says it is.',Negative
+'Steer clear of this product and go with the genuine Palm replacementr pens, which come in a three-pack.',Negative
+'Don\'t buy this product.',Negative
+'Can\'t upload ringtones from a third party.',Negative
+'Car charger as well as AC charger are included to make sure you never run out of juice.Highy recommended',Positive
+'Setup went very smoothly.',Positive
+'Very satisifed with that.',Positive
+'It\'s very attractive and appears to be of good quality.',Positive
+'Bad Choice.',Negative
+'AFter the first charge kept going dead after 12 minutes.',Negative
+'IT\'S REALLY EASY.',Positive
+'This little device has transformed my organizational capability and made my life a whole lot easier.',Positive
+'Great charger.',Positive
+':-)Oh, the charger seems to work fine.',Positive
+'i got this phone around the end of may and i\'m completely unhappy with it.',Negative
+'This phone is very fast with sending any kind of messages and web browsing is significantly faster than previous phones i have used.',Positive
+'But it does get better reception and clarity than any phone I\'ve had before.',Positive
+'Does Not Work.',Negative
+'Also, if your phone is dropped, this case is not going to save it, specially when dropped face down.',Negative
+'I tried talking real loud but shouting on the telephone gets old and I was still told it wasn\'t great.',Negative
+'Works good.',Positive
+'Great case and price!',Positive
+'Performed awful -- muffled, tinny incoming sound and severe echo for those on the other end of the call.',Negative
+'This is by far the worst purchase I\'ve made on Amazon.',Negative
+'It is super charged up for use as a small hybrid palmtop/camera/cellphone, and excels in those roles.',Positive
+'VERY cheap plastic, creaks like an old wooden floor.',Negative
+'Protects the phone on all sides.',Positive
+'If you don\'t find it, too bad, as again the unit comes with one earpad only.I would not recommend this to anyone.',Negative
+'Linked to my phone without effort.',Positive
+'Clear Skype Calls, Long Battery Life, Long Range.',Positive
+'I was looking for this headset for a long time and now that I\'ve got it I couldn\'t be happier.',Positive
+'don\'t waste your money and time.',Negative
+'They work about 2 weeks then break.',Negative
+'Echo Problem....Very unsatisfactory',Negative
+'Excellent product for the price.',Positive
+'This is a great product..... sure beats using your fingers!.',Positive
+'This is a beautiful phone.',Positive
+'I used bitpim (a free program you can find on the internet)to transfer data to the phone.The price of the cable was excellent.',Positive
+'The plug did not work very well.',Negative
+'Works as described.',Positive
+'The pairing of the two devices was so easy it barely took a couple minutes before I started making calls with the voice dialing feature.',Positive
+'DO NOT BUY DO NOT BUYIT SUCKS',Negative
+'Just really good.. So far, probably the best BT headset I have ever had.',Positive
+'Very good stuff for the price.',Positive
+'Otherwise, easy to install and use, clear sound.',Positive
+'Could not get strong enough signal.',Negative
+'I went on Motorola\'s website and followed all directions, but could not get it to pair again.',Negative
+'It looses connection to the phone even when it is within a couple feet between the two.',Negative
+'This is essentially a communications tool that does not communicate.',Negative
+'Iam very pleased with my purchase.',Positive
+'This phone is pretty sturdy and I\'ve never had any large problems with it.',Positive
+'DO NOT PURCHASE THIS PHONE.',Negative
+'Disappointment.. I hate anything that goes in my ear.',Negative
+'very clear, quality sound and you don\'t have to mess with the sound on your iPod since you have the sound buttons on the headset.',Positive
+'I\'m really disappointed all I have now is a charger that doesn\'t work.',Negative
+'I Was Hoping for More.',Negative
+'Product is useless, since it does not have enough charging current to charge the 2 cellphones I was planning to use it with.',Negative
+'The price was very good and with the free shipping and all it was a good purchase.',Positive
+'Comfort for our whole family.',Positive
+'My sister has one also and she loves it.',Positive
+'It always cuts out and makes a beep beep beep sound then says signal failed.',Negative
+'The range is very decent, I\'ve been able to roam around my house with the phone in the living room with no reception/sound quality issues.',Positive
+'the worst phone from samsung...crap..... this crappy Samsung E715.. is the worst i have ever seeen.',Negative
+'I put the latest OS on it (v1.15g), and it now likes to slow to a crawl and lock up every once in a while.',Negative
+'When I placed my treo into the case, not only was it NOT snug, but there was A LOT of extra room on the sides.',Negative
+'Much less than the jawbone I was going to replace it with.',Positive
+'This product had a strong rubber/petroleum smell that was unbearable after a while and caused me to return it',Negative
+'It is easy to turn on and off when you are in the car and the volume controls are quite accessable.',Positive
+'For a product that costs as much as this one does, I expect it to work far better and with greater ease than this thing does.',Negative
+'I\'m happy about this purchase- good quality and low price.',Positive
+'I didn\'t think that the instructions provided were helpful to me.',Negative
+'Its reception is very very poor.',Negative
+'Has been working great.',Positive
+'It was horrible!.',Negative
+'you could only take 2 videos at a time and the quality was very poor.',Negative
+'Terrible product, and waste of money!',Negative
+'I have had problems wit hit dropping signal and more.',Negative
+'No buyers remorse on this one!.',Negative
+'But despite these few flaws, this case is of exceptional quality and well worth the additional costs of owning an official OEM product.',Positive
+'worthless product.',Negative
+'Product is exactly as described.',Positive
+'It looks very nice.',Positive
+'The worst piece of crap ever along with the Verizon customer service.',Negative
+'Awkward to use and unreliable.',Negative
+'Warning - Stay away.',Negative
+'The Jabra EarGels fit my ears very well.',Positive
+'Razr Battery - Good buy.',Positive
+'The battery is completely useless to me.',Negative
+'EXCELLENT SERVICE!!!!!!!!.',Positive
+'It\'s been my choice headset for years.Great sound; good volume; good noise cancellation.',Positive
+'I bought it for my mother and she had a problem with the battery.',Negative
+'Very easy to use.',Positive
+'Plan on ordering from them again and again.',Positive
+'Good Quality.',Positive
+'Restored my phone to like new performance.',Positive
+'I love this phone , It is very handy and has a lot of features .',Positive
+'you can even take self portraits with the outside (exterior) display, very cool.',Positive
+'The nano stated it.My son was dissapointed.',Negative
+'The item received was Counterfeit.',Negative
+'I might have gotten a defect, but I would not risk buying it again because of the built quality alone.',Negative
+'This results in the phone being either stuck at max volume or mute.',Negative
+'Any ring tone..Overall good phone to buy..',Positive
+'It was that loud.Glad to say that the Plantronics 510 maintains a flawless connection to my cell and with no static during normal use.',Positive
+'The case is a flimsy piece of plastic and has no front or side protection whatsoever.',Negative
+'Display is excellent and camera is as good as any from that year.',Positive
+'No ear loop needed, it\'s tiny and the sound is great.',Positive
+'He was very impressed when going from the original battery to the extended battery.',Positive
+'I find this inexcusable and so will probably be returning this phone and perhaps changing carriers.',Negative
+'Don\'t bother - go to the store.',Negative
+'You have to hold the phone at a particular angle for the other party to hear you clearly.',Negative
+'Worked perfectly!',Positive
+'Magical Help.',Positive
+'Its the best headset I have used.',Positive
+'I have had mine for about a year and this Christmas I bought some for the rest of the family.',Positive
+'It defeats the purpose of a bluetooth headset.',Negative
+'Good value, works fine - power via USB, car, or wall outlet.',Positive
+disappointing.,Negative
+'The battery life is highly unacceptable.',Negative
+'Defective crap.',Negative
+'I\'ve only had my bluetooth for a few weeks, but I really like it.',Positive
+'Jawbone Era is awesome too!',Positive
+'It would take too long to describe how bad my customer service experience has been with Amazon.',Negative
+'The phone loads super!',Positive
+'Very good phone.',Positive
+'You won\'t regret it!',Positive
+'Voice recognition is tremendous!',Positive
+'I can barely ever hear on it and am constantly saying "what?"',Negative
+Excellent!.,Positive
+'Their network coverage in Los Angeles is horrible.',Negative
+'Earbud piece breaks easily.',Negative
+'Terrible.. My car will not accept this cassette.',Negative
+'Bluetooth range is good - a few days ago I left my phone in the trunk, got a call, and carried the conversation without a hitch.',Positive
+'The battery runs down quickly.',Negative
+'Waste of 13 bucks.',Negative
+'None of the three sizes they sent with the headset would stay in my ears.',Negative
+'Someone shouldve invented this sooner.',Positive
+'Unfortunately it did not work.',Negative
+'It is very comfortable to wear as well, which is probably the most important aspect about using a case.',Positive
+'I am not impressed with this and i would not recommend this item to anyone.',Negative
+'Krussel Always good.',Positive
+'Not impressed.',Negative
+'I\'ll be looking for a new earpiece.',Negative
+'It\'s AGGRAVATING!',Negative
+'I have this phone and it is a thorn in my side, I really abhor it.',Negative
+'I own 2 of these cases and would order another.',Positive
+'Comfortable, Nice Range, Good Battery Life.',Positive
+'i would advise to not purchase this item it never worked very well.',Negative
+'I even fully charged it before I went to bed and turned off blue tooth and wi-fi and noticed that it only had 20 % left in the morning.',Negative
+'Even in my BMW 3 series which is fairly quiet, I have trouble hearing what the other person is saying.',Negative
+'It quit working after I\'d used it for about 18 months, so I just purchased another one because this is the best headset I\'ve ever owned.',Positive
+'Also makes it easier to hold on to.',Positive
+'THAT one didn\'t work either.',Negative
+'Tied to charger for conversations lasting more than 45 minutes.MAJOR PROBLEMS!!',Negative
+'if you simply want a small flip phone -- look elsewhere as the extra bells & whistles are mediocre.',Negative
+'One of my favorite purchases ever.',Positive
+'This product is very High quality Chinese CRAP!!!!!!',Negative
+'At first I thought I was grtting a good deal at $7.44, until I plugged it into my phone (V3c Razr).',Negative
+'It plays louder than any other speaker of this size; the price is so low that most would think the quality is lacking, however, it\'s not.',Positive
+'Exactly what I wanted.',Positive
+'Using all earpieces, left or right, this thing will not stay on my ear.',Negative
+'The cable looks so thin and flimsy, it is scary.',Negative
+'Poor product.',Negative
+'I found the product to be easy to set up and use.',Positive
+'I especially love the long battery life.',Positive
+'It has a great camera thats 2MP, and the pics are nice and clear with great picture quality.',Positive
+'The picture resolution is far below what other comparably-priced phones are offering today.',Negative
+'Battery has no life.',Negative
+'It was quite comfortable in the ear.',Positive
+'This allows the possibility of double booking for the same date and time after the first.',Negative
+'Poor Talk Time Performance.',Negative
+'I have had TMobile service for 2 or 3 years now, and I am pretty happy with it.',Positive
+'If you have several dozen or several hundred contacts, then imagine the fun of sending each of them one by one.',Negative
+'Product was excellent and works better than the verizon one and Boy was it cheaper!',Positive
+'Their Research and Development division obviously knows what they\'re doing.',Positive
+'Looks great and is strong."',Positive
+'But when I check voice mail at night, the keypad backlight turns off a few seconds into the first message, and then I\'m lost.',Negative
+'However I needed some better instructions.',Negative
+'Poor quality.',Negative
+'awesome device.',Positive
+'Battery charge-life is quite long.',Positive
+'It was an inexpensive piece, but I would still have expected better quality.',Negative
+'So there is no way for me to plug it in here in the US unless I go by a converter.',Negative
+'It didn\'t charge for me.',Negative
+'I cannot make calls at certain places.',Negative
+'I purchased this and within 2 days it was no longer working!!!!!!!!!',Negative
+'Fits comfortably, came with three sizes of earbud tips.',Positive
+'It fits my ear well and is comfortable on.',Positive
+'I highly recommend this case.',Positive
+'Great for iPODs too.',Positive
+'Great Value.',Positive
+'Disappointed with battery.',Negative
+'Great bluetooth!.',Positive
+'Couldn\'t use the unit with sunglasses, not good in Texas!',Negative
+'This is cool because most cases are just open there allowing the screen to get all scratched up.',Positive
+'Very happy with this product.',Positive
+'Other than that, the leather is nice and soft; the fit is very tight; the cut out for the face is a good shape.',Positive
+'Happy so far!.',Positive
+'Works for me.',Positive
+'After 3 months, screen just went black all of a sudden.',Negative
+'While I managed to bend the leaf spring back in place, the metal now has enough stress that it will break on the next drop.',Negative
+'Not a good item.. It worked for a while then started having problems in my auto reverse tape player.',Negative
+'Great product for the price!.',Positive
+'It holds a charge for a long time, is reasonably comfortable under long-wearing conditions and the quality of sound is tremendous.',Positive
+'If the two were seperated by a mere 5+ ft I started to notice excessive static and garbled sound from the headset.',Negative
+'The screen does get smudged easily because it touches your ear and face.',Negative
+'Love it.. Great armband.',Positive
+'It does everything the description said it would.',Positive
+'Audio Quality is poor, very poor.',Negative
+'Best headset ever!!!.',Positive
+'Would recommend this item.',Positive
+'I love my 350 headset.. My Jabra350 bluetooth headset is great, the reception is very good and the ear piece is a comfortable fit.',Positive
+'AFTER ARGUING WITH VERIZON REGARDING THE DROPPED CALLS WE RETURNED THE PHONES AFTER TWO DAYS.',Negative
+'I have always used corded headsets and the freedom from the wireless is very helpful.',Positive
+'As an earlier review noted, plug in this charger and nothing happens.',Negative
+'However, after about a year, the fliptop started to get loose and wobbly and eventually my screen went black and I couldn\'t receive and place calls.',Negative
+'Not loud enough and doesn\'t turn on like it should.',Negative
+WORTHWHILE.,Positive
+'Five star Plus, plus.',Positive
+'Very Dissapointing Performance.',Negative
+'All in all I think it was a good investment.',Positive
+'The phone can also take great pictures and even video clips.',Positive
+'Does not fit.',Negative
+'This frog phone charm is adorable and very eye catching.',Positive
+'I love all the features and form factor.',Positive
+'The majority of the Logitech earbud headsets failed.',Negative
+'It finds my cell phone right away when I enter the car.',Positive
+'(It works!)',Positive
+'VERY comfortable.',Positive
+'So Far So Good!.',Positive
+'Very Displeased.',Negative
+'So anyone near you will hear part of your conversation.',Negative
+'Phone is sturdy as all nokia bar phones are.',Positive
+'Same problem as others have mentioned.',Negative
+'The handsfree part works fine, but then the car tries to download the address book, and the Treo reboots.Overall, I still rate this device high.',Positive
+'I am very impressed with the job that Motorola did on the sturdiness of this phone.',Positive
+'During several different 2 minute calls, I experienced 5 drops and it was in an area that had 5 bars.',Negative
+'the charger worked for about a week and then completely stopped charging my phone.',Negative
+'Great price, too!',Positive
+'I have been very happy with the 510 and have had NO complaints from any one regarding my sound quality on their end.',Positive
+'Also, the phone doesn\'t seem to accept anything except CBR mp3s, preferably ripped by Windows Media Player.',Negative
+'Well packaged, arrived on time, and works as intended.',Positive
+'Don\'t waste your money!.',Negative
+'I highly recommend these and encourage people to give them a try.',Positive
+'The reception is excellent!',Positive
+'The bose noise cancelling is amazing, which is very important for a NYC commuter.',Positive
+'A week later after I activated it, it suddenly died.',Negative
+'This is a great deal.',Positive
+'I really wanted the Plantronics 510 to be the right one, but it has too many issues for me.The good',Negative
+'bad fit, way too big.',Negative
+'It is very comfortable on the ear.',Positive
+'For the price on Amazon, it is an excellent product, which I would highly recommend.',Positive
+'It works fine on my Motorola 325 cellphone, and a lot better than the worn-out battery did.',Positive
+'I purcashed this for the car charger and it does not work.',Negative
+'Good transmit audio.',Positive
+'I love this bluetooth!',Positive
+'Its well-designed and very sharp -- the blue is a very nice color.',Positive
+'The only good thing was that it fits comfortably on small ears.',Positive
+'#1 It Works - #2 It is Comfortable.',Positive
+'I\'ve had no trouble accessing the Internet, downloading ringtones or performing any of the functions.',Positive
+'My experience was terrible..... This was my fourth bluetooth headset, and while it was much more comfortable than my last Jabra (which I HATED!!!',Negative
+'The first thing that happened was that the tracking was off.',Negative
+'Excellent hands free tool.',Positive
+'Bad Quality.',Negative
+'The instruction manual is lacking.',Negative
+'Battery is terrible.',Negative
+'Unreliable - I\'m giving up.',Negative
+'Pros:-Good camera - very nice pictures , also has cool styles like black and white, and more.',Positive
+'Best I\'ve found so far .... I\'ve tried 2 other bluetooths and this one has the best quality (for both me and the listener) as well as ease of using.',Positive
+'After a year the battery went completely dead on my headset.',Negative
+'The volume switch rocketed out of the unit to a destination unknown.',Negative
+'Blue Ant is easy to use.',Positive
+'The reception has been generally good.',Positive
+'Absolutel junk.',Negative
+'Just does not work.',Negative
+'I have 2-3 bars on my cell phone when I am home, but you cant not hear anything.',Negative
+'Excellent starter wireless headset.',Negative
+'I like the fact that it rests lightly against your ear, rather than inside.',Positive
+'Better than you\'d expect.',Positive
+'Does not work for listening to music with the cingular 8125.',Negative
+'Works fine.',Positive
+'nice leather.',Positive
+'My 5-year old Nokia 2160 from Tracfone holds the charge a lot better than this.',Negative
+'Disappointing accessory from a good manufacturer.',Negative
+'Sprint charges for this service.',Negative
+'We have gotten a lot of compliments on it.',Positive
+'Good case, Excellent value.',Positive
+'Motorola finally got the voice quality of a bluetooth headset right.',Positive
+'Virgin Wireless rocks and so does this cheap little phone!',Positive
+'The mic there is a joke, and the volume is quite low.',Negative
+'However, the ear pads come off easily and after only one week I lost one.',Negative
+'The BT headset was such a disapoinment.',Negative
+'wont work right or atleast for me.',Negative
+'These products cover up the important light sensor above the ear outlet.',Negative
+'its a little geeky but i think thats its sex on toast and it rocks and oozes sex right down to its battery embedded sleek stylish leather case.',Positive
+'Makes it easier to keep up with my bluetooth when I\'m not wearing it.',Negative
+'I have to use the smallest earpieces provided, but it stays on pretty well.',Positive
+'I\'d like to return it.',Negative
+'The case is great and works fine with the 680.',Positive
+'Poor Reliability.',Negative
+'It\'s a great tool for entertainment, communication, and data management.Oh, be sure to use ActiveSync 4.2 for optimal data synchronization results!',Positive
+'Excellent product.',Positive
+'I only used it two days, and it wasn\'t always easy to hear with.',Negative
+'Everything about this product is wrong.First',Negative
+'I love this device.',Positive
+'Battery life is also great!',Positive
+'Great phone.',Positive
+'None of it works, just don\'t buy it.',Negative
+'Integrated seamlessly with the Motorola RAZR phone.',Positive
+'Works great.',Positive
+'I\'ve had this bluetoooth headset for some time now and still not comfortable with the way it fits on the ear.',Negative
+'I does not maintain a connection with the computer while it is on my lap.',Negative
+'.... Item arrived quickly and works great with my Metro PCS Samsung SCH-r450 slider phone and Sony Premium Sound in ear plugs.',Positive
+'Great phone!.',Positive
+'The best phone in market :).',Positive
+'I love the ringtones because they are so upbeat!',Positive
+'but it is great, i would really recommend it',Positive
+'The design is very good.4.',Positive
+'Plug was the wrong size.',Negative
+'What a waste.',Negative
+'Because both ears are occupied, background is not distracting at all.',Positive
+'You can\'t beat the price on these.',Positive
+'Poorly contstruct hinge.',Negative
+'fast service.',Positive
+'The delivery was on time.',Positive
+'Excellent sound quality.',Positive
+'Price is good too.',Positive
+')Setup couldn\'t have been simpler.',Positive
+'The company shipped my product very promptly and it works well.',Positive
+'Not enough volume.',Negative
+'I am glad I purchased it.',Positive
+'Utter crap.. Sound quality is TERRIBLE.',Negative
+'I wouldn\'t recommend buying this product.',Negative
+'As many people complained, I found this headset\'s microphone was very weak.',Negative
+'I received my orders well within the shipping timeframe, everything was in good working order and overall, I am very excited to have this source.',Positive
+'Still Waiting...... I\'m sure this item would work well.. if I ever recieve it!',Negative
+'Painful on the ear.',Negative
+'Battery is holding up well.',Positive
+'Unfortunately the ability to actually know you are receiving a call is a rather important feature and this phone is pitiful in that respect.',Negative
+'Worst customer service.',Negative
+'1. long lasting battery (you don\'t have to recharge it as frequentyly as some of the flip phones)2.',Negative
+'lightweight and works well.',Positive
+'Essentially you can forget Microsoft\'s tech support.',Negative
+'I am sorry I made this purchase.',Negative
+'I had absolutely no problem with this headset linking to my 8530 Blackberry Curve!',Positive
+'Nice docking station for home or work.',Positive
+'Cheap but hey it works.. Was pleasantly suprised given the low cost of this item.',Positive
+'Another note about this phone\'s appearance is that it really looks rather bland, especially in the all black model.',Negative
+'If you hate earbugs, avoid this phone by all means.',Negative
+'Will order from them again!',Positive
+'Gets the job done.',Positive
+'Basically the service was very bad.',Negative
+'im surprised this is a good quality car charger and there\'s not much reviews about it.',Positive
+'They do not care about the consumer one bit.',Negative
+'horrible, had to switch 3 times.',Negative
+'Not good when wearing a hat or sunglasses.',Negative
+'jabra ear gels "R" the best!.',Positive
+'It is practically useless and did not add any kind of boost to my reception after I bought it.',Negative
+'* Comes with a strong light that you can use to light up your camera shots, and even flash SOS signals (seriously!',Positive
+'Freezes frequently4.',Negative
+'Best of all is the rotating feature, very helpful.',Positive
+'I was amazed at the quick arrival of the two original lg cell phone batteries and and at a fraction of the price.',Positive
+'Just what I wanted.',Positive
+'I am also very happy with the price.',Positive
+'Do Not Buy for D807...wrongly advertised for D807.',Negative
+'First of all, it doesn\'t wear well.',Negative
+'It was a waste of my money.',Negative
+'So I had to take the battery out of the phone put it all back together and then restart it.',Negative
+'I did not have any problem with this item and would order it again if needed.',Positive
+'This one works and was priced right.',Positive
+'I connected my wife\'s bluetooth,(Motorola HS850) to my phone and it worked like a charm whether the phone was in my pocket or the case.',Positive
+'People couldnt hear me talk and I had to pull out the earphone and talk on the phone.',Negative
+'A PIECE OF JUNK THAT BROKE AFTER BEING ON MY PHONE FOR 2 DAYS!!!',Negative
+'Needless to say, I wasted my money.',Negative
+'It makes very strange ticking noises before it ends the call.',Negative
+'Great for using with your home stereo.',Positive
+'One thing I hate is the mode set button at the side.',Negative
+'Overall, I am psyched to have a phone which has all my appointments and contacts in and gets great reception.',Positive
+'I know that sounds funny, but to me it seemed like sketchy technology that wouldn\'t work well.Well, this one works great.',Positive
+'Fantastic buy and will get again for whatever my next phone is',Positive
+'Simple, lightweight and great fit.',Positive
+'We are sending it back.',Negative
+'Great audio!.',Positive
+'New Battery works great in phone.',Positive
+'However, the keypads are so tinny that I sometimes reach the wrong buttons.',Negative
+'Bad Purchase.',Negative
+'Were JERKS on the phone.',Negative
+'My father has the V265, and the battery is dying.',Negative
+'This phone might well be the worst I\'ve ever had in any brand.',Negative
+'The nokia CA-42 USB cable did not work with my phone.',Negative
+'Love This Phone.',Positive
+'Lately they have been extremely nice and helpful on the phone.',Positive
+'Love this product.',Positive
+'I checked everywhere and there is no feature for it which is really disappointing.',Negative
+'They refuse to refund or replace.',Negative
+'It fits comfortably in either ear, the sound is clear and loud, and the charge lasts a couple of days.',Positive
+disappointed.,Negative
+'I bought two of them and neither will charge.',Negative
+'Comfortable fit - you need your headset to be comfortable for at least an hour at a time, if not for an entire day.',Positive
+'Works great!.',Positive
+'Excellent wallet type phone case.',Positive
+'best bluetooth on the market.',Positive
+'I was sitting in my vehicle, with the cradle on my belt, and the headset lost signal.',Negative
+'Great phone!.',Positive
+'Never got it!!!!!',Negative
+'Last time buying from you.',Negative
+'You\'ll love how thin it is.',Positive
+'Doesn\'t do the job.',Negative
+'I wasted my little money with this earpiece.',Negative
+'I\'ve had this for nearly 2 years and it has worked great for me.',Positive
+'This item is fantastic and works perfectly!',Positive
+'its extremely slow and takes forever to do anything with it.',Negative
+'Linksys should have some way to exchange a bad phone for a refurb unit or something!',Negative
+'This fixes all the problems.',Positive
+'I posted more detailed comments under the grey or black phone, but i have the Fire Red and it\'s a great color!',Positive
+'Provides good protection and looks classy, too.',Positive
+'Good case!.',Positive
+'The loudspeaker option is great, the bumpers with the lights is very ... appealing.',Negative
+'We would recommend these to others.',Positive
+'Due to this happening on every call I was forced to stop using this headset.',Negative
+'Think it over when you plan to own this one!This sure is the last MOTO phone for me!',Negative
+'Verizon\'s bills, however, are difficult to understand even though their pricing plans are simple.',Negative
+'I love the look and feel of Samsung flipphones.',Positive
+'Very disappointed in AccessoryOne.',Negative
+'Nice case, feels good in your hands.',Positive
+'Piece of trash.',Negative
+'Sprint - terrible customer service.',Negative
+'Better than expected.',Positive
+'It worked very well.',Positive
+'Works like a charm; it work the same as the one I got with the phone.',Positive
+'The worst phone I\'ve ever had.... Only had it for a few months.',Negative
+'No additional ear gels provided, and no instructions whatsoever.',Negative
+'It has kept up very well.',Positive
+'I ordered this product first and was unhappy with it immediately.',Negative
+'Phone falls out easily.',Negative
+'I used to talk on it for 1 - 1 1/2 hours and the battery would be literally drained and dying.',Negative
+'So I bought about 10 of these and saved alot of money.',Positive
+'It is light, has plenty of battery capacity, and is very confortable to wear for somewhat extended periods of time.',Positive
+'Worked great!.',Positive
+'I am very impressed with this headset from Plantronics.',Positive
+'The battery works great!',Positive
+'good item, low price.',Positive
+'Keep up the good work Amazon!!',Positive
+'I\'ve tried several different earpieces for my cell phone and this Jabra one is the first one I\'ve found that fits my ear comfortably.',Positive
+'You get extra minutes so that you can carry out the call and not get cut off."',Positive
+'The update procedure is difficult and cumbersome.',Negative
+'I love this phone!.',Positive
+'The keyboard is really worthwhile in usefulness and is sturdy enough I don\'t expect any problems.',Positive
+'I\'m very disappointed with my decision.',Negative
+'The battery is working well as a replacement for the original that came with the phone over 2 years ago.',Positive
+'Don\'t trust their website and don\'t expect any helpful support.',Negative
+'it did not work in my cell phone plug i am very up set with the charger!.',Negative
+'My phone sounded OK ( not great - OK), but my wife\'s phone was almost totally unintelligible, she couldn\'t understand a word being said on it.',Negative
+'When it opens, the battery connection is broken and the device is turned off.',Negative
+'The shipping time was also very quick!',Positive
+'The best electronics of the available FM Transmitters.',Positive
+'The mic is great.',Positive
+'I bought this to use with my Kindle Fire and absolutely loved it!',Positive
+'Now I know that I made a wise decision.',Positive
+'If there is a wind, it is completely useless.',Negative
+'I use this product in a motor control center where there is a lot of high voltage humming from the equipment, and it works great!',Positive
+'I got this phone on reccomendation from a relative and I\'m glad I did.',Positive
+'Waste of money.',Negative
+'Item Does Not Match Picture.',Negative
+'Poor Construction.',Negative
+'This is the phone to get for 2005.... I just bought my S710a and all I can say is WOW!',Positive
+'The accompanied software is almost brilliant.',Positive
+'It has everything I need and I couldn\'t ask for more.',Positive
+'The "1.2" mega pixel camera, being a part of a phone, is reasonably good7.',Positive
+'great headset, very impressed - H500.',Positive
+'It is unusable in a moving car at freeway speed.',Negative
+'Big Disappointment with calendar sync.',Negative
+'Sending it back.',Negative
+'I\'m pleased.',Positive
+'After my phone got to be about a year old, it\'s been slowly breaking despite much care on my part.',Negative
+'Muddy, low quality sound, and the casing around the wire\'s insert was poorly super glued and slid off.',Negative
+'In the span of an hour, I had two people exclaim "Whoa - is that the new phone on TV?!?',Positive
+'It is cheap, and it feel and look just as cheap.',Negative
+'Horrible, horrible protector.',Negative
+'I searched the Internet, and found this one to be the best value.',Positive
+'don\'t waste your money.',Negative
+'It has been a winner for us.',Positive
+'Phone now holds charge like it did when it was new.',Positive
+'Absolutely great.',Positive
+'I had ordered a motorola data cable, got a very well finished and working product.',Positive
+'I was very excited to get this headset because I thought it was really cute.',Positive
+'I was not happy with this item.',Negative
+'The charger arrived within the promised timeframe, but it did not work.',Negative
+'This does not fit the Palm Tungsten E2 and it broke the first time I tried to plug it in.',Negative
+'What a waste of money and time!.',Negative
+'Seller shipped quickly and much cheaper than the competitors.',Positive
+'Doesn\'t Work.',Negative
+'I did not bother contacting the company for few dollar product but I learned the lesson that I should not have bought this form online anyway.',Negative
+'W810i is just SUPERB.',Positive
+'Great product.',Positive
+'Used and dirty.',Negative
+'[...] down the drain because of a weak snap!',Negative
+'Perfect for the PS3.',Positive
+'Do NOT buy if you want to use the holster.',Negative
+'Verizon tech support walked my through a few procedures, none of which worked and I ended up having to do a hard re-set, wiping out all my data.',Negative
+'Superb Phone on a Great Network.',Positive
+'This is so embarassing and also my ears hurt if I try to push the ear plug into my ear.',Negative
+'Works great!.',Positive
+'Low Quality.',Negative
+'I have to jiggle the plug to get it to line up right to get decent volume.',Negative
+'I really like this product over the Motorola because it is allot clearer on the ear piece and the mic.',Positive
+'what a disappointment',Negative
+'camera color balance is AWFUL.',Negative
+'Leopard Print is wonderfully wild!.',Positive
+'I have two more years left in this contract and I hate this phone.',Negative
+'Great product, fast shipping!.',Positive
+'Not only will it drain your player, but may also potentially fry it.',Negative
+'THey are so cool!',Positive
+'Nice design and quality.',Positive
+'Good show, Samsung.',Positive
+'It is simple to use and I like it.',Positive
+'WELL IM SATISFIED.',Positive
+'It feels poorly constructed, the menus are difficult to navigate, and the buttons are so recessed that it is difficult to push them.',Negative
+'These are certainly very comfortable and functionality is decent.',Positive
+'They have been around for years and carries the highest quality of anti-glare screen protector that I have found to date.',Positive
+'That being said, for a phone, the camera is very nice; many cool effects to play with, and video is decent as well.',Positive
+'I got the aluminum case for my new Palm VX and it worked really well--it has protected my handheld perfectly so far.',Positive
+'It also had a new problem.',Negative
+'Don\'t buy this product.',Negative
+'The keyboard is a nice compromise between a full QWERTY and the basic cell phone number keypad.',Positive
+'This product is great... it makes working a lot easier I can go to the copier while waiting on hold for something.',Positive
+'A Disappointment.',Negative
+'In my house I was getting dropped coverage upstairs and no coverage in my basement.',Negative
+'Logitech Bluetooth Headset is a 10!.',Positive
+'Arrived quickly and much less expensive than others being sold.',Positive
+'Then I exchanged for the same phone, even that had the same problem.',Negative
+'Mic Doesn\'t work.',Negative
+'Also the area where my unit broke).- I\'m not too fond of the magnetic strap.',Negative
+'Good product, good seller.',Positive
+'I can\'t use this case because the smell is disgusting.',Negative
+'I got it because it was so small and adorable.',Positive
+'doesn\'t last long.',Negative
+'Awsome Device Works Great!!.',Positive
+'Worst Customer Service Ever.',Negative
+'The look of it is very sharp and the screen is nice and clear, with great graphics.',Positive
+'This phone tries very hard to do everything but fails at it\'s very ability to be a phone.',Negative
+'$50 Down the drain.',Negative
+'I would have given no star if I was able.',Negative
+'And none of the tones is acceptable.',Negative
+'I love this thing!',Positive
+'We have tried 2 units and they both failed within 2 months.. Pros',Negative
+'This was utterly confusing at first, which caused me to lose a couple of very, very important contacts.',Negative
+'I can hear while I\'m driving in the car, and usually don\'t even have to put it on it\'s loudest setting.',Positive
+'Buyer Beware, you could flush money right down the toilet.',Negative
+'This is definitely a must have if your state does not allow cell phone usage while driving.',Positive
+'Voice Quality, Signal Strength, Dropped Calls.',Negative
+'Great price also!',Positive
+'Great Pocket PC / phone combination.',Positive
+'A usable keyboard actually turns a PDA into a real-world useful machine instead of just a neat gadget.',Positive
+'Great product and price.',Positive
+'This is the first phone I\'ve had that has been so cheaply made.',Negative
+'Only had this a month but it\'s worked flawlessly so far.',Positive
+'I would not recommend this item to anyone.',Negative
+'Yes it\'s shiny on front side - and I love it!',Positive
+'Excellent sound, battery life and inconspicuous to boot!.',Positive
+'They keep getting better and better (this is my third one and I\'ve had numerous Palms too).',Positive
+'I had to go to a store and bought a new NOKIA phone which is working great.',Positive
+'The volume for the ringer is REAL good (you have choices how loud).',Positive
+'You need at least 3 mins to get to your phone book from the time you first turn on the phone.Battery life is short.',Negative
+'Pretty piece of junk.',Negative
+'It has all the features I want',Positive
+'I had Verizon 2 years ago and really liked their service.',Positive
+'The eargels channel the sound directly into your ear and seem to increase the sound volume and clarity.',Positive
+'A pretty good product.',Positive
+'Also difficult to put on.I\'d recommend avoiding this product.',Negative
+'The earpiece on this is too large or too heavy...it keeps falling out of my ear.',Negative
+'I was able to do voice dialing in the car with no problem.',Positive
+'The only thing that I think could improve is the sound leaks out from the headset.',Negative
+'Sound quality on both end is excellent, I use headset to call my wife and ask my wife to use headset to call me !2.',Positive
+'A must study for anyone interested in the "worst sins" of industrial design.',Negative
+'Thank you for such great service.',Positive
+'Very prompt service.',Positive
+'It lasts less than 3o minutes, if I actually try to use the phone.My wife has the same phone with the same problem.',Negative
+'The sound quality is excellent as well.',Positive
+'It fits so securely that the ear hook does not even need to be used and the sound is better directed through your ear canal.',Positive
+'I was not impressed by this product.',Negative

@@ -1,0 +1,1006 @@
+@RELATION Yelp
+
+@ATTRIBUTE sentence STRING 
+@ATTRIBUTE classAttribute {Positive,Negative}
+
+@DATA
+'Waitress was good though!',Positive
+'Very good food, great atmosphere.1',Positive
+'However, there was so much garlic in the fondue, it was barely edible.',Negative
+'Awesome selection of beer.',Positive
+'Great place to eat, reminds me of the little mom and pop shops in the San Francisco Bay Area.',Positive
+'The manager was the worst.',Negative
+'On the ground, right next to our table was a large, smeared, been-stepped-in-and-tracked-everywhere pile of green bird poop.',Negative
+'The food was barely lukewarm, so it must have been sitting waiting for the server to bring it out to us.',Negative
+'A great way to finish a great.',Positive
+'Always a great time at Dos Gringos!',Positive
+'I\'ve had better bagels from the grocery store.',Negative
+'This place is disgusting!',Negative
+'This place deserves one star and 90% has to do with the food.',Negative
+'In the summer, you can dine in a charming outdoor patio - so very delightful.',Positive
+'It was just not a fun experience.',Positive
+'Of all the dishes, the salmon was the best, but all were great.',Positive
+'Not good by any stretch of the imagination.',Negative
+'In summary, this was a largely disappointing dining experience.',Negative
+'- They never brought a salad we asked for.',Negative
+'Never been to Hard Rock Casino before, WILL NEVER EVER STEP FORWARD IN IT AGAIN!',Negative
+'My side Greek salad with the Greek dressing was so tasty, and the pita and hummus was very refreshing.',Positive
+'I just don\'t know how this place managed to served the blandest food I have ever eaten when they are preparing Indian cuisine.',Negative
+'The desserts were a bit strange.',Negative
+'Paying $7.85 for a hot dog and fries that looks like it came out of a kid\'s meal at the Wienerschnitzel is not my idea of a good meal.',Negative
+'Best tater tots in the southwest.',Positive
+'When I opened the sandwich, I was impressed, but not in a good way.',Negative
+'The WORST EXPERIENCE EVER.',Negative
+'The owner used to work at Nobu, so this place is really similar for half the price.',Positive
+'Honeslty it didn\'t taste THAT fresh.)',Negative
+'I was so insulted.',Negative
+'The food is good.',Positive
+'I won\'t be back.',Negative
+'We also ordered the spinach and avocado salad; the ingredients were sad and the dressing literally had zero taste.',Negative
+'How awesome is that.',Positive
+'You won\'t be disappointed.',Positive
+'An excellent new restaurant by an experienced Frenchman.',Positive
+'Be sure to order dessert, even if you need to pack it to-go - the tiramisu and cannoli are both to die for.',Positive
+'Left very frustrated.',Negative
+'Nicest Chinese restaurant I\'ve been in a while.',Positive
+'This place is overpriced, not consistent with their boba, and it really is OVERPRICED!',Negative
+'Not a single employee came out to see if we were OK or even needed a water refill once they finally served us our food.',Negative
+'A good time!',Positive
+'It was packed!!',Negative
+'Hell no will I go back',Negative
+'He came running after us when he realized my husband had left his sunglasses on the table.',Positive
+'did not like at all.',Negative
+'When my mom and I got home she immediately got sick and she only had a few bites of salad.',Negative
+'Ordered a double cheeseburger & got a single patty that was falling apart (picture uploaded) Yeah, still sucks.',Negative
+'The yellowtail carpaccio was melt in your mouth fresh.',Positive
+'The Macarons here are insanely good.',Positive
+'I asked multiple times for the wine list and after some time of being ignored I went to the hostess and got one myself.',Negative
+'I loved the bacon wrapped dates.',Positive
+'Don\'t waste your time here.',Negative
+'As for the service: I\'m a fan, because it\'s quick and you\'re being served by some nice folks.',Positive
+'I LOVED it!',Positive
+'Lordy, the Khao Soi is a dish that is not to be missed for curry lovers!',Positive
+'Ample portions and good prices.',Positive
+'This is a great restaurant at the Mandalay Bay.',Positive
+'Wow very spicy but delicious.',Positive
+'The cocktails are all handmade and delicious.',Positive
+'I could eat their bruschetta all day it is devine.',Positive
+'It was attached to a gas station, and that is rarely a good sign.',Negative
+'Avoid at all cost!',Negative
+'I have been to very few places to eat that under no circumstances would I ever return to, and this tops the list.',Negative
+'This place lacked style!!',Negative
+'I had about two bites and refused to eat anymore.',Negative
+'Anyways, The food was definitely not filling at all, and for the price you pay you should expect more.',Negative
+'I got food poisoning here at the buffet.',Negative
+'This is a really fantastic Thai restaurant which is definitely worth a visit.',Positive
+'Once you get inside you\'ll be impressed with the place.',Positive
+'They brought a fresh batch of fries and I was thinking yay something warm but no!',Negative
+'Then, as if I hadn\'t wasted enough of my life there, they poured salt in the wound by drawing out the time it took to bring the check.',Negative
+'The wontons were thin, not thick and chewy, almost melt in your mouth.',Positive
+'Unfortunately, we must have hit the bakery on leftover day because everything we ordered was STALE.',Negative
+'And service was super friendly.',Positive
+'Once your food arrives it\'s meh.',Negative
+'I can say that the desserts were yummy.',Positive
+'I wasn\'t really impressed with Strip Steak.',Negative
+'The staff are great, the ambiance is great.',Positive
+'We had fantastic service, and were pleased by the atmosphere.',Positive
+'Everything was fresh and delicious!',Positive
+'Definitely worth venturing off the strip for the pork belly, will return next time I\'m in Vegas.',Positive
+'The lighting is just dark enough to set the mood.',Positive
+'The server was very negligent of our needs and made us feel very unwelcome... I would not suggest this place!',Negative
+'Great food and awesome service!',Positive
+'This one is simply a disappointment.',Negative
+'This hole in the wall has great Mexican street tacos, and friendly staff.',Positive
+'I had a pretty satifying experience.',Positive
+'After all the rave reviews I couldn\'t wait to eat here......what a disappointment!',Negative
+'Ordered an appetizer and took 40 minutes and then the pizza another 10 minutes.',Negative
+'Eew... This location needs a complete overhaul.',Negative
+'Also, the fries are without a doubt the worst fries I\'ve ever had.',Negative
+'Overall, a great experience.',Positive
+'Everything was perfect the night we were in.',Positive
+'I didn\'t know pulled pork could be soooo delicious.',Positive
+'My husband and I ate lunch here and were very disappointed with the food and service.',Negative
+'Everything was good and tasty!',Positive
+'I can\'t tell you how disappointed I was.',Negative
+'Every time I eat here, I see caring teamwork to a professional degree.',Positive
+'We had 7 at our table and the service was pretty fast.',Positive
+'Delicious NYC bagels, good selections of cream cheese, real Lox with capers even.',Positive
+'Level 5 spicy was perfect, where spice didn\'t over-whelm the soup.',Positive
+'It was a huge awkward 1.5lb piece of cow that was 3/4ths gristle and fat.',Negative
+'definitely will come back here again.',Positive
+'The sides are delish - mixed mushrooms, yukon gold puree, white corn - beateous.',Positive
+'Very disappointing!!!',Negative
+'Kids pizza is always a hit too with lots of great side dish options for the kiddos!',Positive
+'I\'ll take my business dinner dollars elsewhere.',Negative
+'Also, I feel like the chips are bought, not made in house.',Negative
+'What SHOULD have been a hilarious, yummy Christmas Eve dinner to remember was the biggest fail of the entire trip for us.',Negative
+'The deal included 5 tastings and 2 drinks, and Jeff went above and beyond what we expected.',Positive
+'The scallop dish is quite appalling for value as well.',Negative
+'Interesting decor.',Positive
+'Needless to say, we will never be back here again.',Negative
+'This place receives stars for their APPETIZERS!!!',Positive
+'But now I was completely grossed out.',Negative
+'As for the "mains," also uninspired.',Negative
+'Fantastic food!',Positive
+'One nice thing was that they added gratuity on the bill since our party was larger than 6 or 8, and they didn\'t expect more tip than that.',Positive
+'Their chow mein is so good!',Positive
+'The selection of food was not the best.',Negative
+'This place deserves no stars.',Negative
+'Lastly, the mozzarella sticks, they were the best thing we ordered.',Positive
+'The burger had absolutely no flavor - the meat itself was totally bland, the burger was overcooked and there was no charcoal flavor.',Negative
+'Insults, profound deuchebaggery, and had to go outside for a smoke break while serving just to solidify it.',Negative
+'I ordered the Lemon raspberry ice cocktail which was also incredible.',Positive
+'The selection on the menu was great and so were the prices.',Positive
+'From what my dinner companions told me...everything was very fresh with nice texture and taste.',Positive
+'Not much flavor to them, and very poorly constructed.',Negative
+'The staff is always super friendly and helpful, which is especially cool when you bring two small boys and a baby!',Positive
+'The food was terrible.',Negative
+'The service here is fair at best.',Negative
+'After the disappointing dinner we went elsewhere for dessert.',Negative
+'Worst food/service I\'ve had in a while.',Negative
+'I think not again',Negative
+'Extremely Tasty!',Positive
+'I think this restaurant suffers from not trying hard enough.',Negative
+'My husband said she was very rude... did not even apologize for the bad food or anything.',Negative
+'Couldn\'t ask for a more satisfying meal.',Positive
+'What a mistake that was!',Negative
+'This place is not quality sushi, it is not a quality restaurant.',Negative
+'2 times - Very Bad Customer Service !',Negative
+'Perfect for someone (me) who only likes beer ice cold, or in this case, even colder.',Positive
+'The live music on Fridays totally blows.',Negative
+'Pretty awesome place.',Positive
+'Based on the sub-par service I received and no effort to show their gratitude for my business I won\'t be going back.',Negative
+'The ambiance isn\'t much better.',Negative
+'A FLY was in my apple juice.. A FLY!!!!!!!!',Negative
+'I mean really, how do you get so famous for your fish and chips when it\'s so terrible!?!',Negative
+'So we went to Tigerlilly and had a fantastic afternoon!',Positive
+'I vomited in the bathroom mid lunch.',Negative
+'a drive thru means you do not want to wait around for half an hour for your food, but somehow when we end up going here they make us wait and wait.',Negative
+'We definately enjoyed ourselves.',Positive
+'The burger... I got the "Gold Standard" a $17 burger and was kind of disappointed.',Negative
+'Needless to say, I won\'t be going back anytime soon.',Negative
+'Everyone is treated equally special.',Positive
+'seems like a good quick place to grab a bite of some familiar pub food, but do yourself a favor and look elsewhere.',Negative
+'Best breakfast buffet!!!',Positive
+'The service was terrible though.',Negative
+'Never had anything to complain about here.',Positive
+'We\'d definitely go back here again.',Positive
+'I love that they put their food in nice plastic containers as opposed to cramming it in little paper takeout boxes.',Positive
+'The best place to go for a tasty bowl of Pho!',Positive
+'Stopped by during the late May bank holiday off Rick Steve recommendation and loved it.',Positive
+'The food was very good.',Positive
+'I would definitely recommend the wings as well as the pizza.',Positive
+'I gave it 5 stars then, and I\'m giving it 5 stars now.',Positive
+'I checked out this place a couple years ago and was not impressed.',Negative
+'Come hungry, leave happy and stuffed!',Positive
+'The block was amazing.',Positive
+'We ordered the duck rare and it was pink and tender on the inside with a nice char on the outside.',Positive
+'The owners are super friendly and the staff is courteous.',Positive
+'I\'ve never been treated so bad.',Negative
+'We were promptly greeted and seated.',Positive
+'I won\'t be back.',Negative
+'I would recommend saving room for this!',Positive
+'This was like the final blow!',Negative
+'not even a "hello, we will be right with you."',Negative
+'Love the margaritas, too!',Positive
+'They have a plethora of salads and sandwiches, and everything I\'ve tried gets my seal of approval.',Positive
+'I\'ve lived here since 1979 and this was the first (and last) time I\'ve stepped foot into this place.',Negative
+'If the food isn\'t bad enough for you, then enjoy dealing with the world\'s worst/annoying drunk people.',Negative
+'My wife had the Lobster Bisque soup which was lukewarm.',Negative
+'dont go here.',Negative
+'The service here leaves a lot to be desired.',Negative
+'Great Subway, in fact it\'s so good when you come here every other Subway will not meet your expectations.',Positive
+'Unfortunately, it only set us up for disapppointment with our entrees.',Negative
+'They had a toro tartare with a cavier that was extraordinary and I liked the thinly sliced wagyu with white truffle.',Positive
+'It\'ll be a regular stop on my trips to Phoenix!',Positive
+'Gave up trying to eat any of the crust (teeth still sore).',Negative
+'Their rotating beers on tap is also a highlight of this place.',Positive
+'We waited an hour for what was a breakfast I could have done 100 times better at home.',Negative
+'like the other reviewer said "you couldn\'t pay me to eat at this place again."',Negative
+'the staff is friendly and the joint is always clean.',Positive
+'Disappointing experience.',Negative
+'WAAAAAAyyyyyyyyyy over rated is all I am saying.',Negative
+'The only thing I wasn\'t too crazy about was their guacamole as I don\'t like it puréed.',Negative
+'The menu is always changing, food quality is going down & service is extremely slow.',Negative
+'It\'s too bad the food is so damn generic.',Negative
+'This isn\'t a small family restaurant, this is a fine dining establishment.',Positive
+'Coming here is like experiencing an underwhelming relationship where both parties can\'t wait for the other person to ask to break up.',Negative
+'I just wanted to leave.',Negative
+'Bland and flavorless is a good way of describing the barely tepid meat.',Negative
+'I kept looking at the time and it had soon become 35 minutes, yet still no food.',Negative
+'the presentation of the food was awful.',Negative
+'We\'ve have gotten a much better service from the pizza place next door than the services we received from this restaurant.',Negative
+'Worst service to boot, but that is the least of their worries.',Negative
+'If you\'re not familiar, check it out.',Positive
+'The steak was amazing...rge fillet relleno was the best seafood plate i have ever had!',Positive
+'I had the opportunity today to sample your amazing pizzas!',Positive
+'Def coming back to bowl next time',Positive
+'I got to enjoy the seafood salad, with a fabulous vinegrette.',Positive
+'I love the fact that everything on their menu is worth it.',Positive
+'It was awesome.',Positive
+'Similarly, the delivery man did not say a word of apology when our food was 45 minutes late.',Negative
+'An absolute must visit!',Positive
+'The descriptions said "yum yum sauce" and another said "eel sauce", yet another said "spicy mayo"...well NONE of the rolls had sauces on them.',Negative
+'Overall, I was very disappointed with the quality of food at Bouchon.',Negative
+'As always the evening was wonderful and the food delicious!',Positive
+'The potato chip order was sad... I could probably count how many chips were in that box and it was probably around 12.',Negative
+'The staff is super nice and very quick even with the crazy crowds of the downtown juries, lawyers, and court staff.',Positive
+'Hot dishes are not hot, cold dishes are close to room temp.I watched staff prepare food with BARE HANDS, no gloves.Everything is deep fried in oil.',Negative
+'Our server was very nice and attentive as were the other serving staff.',Positive
+'We literally sat there for 20 minutes with no one asking to take our order.',Negative
+'The service was a bit lacking.',Negative
+'They could serve it with just the vinaigrette and it may make for a better overall dish, but it was still very good.',Positive
+'5 stars for the brick oven bread app!',Positive
+'this place is good.',Positive
+'Food was so gooodd.',Positive
+'You can\'t beat that.',Positive
+'I\'d love to go back.',Positive
+'The tables outside are also dirty a lot of the time and the workers are not always friendly and helpful with the menu.',Negative
+'Loved it...friendly servers, great food, wonderful and imaginative menu.',Positive
+'Omelets are to die for!',Positive
+'The restaurant is very clean and has a family restaurant feel to it.',Positive
+'Join the club and get awesome offers via email.',Positive
+'I\'m probably one of the few people to ever go to Ians and not like it.',Negative
+'Sooooo good!!',Positive
+'It\'s NOT hard to make a decent hamburger.',Negative
+'Main thing I didn\'t enjoy is that the crowd is of older crowd, around mid 30s and up.',Negative
+'Owner\'s are really great people.!',Positive
+'I started this review with two stars, but I\'m editing it to give it only one.',Negative
+'They have horrible attitudes towards customers, and talk down to each one when customers don\'t enjoy their food.',Negative
+'When I received my Pita it was huge it did have a lot of meat in it so thumbs up there.',Positive
+'Generous portions and great taste.',Positive
+'The pizza tasted old, super chewy in not a good way.',Negative
+'Not a weekly haunt, but definitely a place to come back to every once in a while.',Positive
+'The one down note is the ventilation could use some upgrading.',Negative
+'Stopped by this place while in Madison for the Ironman, very friendly, kind staff.',Positive
+'Con: spotty service.',Negative
+'If it were possible to give them zero stars, they\'d have it.',Negative
+'There is not a deal good enough that would drag me into that establishment again.',Negative
+'I was shocked because no signs indicate cash only.',Negative
+'Strike 2, who wants to be rushed.',Negative
+'Hopefully this bodes for them going out of business and someone who can cook can come in.',Negative
+'This is an Outstanding little restaurant with some of the Best Food I have ever tasted.',Positive
+'No allergy warnings on the menu, and the waitress had absolutely no clue as to which meals did or did not contain peanuts.',Negative
+'Went for lunch - service was slow.',Negative
+'After I pulled up my car I waited for another 15 minutes before being acknowledged.',Negative
+'Each day of the week they have a different deal and it\'s all so delicious!',Positive
+'Cute, quaint, simple, honest.',Positive
+'Service was good and the company was better!',Positive
+'Great food for the price, which is very high quality and house made.',Positive
+'The food, amazing.',Positive
+'The price is reasonable and the service is great.',Positive
+'The seasonal fruit was fresh white peach puree.',Positive
+'We watched our waiter pay a lot more attention to other tables and ignore us.',Negative
+'The classic Maine Lobster Roll was fantastic.',Positive
+'The first time I ever came here I had an amazing experience, I still tell people how awesome the duck was.',Positive
+'Will be back again!',Positive
+'It was absolutely amazing.',Positive
+'Best of luck to the rude and non-customer service focused new management.',Negative
+'My first visit to Hiro was a delight!',Positive
+'-Drinks took close to 30 minutes to come out at one point.',Negative
+'Pretty good beer selection too.',Positive
+'In fact I\'m going to round up to 4 stars, just because she was so awesome.',Positive
+'It is worth the drive.',Positive
+'This place has a lot of promise but fails to deliver.',Negative
+'I give it 2 thumbs down',Negative
+'What a mistake.',Negative
+'All in all, I can assure you I\'ll be back.',Positive
+'If you want a sandwich just go to any Firehouse!!!!!',Positive
+'Would not go back.',Negative
+'Today was my first taste of a Buldogis Gourmet Hot Dog and I have to tell you it was more than I ever thought possible.',Positive
+'Fantastic service here.',Positive
+'I had a salad with the wings, and some ice cream for dessert and left feeling quite satisfied.',Positive
+'All the bread is made in-house!',Positive
+'Try them in the airport to experience some tasty food and speedy, friendly service.',Positive
+'Our server was very nice, and even though he looked a little overwhelmed with all of our needs, he stayed professional and friendly until the end.',Positive
+'We\'ve tried to like this place but after 10+ times I think we\'re done with them.',Negative
+'Our server was fantastic and when he found out the wife loves roasted garlic and bone marrow, he added extra to our meal and another marrow to go!',Positive
+'I\'ve had better, not only from dedicated boba tea spots, but even from Jenni Pho.',Negative
+'Mediocre food.',Negative
+'Give it a try, you will be happy you did.',Positive
+'He deserves 5 stars.',Positive
+'Seriously flavorful delights, folks.',Positive
+'The whole experience was underwhelming, and I think we\'ll just go to Ninja Sushi next time.',Negative
+'We won\'t be going back anytime soon!',Negative
+'I have never had such bland food which surprised me considering the article we read focused so much on their spices and flavor.',Negative
+'First - the bathrooms at this location were dirty- Seat covers were not replenished & just plain yucky!!!',Negative
+'My brother in law who works at the mall ate here same day, and guess what he was sick all night too.',Negative
+'They were excellent.',Positive
+'This wonderful experience made this place a must-stop whenever we are in town again.',Positive
+'If you stay in Vegas you must get breakfast here at least once.',Positive
+'What happened next was pretty....off putting.',Negative
+'I hate those things as much as cheap quality black olives.',Negative
+'No complaints!',Positive
+'We could not believe how dirty the oysters were!',Negative
+'Everything was gross.',Negative
+'This is my new fav Vegas buffet spot.',Positive
+'The inside is really quite nice and very clean.',Positive
+'The service was not up to par, either.',Negative
+'If you are reading this please don\'t go there.',Negative
+'The kids play area is NASTY!',Negative
+'A greasy, unhealthy meal.',Negative
+'For about 10 minutes, we we\'re waiting for her salad when we realized that it wasn\'t coming any time soon.',Negative
+'The guys all had steaks, and our steak loving son who has had steak at the best and worst places said it was the best steak he\'s ever eaten.',Positive
+'The food wasn\'t good.',Negative
+'On three different occasions I asked for well done or medium well, and all three times I got the bloodiest piece of meat on my plate.',Negative
+'I never come again.',Negative
+'Worst martini ever!',Negative
+'Very friendly staff.',Positive
+'For sushi on the Strip, this is the place to go.',Positive
+'We got the food and apparently they have never heard of salt and the batter on the fish was chewy.',Negative
+'Tasted like dirt.',Negative
+'The steak and the shrimp are in my opinion the best entrees at GC.',Positive
+'I ordered Albondigas soup - which was just warm - and tasted like tomato soup with frozen meatballs.',Negative
+'The burger is good beef, cooked just right.',Positive
+'This place is a jewel in Las Vegas, and exactly what I\'ve been hoping to find in nearly ten years living here.',Positive
+'The nachos are a MUST HAVE!',Positive
+'Some may say this buffet is pricey but I think you get what you pay for and this place you are getting quite a lot!',Positive
+'Sauce was tasteless.',Negative
+'No one at the table thought the food was above average or worth the wait that we had for it.',Negative
+'The ambiance here did not feel like a buffet setting, but more of a douchey indoor garden for tea and biscuits.',Negative
+'And it was way to expensive.',Negative
+'Probably never coming back, and wouldn\'t recommend it.',Negative
+'I also decided not to send it back because our waitress looked like she was on the verge of having a heart attack.',Negative
+'TOTAL WASTE OF TIME.',Negative
+'This is an unbelievable BARGAIN!',Positive
+'I dressed up to be treated so rudely!',Negative
+'OMG I felt like I had never eaten Thai food until this dish.',Positive
+'They have a really nice atmosphere.',Positive
+'I go to far too many places and I\'ve never seen any restaurant that serves a 1 egg breakfast, especially for $4.00.',Negative
+'Do yourself a favor and stay away from this dish.',Negative
+'Food was delicious!',Positive
+'I will continue to come here on ladies night andddd date night ... highly recommend this place to anyone who is in the area (;',Positive
+'It lacked flavor, seemed undercooked, and dry.',Negative
+'I went to Bachi Burger on a friend\'s recommendation and was not disappointed.',Positive
+'This is a disgrace.',Negative
+'Oh this is such a thing of beauty, this restaurant.',Positive
+'The chips that came out were dripping with grease, and mostly not edible.',Negative
+'Service stinks here!',Negative
+'Will never, ever go back.',Negative
+'This place is great!!!!!!!!!!!!!!',Positive
+'The food is about on par with Denny\'s, which is to say, not good at all.',Negative
+'Waited and waited and waited.',Negative
+'I could care less... The interior is just beautiful.',Positive
+'And the beans and rice were mediocre at best.',Negative
+'We\'ll never go again.',Negative
+DELICIOUS!!,Positive
+'Great pork sandwich.',Positive
+'I seriously cannot believe that the owner has so many unexperienced employees that all are running around like chickens with their heads cut off.',Negative
+'The cashier was friendly and even brought the food out to me.',Positive
+'The atmosphere is modern and hip, while maintaining a touch of coziness.',Positive
+'It also took her forever to bring us the check when we asked for it.',Negative
+'The food is very good for your typical bar food.',Positive
+'The food was very good and I enjoyed every mouthful, an enjoyable relaxed venue for couples small family groups etc.',Positive
+'The poor batter to meat ratio made the chicken tenders very unsatisfying.',Negative
+'We walked away stuffed and happy about our first Vegas buffet experience.',Positive
+'Last night was my second time dining here and I was so happy I decided to go back!',Positive
+'And then tragedy struck.',Negative
+'Worse of all, he humiliated his worker right in front of me..Bunch of horrible name callings.',Negative
+'It sure does beat the nachos at the movies but I would expect a little bit more coming from a restaurant.',Negative
+'Waiter was a jerk.',Negative
+'Total letdown, I would much rather just go to the Camelback Flower Shop and Cartel Coffee.',Negative
+'Highly recommended.',Positive
+'Everyone is very attentive, providing excellent customer service.',Positive
+'We loved the biscuits!!!',Positive
+'Things that went wrong: - They burned the saganaki.',Negative
+'The Burrittos Blah!',Negative
+'Not to mention the combination of pears, almonds and bacon is a big winner!',Positive
+'Food quality has been horrible.',Negative
+'The patio seating was very comfortable.',Positive
+'Service is perfect and the family atmosphere is nice to see.',Positive
+'Service is quick and even "to go" orders are just like we like it!',Positive
+'For that price I can think of a few place I would have much rather gone.',Negative
+'Talk about great customer service of course we will be back.',Positive
+'I was proven dead wrong by this sushi bar, not only because the quality is great, but the service is fast and the food, impeccable.',Positive
+'Same evening, him and I are both drastically sick.',Negative
+'Crostini that came with the salad was stale.',Negative
+'I recently tried Caballero\'s and I have been back every week since!',Positive
+'(It wasn\'t busy either) Also, the building was FREEZING cold.',Negative
+'Bacon is hella salty.',Positive
+'It\'s worth driving up from Tucson!',Positive
+'I guess I should have known that this place would suck, because it is inside of the Excalibur, but I didn\'t use my common sense.',Negative
+'It was not good.',Negative
+'Wow... Loved this place.',Positive
+'Prices are very reasonable, flavors are spot on, the sauce is home made, and the slaw is not drenched in mayo.',Positive
+'My breakfast was perpared great, with a beautiful presentation of 3 giant slices of Toast, lightly dusted with powdered sugar.',Positive
+'The feel of the dining room was more college cooking course than high class dining and the service was slow at best.',Negative
+'The food was outstanding and the prices were very reasonable.',Positive
+'To my disbelief, each dish qualified as the worst version of these foods I have ever tasted.',Negative
+'I\'m so happy to be here!!!"',Positive
+'The Jamaican mojitos are delicious.',Positive
+'Go To Place for Gyros.',Positive
+'Just as good as when I had it more than a year ago!',Positive
+'Very bad Experience!',Negative
+'After 20 minutes wait, I got a table.',Negative
+'The building itself seems pretty neat; the bathroom is pretty trippy, but I wouldn\'t eat here again.',Negative
+'Food was below average.',Negative
+'When my order arrived, one of the gyros was missing.',Negative
+'I really enjoyed Crema Café before they expanded; I even told friends they had the BEST breakfast.',Positive
+'Eclectic selection.',Positive
+'Service is friendly and inviting.',Positive
+'Nice blanket of moz over top but i feel like this was done to cover up the subpar food.',Positive
+'The plantains were the worst I\'ve ever tasted.',Negative
+'Service was excellent and prices are pretty reasonable considering this is Vegas and located inside the Crystals shopping mall by Aria.',Positive
+'The chicken I got was definitely reheated and was only ok, the wedges were cold and soggy.',Negative
+'The Han Nan Chicken was also very tasty.',Positive
+'The chipolte ranch dipping sause was tasteless, seemed thin and watered down with no heat.',Negative
+'I had heard good things about this place, but it exceeding every hope I could have dreamed of.',Positive
+'The decor is nice, and the piano music soundtrack is pleasant.',Positive
+'We had a group of 70+ when we claimed we would only have 40 and they handled us beautifully.',Positive
+'My friend loved the salmon tartar.',Positive
+'If that bug never showed up I would have given a 4 for sure, but on the other side of the wall where this bug was climbing was the kitchen.',Negative
+'Very good, though!',Positive
+'Also there are combos like a burger, fries, and beer for 23 which is a decent deal.',Positive
+'One of the few places in Phoenix that I would definately go back to again .',Positive
+'Seafood was limited to boiled shrimp and crab legs but the crab legs definitely did not taste fresh.',Negative
+'I\'m not eating here!',Negative
+'Good food , good service .',Positive
+'Tried to go here for lunch and it was a madhouse.',Negative
+'The service was poor and thats being nice.',Negative
+'By this time our side of the restaurant was almost empty so there was no excuse.',Negative
+'Four stars for the food & the guy in the blue shirt for his great vibe & still letting us in to eat !',Positive
+'He also came back to check on us regularly, excellent service.',Positive
+'I as well would\'ve given godfathers zero stars if possible.',Negative
+'There is nothing privileged about working/eating there.',Negative
+'It\'s close to my house, it\'s low-key, non-fancy, affordable prices, good food.',Positive
+'At least 40min passed in between us ordering and the food arriving, and it wasn\'t that busy.',Negative
+'Nice, spicy and tender.',Positive
+'At first glance it is a lovely bakery cafe - nice ambiance, clean, friendly staff.',Positive
+'The shrimp tender and moist.',Positive
+'Spend your money and time some place else.',Negative
+'As for the service, I thought it was good.',Positive
+'Your servers suck, wait, correction, our server Heimer sucked.',Negative
+'The ambience is wonderful and there is music playing.',Positive
+'By far the BEST cheesecurds we have ever had!',Positive
+'I don\'t know what kind it is but they have the best iced tea.',Positive
+'Anyway, I do not think i will go back there.',Negative
+'The meat was pretty dry, I had the sliced brisket and pulled pork.',Negative
+'My ribeye steak was cooked perfectly and had great mesquite flavor.',Positive
+'I consider this theft.',Negative
+'First time going but I think I will quickly become a regular.',Positive
+'This place is not worth your time, let alone Vegas.',Negative
+'I was VERY disappointed!!',Negative
+'The cow tongue and cheek tacos are amazing.',Positive
+'Service is also cute.',Positive
+'Now the burgers aren\'t as good, the pizza which used to be amazing is doughy and flavorless.',Negative
+'The chips and sals a here is amazing!!!!!!!!!!!!!!!!!!!',Positive
+'In an interesting part of town, this place is amazing.',Positive
+'There is so much good food in Vegas that I feel cheated for wasting an eating opportunity by going to Rice and Company.',Negative
+'Please stay away from the shrimp stir fried noodles.',Negative
+'When I\'m on this side of town, this will definitely be a spot I\'ll hit up again!',Positive
+'The servers are not pleasant to deal with and they don\'t always honor Pizza Hut coupons.',Negative
+'Sadly, Gordon Ramsey\'s Steak is a place we shall sharply avoid during our next trip to Vegas.',Negative
+'This was my first crawfish experience, and it was delicious!',Positive
+'There was hardly any meat.',Negative
+'Their monster chicken fried steak and eggs is my all time favorite.',Positive
+'this was a different cut than the piece the other day but still wonderful and tender s well as well flavored.',Positive
+'There is nothing authentic about this place.',Negative
+'The worst was the salmon sashimi.',Negative
+'This is some seriously good pizza and I\'m an expert/connisseur on the topic.',Positive
+'2 Thumbs Up!!',Positive
+'If you haven\'t gone here GO NOW!',Positive
+'this is the worst sushi i have ever eat besides Costco\'s.',Negative
+'Maybe it\'s just their Vegetarian fare, but I\'ve been twice and I thought it was average at best.',Negative
+'All in all, Ha Long Bay was a bit of a flop.',Negative
+'A couple of months later, I returned and had an amazing meal.',Positive
+'I don\'t have to be an accountant to know I\'m getting screwed!',Negative
+'The vegetables are so fresh and the sauce feels like authentic Thai.',Positive
+'The shower area is outside so you can only rinse, not take a full shower, unless you don\'t mind being nude for everyone to see!',Negative
+'Seriously killer hot chai latte.',Positive
+'Awesome service and food.',Positive
+'Despite how hard I rate businesses, its actually rare for me to give a 1 star.',Negative
+'We won\'t be going back.',Negative
+'Their menu is diverse, and reasonably priced.',Positive
+'I like Steiners because it\'s dark and it feels like a bar.',Positive
+'(The bathroom is just next door and very nice.)',Positive
+'Those burgers were amazing.',Positive
+'This greedy corporation will NEVER see another dime from me!',Negative
+'The sweet potato fries were very good and seasoned well.',Positive
+'My fella got the huevos rancheros and they didn\'t look too appealing.',Negative
+'Favorite place in town for shawarrrrrrma!!!!!!',Positive
+'The fries were great too.',Positive
+'This is a good joint.',Positive
+'Thus far, have only visited twice and the food was absolutely delicious each time.',Positive
+'Special thanks to Dylan T. for the recommendation on what to order :) All yummy for my tummy.',Positive
+'Poor service, the waiter made me feel like I was stupid every time he came to the table.',Negative
+'I would not recommend this place.',Negative
+'Total brunch fail.',Negative
+'We got sitting fairly fast, but, ended up waiting 40 minutes just to place our order, another 30 minutes before the food arrived.',Negative
+'Great place to relax and have an awesome burger and beer.',Positive
+'Overpriced for what you are getting.',Negative
+'Always a pleasure dealing with him.',Positive
+'All of the tapas dishes were delicious!',Positive
+'Anyway, this FS restaurant has a wonderful breakfast/lunch.',Positive
+'The servers went back and forth several times, not even so much as an "Are you being helped?"',Negative
+'The goat taco didn\'t skimp on the meat and wow what FLAVOR!',Positive
+'This place is hands-down one of the best places to eat in the Phoenix metro area.',Positive
+'I will not be eating there again.',Negative
+'The flair bartenders are absolutely amazing!',Positive
+'Waited 2 hours & never got either of our pizzas as many other around us who came in later did!',Negative
+'The bartender was also nice.',Positive
+'The sangria was about half of a glass wine full and was $12, ridiculous.',Negative
+'i felt insulted and disrespected, how could you talk and judge another human being like that?',Negative
+'very slow at seating even with reservation.',Negative
+'We waited for thirty minutes to be seated (although there were 8 vacant tables and we were the only folks waiting).',Negative
+'The Buffet at Bellagio was far from what I anticipated.',Negative
+'The service was a little slow , considering that were served by 3 people servers so the food was coming in a slow pace.',Negative
+'The Veggitarian platter is out of this world!',Positive
+'Both great!',Positive
+'As a sushi lover avoid this place by all means.',Negative
+'Server did a great job handling our large rowdy table.',Positive
+'After waiting an hour and being seated, I was not in the greatest of moods.',Negative
+'Hard to judge whether these sides were good because we were grossed out by the melted styrofoam and didn\'t want to eat it for fear of getting sick.',Negative
+'Will go back next trip out.',Positive
+'Just don\'t know why they were so slow.',Negative
+'The refried beans that came with my meal were dried out and crusty and the food was bland.',Negative
+'Everything on the menu is terrific and we were also thrilled that they made amazing accommodations for our vegetarian daughter.',Positive
+'I\'ll definitely be in soon again.',Positive
+'We loved the place.',Positive
+'For a self proclaimed coffee cafe, I was wildly disappointed.',Negative
+'I will come back here every time I\'m in Vegas.',Positive
+'This is the place where I first had pho and it was amazing!!',Positive
+'CONCLUSION: Very filling meals.',Positive
+'Great atmosphere, friendly and fast service.',Positive
+'Bad day or not, I have a very low tolerance for rude customer service people, it is your job to be nice and polite, wash dishes otherwise!!',Negative
+'too bad cause I know it\'s family owned, I really wanted to like this place.',Negative
+'I wouldn\'t return.',Negative
+'High-quality chicken on the chicken Caesar salad.',Positive
+'Del Taco is pretty nasty and should be avoided if possible.',Negative
+'To summarize... the food was incredible, nay, transcendant... but nothing brings me joy quite like the memory of the pneumatic condiment dispenser.',Positive
+'The waiter wasn\'t helpful or friendly and rarely checked on us.',Negative
+'The buffet is small and all the food they offered was BLAND.',Negative
+'Great place to have a couple drinks and watch any and all sporting events as the walls are covered with TV\'s.',Positive
+'Back to good BBQ, lighter fare, reasonable pricing and tell the public they are back to the old ways.',Positive
+'Definitely a turn off for me & i doubt I\'ll be back unless someone else is buying.',Negative
+'Their regular toasted bread was equally satisfying with the occasional pats of butter... Mmmm...!',Positive
+'The vanilla ice cream was creamy and smooth while the profiterole (choux) pastry was fresh enough.',Positive
+'My boyfriend and I came here for the first time on a recent trip to Vegas and could not have been more pleased with the quality of food and service.',Positive
+'The only good thing was our waiter, he was very helpful and kept the bloddy mary\'s coming.',Positive
+'The Greek dressing was very creamy and flavorful.',Positive
+'you can watch them preparing the delicious food!)',Positive
+'The steaks are all well trimmed and also perfectly cooked.',Positive
+'walked in and the place smelled like an old grease trap and only 2 others there eating.',Negative
+'It kept getting worse and worse so now I\'m officially done.',Negative
+'If she had not rolled the eyes we may have stayed... Not sure if we will go back and try it again.',Negative
+'Their daily specials are always a hit with my group.',Positive
+'Would not recommend to others.',Negative
+'And the chef was generous with his time (even came around twice so we can take pictures with him).',Positive
+'it was a drive to get there.',Negative
+'It really is impressive that the place hasn\'t closed down.',Negative
+'Im in AZ all the time and now have my new spot.',Positive
+'The management is rude.',Negative
+'They dropped more than the ball.',Negative
+'The bathrooms are clean and the place itself is well decorated.',Positive
+'I had high hopes for this place since the burgers are cooked over a charcoal grill, but unfortunately the taste fell flat, way flat.',Negative
+'Delicious and I will absolutely be back!',Positive
+'I live in the neighborhood so I am disappointed I won\'t be back here, because it is a convenient location.',Negative
+'This is a GREAT place to eat!',Positive
+'Ambience is perfect.',Positive
+'So absolutley fantastic.',Positive
+'She was quite disappointed although some blame needs to be placed at her door.',Negative
+'It\'s a great place and I highly recommend it.',Positive
+'Service was slow and not attentive.',Negative
+'They also have the best cheese crisp in town.',Positive
+'I also had to taste my Mom\'s multi-grain pumpkin pancakes with pecan butter and they were amazing, fluffy, and delicious!',Positive
+'I have watched their prices inflate, portions get smaller and management attitudes grow rapidly!',Negative
+'I did not expect this to be so good!',Positive
+'The seafood was fresh and generous in portion.',Positive
+'My boyfriend tried the Mediterranean Chicken Salad and fell in love.',Positive
+'We aren\'t ones to make a scene at restaurants but I just don\'t get it...definitely lost the love after this one!',Negative
+'The waitress and manager are so friendly.',Positive
+'I ordered the Voodoo pasta and it was the first time I\'d had really excellent pasta since going gluten free several years ago.',Positive
+'Bland... Not a liking this place for a number of reasons and I don\'t want to waste time on bad reviewing.. I\'ll leave it at that...',Negative
+'What a great double cheeseburger!',Positive
+'We enjoy their pizza and brunch.',Positive
+'If you want healthy authentic or ethic food, try this place.',Positive
+'I always order from the vegetarian menu during dinner, which has a wide array of options to choose from.',Positive
+'The chicken was deliciously seasoned and had the perfect fry on the outside and moist chicken on the inside.',Positive
+'I probably won\'t be back, to be honest.',Negative
+'The chicken dishes are OK, the beef is like shoe leather.',Negative
+'However, my recent experience at this particular location was not so good.',Negative
+'No, I\'m going to eat the potato that I found some strangers hair in it.',Negative
+'-My order was not correct.',Negative
+'Frozen pucks of disgust, with some of the worst people behind the register.',Negative
+'I took back my money and got outta there.',Negative
+'I do love sushi, but I found Kabuki to be over-priced, over-hip and under-services.',Negative
+'If someone orders two tacos don\'t\' you think it may be part of customer service to ask if it is combo or ala cart?',Negative
+'Great place fo take out or eat in.',Positive
+'Then our food came out, disappointment ensued.',Negative
+'The waitresses are very friendly.',Positive
+'I have been here several times in the past, and the experience has always been great.',Positive
+'I\'m super pissd.',Negative
+'Shrimp- When I unwrapped it (I live only 1/2 a mile from Brushfire) it was literally ice cold.',Negative
+'Great food and service, huge portions and they give a military discount.',Positive
+'The service was extremely slow.',Negative
+'Update.....went back for a second time and it was still just as amazing',Positive
+'the spaghetti is nothing special whatsoever.',Negative
+'Horrible - don\'t waste your time and money.',Negative
+'I have been in more than a few bars in Vegas, and do not ever recall being charged for tap water.',Negative
+'It was pretty gross!',Negative
+'say bye bye to your tip lady!',Negative
+'The place was not clean and the food oh so stale!',Negative
+'Point your finger at any item on the menu, order it and you won\'t be disappointed.',Positive
+'And considering the two of us left there very full and happy for about $20, you just can\'t go wrong.',Positive
+'Great time - family dinner on a Sunday night.',Positive
+'If you love authentic Mexican food and want a whole bunch of interesting, yet delicious meats to choose from, you need to try this place.',Positive
+'For service, I give them no stars.',Negative
+'It was extremely "crumby" and pretty tasteless.',Negative
+'I don\'t know what the big deal is about this place, but I won\'t be back "ya\'all".',Negative
+'After two I felt disgusting.',Negative
+'A lady at the table next to us found a live green caterpillar In her salad.',Negative
+'I loved the grilled pizza, reminded me of legit Italian pizza.',Positive
+'Service was fine and the waitress was friendly.',Positive
+'Service was very prompt.',Positive
+'Which are small and not worth the price.',Negative
+'Thoroughly disappointed!',Negative
+'Friend\'s pasta -- also bad, he barely touched it.',Negative
+'I probably would not go here again.',Negative
+'Furthermore, you can\'t even find hours of operation on the website!',Negative
+'I won\'t try going back there even if it\'s empty.',Negative
+'My girlfriend\'s veal was very bad.',Negative
+'This place is horrible and way overpriced.',Negative
+'That said, our mouths and bellies were still quite pleased.',Positive
+'The place was fairly clean but the food simply wasn\'t worth it.',Negative
+'Overall, I don\'t think that I would take my parents to this place again because they made most of the similar complaints that I silently felt too.',Negative
+'for 40 bucks a head, i really expect better food.',Negative
+'He was terrible!',Negative
+'Ryan\'s Bar is definitely one Edinburgh establishment I won\'t be revisiting.',Negative
+'Hands down my favorite Italian restaurant!',Positive
+'It was equally awful.',Negative
+'These are the nicest restaurant owners I\'ve ever come across.',Positive
+'Not tasty and the texture was just nasty.',Negative
+'The menu had so much good stuff on it i could not decide!',Positive
+'Definitely not worth the $3 I paid.',Negative
+'The chips and salsa were really good, the salsa was very fresh.',Positive
+'So good I am going to have to review this place twice - once hereas a tribute to the place and once as a tribute to an event held here last night.',Positive
+'I can\'t wait to go back.',Positive
+'My boyfriend and i sat at the bar and had a completely delightful experience.',Positive
+'Ordered burger rare came in we\'ll done.',Negative
+'I know this is not like the other restaurants at all, something is very off here!',Negative
+'This was my first time and I can\'t wait until the next.',Positive
+'Over rated.',Negative
+'They have a good selection of food including a massive meatloaf sandwich, a crispy chicken wrap, a delish tuna melt and some tasty burgers.',Positive
+'You get incredibly fresh fish, prepared with care.',Positive
+'Penne vodka excellent!',Positive
+'The problem I have is that they charge $11.99 for a sandwich that is no bigger than a Subway sub (which offers better and more amount of vegetables).',Negative
+'Would come back again if I had a sushi craving while in Vegas.',Positive
+'This place is two thumbs up....way up.',Positive
+'That just SCREAMS "LEGIT" in my book...somethat\'s also pretty rare here in Vegas.',Positive
+'We had so much to say about the place before we walked in that he expected it to be amazing, but was quickly disappointed.',Negative
+'Will not be back.',Negative
+'She ordered a toasted English muffin that came out untoasted.',Negative
+'This is one of the best bars with food in Vegas.',Positive
+'Great Pizza and Salads!',Positive
+'I\'m not really sure how Joey\'s was voted best hot dog in the Valley by readers of Phoenix Magazine.',Negative
+'Food was really boring.',Negative
+'I love the owner/chef, his one authentic Japanese cool dude!',Positive
+'But I don\'t like it.',Negative
+'Went in for happy hour, great list of wines.',Positive
+'We were sat right on time and our server from the get go was FANTASTIC!',Positive
+'- Really, really good rice, all the time.',Positive
+'This place is pretty good, nice little vibe in the restaurant.',Positive
+'- the food is rich so order accordingly.',Positive
+'I was mortified.',Negative
+'Great food.',Positive
+'Have been going since 2007 and every meal has been awesome!!',Positive
+'Now this dish was quite flavourful.',Positive
+'Spend your money elsewhere.',Negative
+'The real disappointment was our waiter.',Negative
+'My salad had a bland vinegrette on the baby greens and hearts of Palm.',Negative
+'Unfortunately, it was not good.',Negative
+'Crust is not good.',Negative
+'The salad had just the right amount of sauce to not over power the scallop, which was perfectly cooked.',Positive
+'I paid the bill but did not tip because I felt the server did a terrible job.',Negative
+'I hope this place sticks around.',Positive
+'I don\'t recommend unless your car breaks down in front of it and you are starving.',Negative
+'* Both the Hot & Sour & the Egg Flower Soups were absolutely 5 Stars!',Positive
+'The food sucked, which we expected but it sucked more than we could have imagined.',Negative
+'They have great dinners.',Positive
+'Weird vibe from owners.',Negative
+'It took over 30 min to get their milkshake, which was nothing more than chocolate milk.',Negative
+'first time there and might just be the last.',Negative
+'Awful service.',Negative
+'I\'ve had better atmosphere.',Negative
+'I could barely stomach the meal, but didn\'t complain because it was a business lunch.',Negative
+'Damn good steak.',Positive
+'Not good for the money.',Negative
+'Terrible management.',Negative
+'A fantastic neighborhood gem !!!',Positive
+'I came back today since they relocated and still not impressed.',Negative
+'The jalapeno bacon is soooo good.',Positive
+'Our waiter was very attentive, friendly, and informative.',Positive
+'Very very fun chef.',Positive
+'I found this place by accident and I could not be happier.',Positive
+'Perhaps I caught them on an off night judging by the other reviews, but I\'m not inspired to go back.',Negative
+'That\'s right....the red velvet cake.....ohhh this stuff is so good.',Positive
+'Before I go in to why I gave a 1 star rating please know that this was my third time eating at Bachi burger before writing a review.',Negative
+'I was seated immediately.',Positive
+'Why are these sad little vegetables so overcooked?',Negative
+'It was delicious!!!',Positive
+'I really enjoyed eating here.',Positive
+'The staff was very attentive.',Positive
+'The last 3 times I had lunch here has been bad.',Negative
+'This is was due to the fact that it took 20 minutes to be acknowledged, then another 35 minutes to get our food...and they kept forgetting things.',Negative
+'I can assure you that you won\'t be disappointed.',Positive
+'Also were served hot bread and butter, and home made potato chips with bacon bits on top....very original and very good.',Positive
+'All I have to say is the food was amazing!!!',Positive
+'The only thing I did like was the prime rib and dessert section.',Positive
+'He was extremely rude and really, there are so many other restaurants I would love to dine at during a weekend in Vegas.',Negative
+'The chicken wings contained the driest chicken meat I have ever eaten.',Negative
+'Only Pros : Large seating area/ Nice bar area/ Great simple drink menu/ The BEST brick oven pizza with homemade dough!',Positive
+'I love the decor with the Chinese calligraphy wall paper.',Positive
+'We started with the tuna sashimi which was brownish in color and obviously wasn\'t fresh.',Negative
+'I don\'t have very many words to say about this place, but it does everything pretty well.',Positive
+'Much better than the other AYCE sushi place I went to in Vegas.',Positive
+'I tried the Cape Cod ravoli, chicken,with cranberry...mmmm!',Positive
+'I\'ve never been more insulted or felt disrespected.',Negative
+'Some highlights : Great quality nigiri here!',Positive
+'Service sucks.',Negative
+'RUDE & INCONSIDERATE MANAGEMENT.',Negative
+'Soggy and not good.',Negative
+'The pizza selections are good.',Positive
+'My gyro was basically lettuce only.',Negative
+'Host staff were, for lack of a better word, BITCHES!',Negative
+'We thought you\'d have to venture further away to get good sushi, but this place really hit the spot that night.',Positive
+'Took an hour to get our food only 4 tables in restaurant my food was Luke warm, Our sever was running around like he was totally overwhelmed.',Negative
+'It was a pale color instead of nice and char and has NO flavor.',Negative
+'If you want to wait for mediocre food and downright terrible service, then this is the place for you.',Negative
+'Don\'t bother coming here.',Negative
+'Food was really good and I got full petty fast.',Positive
+'The food was excellent and service was very good.',Positive
+'I LOVED their mussels cooked in this wine reduction, the duck was tender, and their potato dishes were delicious.',Positive
+'The service was great, even the manager came and helped with our table.',Positive
+'Google mediocre and I imagine Smashburger will pop up.',Negative
+'I will never go back to this place and will never ever recommended this place to anyone!',Negative
+'very tough and very short on flavor!',Negative
+'Nice ambiance.',Positive
+'But I definitely would not eat here again.',Negative
+'Food was great and so was the serivce!',Positive
+'Restaurant is always full but never a wait.',Positive
+'I waited and waited.',Negative
+'Highly unprofessional and rude to a loyal patron!',Negative
+'I don\'t think I\'ll be running back to Carly\'s anytime soon for food.',Negative
+'It was a bit too sweet, not really spicy enough, and lacked flavor.',Negative
+'I believe that this place is a great stop for those with a huge belly and hankering for sushi.',Positive
+'Just had lunch here and had a great experience.',Positive
+'Just spicy enough.. Perfect actually.',Positive
+'Love this place, hits the spot when I want something healthy but not lacking in quantity or flavor.',Positive
+'Pricing is a bit of a concern at Mellow Mushroom.',Negative
+'You cant go wrong with any of the food here.',Positive
+'I had a seriously solid breakfast here.',Positive
+'This place has it!',Positive
+'Sorry, I will not be getting food from here anytime soon :(',Negative
+'Overall, I like there food and the service.',Positive
+'Never again will I be dining at this place!',Negative
+'It was probably dirt.',Negative
+'The ambiance was incredible.',Positive
+'Service was fantastic.',Positive
+'I miss it and wish they had one in Philadelphia!',Positive
+'By this point, my friends and I had basically figured out this place was a joke and didn\'t mind making it publicly and loudly known.',Negative
+'I dont think I will be back for a very long time.',Negative
+'Good Service-check!',Positive
+'It\'s like a really sexy party in your mouth, where you\'re outrageously flirting with the hottest person at the party.',Positive
+'Great steak, great sides, great wine, amazing desserts.',Positive
+'This place should honestly be blown up.',Negative
+'I had to wait over 30 minutes to get my drink and longer to get 2 arepas.',Negative
+'I would not recommend this place.',Negative
+'We waited for forty five minutes in vain.',Negative
+'Never going back.',Negative
+'I had the mac salad and it was pretty bland so I will not be getting that again.',Negative
+'I really do recommend this place, you can go wrong with this donut place!',Positive
+'The roast beef sandwich tasted really good!',Positive
+'The atmosphere here is fun.',Positive
+'I don\'t each much pasta, but I love the homemade /hand made pastas and thin pizzas here.',Positive
+'My fiancé and I came in the middle of the day and we were greeted and seated right away.',Positive
+'They know how to make them here.',Positive
+'Third, the cheese on my friend\'s burger was cold.',Negative
+'So they performed.',Positive
+'I work in the hospitality industry in Paradise Valley and have refrained from recommending Cibo any longer.',Negative
+'So don\'t go there if you are looking for good food...',Negative
+'The croutons also taste homemade which is an extra plus.',Positive
+'The atmosphere was great with a lovely duo of violinists playing songs we requested.',Positive
+'They were golden-crispy and delicious.',Positive
+'Best service and food ever, Maria our server was so good and friendly she made our day.',Positive
+'This really is how Vegas fine dining used to be, right down to the menus handed to the ladies that have no prices listed.',Positive
+'I love this place.',Positive
+'Your staff spends more time talking to themselves than me.',Negative
+'Their steaks are 100% recommended!',Positive
+'will definitely be back!',Positive
+'At least think to refill my water before I struggle to wave you over for 10 minutes.',Negative
+'I hate to disagree with my fellow Yelpers, but my husband and I were so disappointed with this place.',Negative
+'It was so bad, I had lost the heart to finish it.',Negative
+'We will not be coming back.',Negative
+'As much as I\'d like to go back, I can\'t get passed the atrocious service and will never return.',Negative
+'Overall I was not impressed and would not go back.',Negative
+'The cashew cream sauce was bland and the vegetables were undercooked.',Negative
+'The black eyed peas and sweet potatoes... UNREAL!',Positive
+'We are so glad we found this place.',Positive
+'But the service was beyond bad.',Negative
+'The pan cakes everyone are raving about taste like a sugary disaster tailored to the palate of a six year old.',Negative
+'Boy was that sucker dry!!.',Negative
+'I swung in to give them a try but was deeply disappointed.',Negative
+'The bus boy on the other hand was so rude.',Negative
+'The service was meh.',Negative
+'I would avoid this place if you are staying in the Mirage.',Negative
+'It was either too cold, not enough flavor or just bad.',Negative
+'Service was exceptional and food was a good as all the reviews.',Positive
+'I personally love the hummus, pita, baklava, falafels and Baba Ganoush (it\'s amazing what they do with eggplant!).',Positive
+'Terrible service!',Negative
+'They really want to make your experience a good one.',Positive
+'What I really like there is the crepe station.',Positive
+'I want to first say our server was great and we had perfect service.',Positive
+'The food was great as always, compliments to the chef.',Positive
+'WILL NEVER EVER GO BACK AND HAVE TOLD MANY PEOPLE WHAT HAD HAPPENED.',Negative
+'The ripped banana was not only ripped, but petrified and tasteless.',Negative
+'OMG, the food was delicioso!',Positive
+'I love this place.',Positive
+'Classy/warm atmosphere, fun and fresh appetizers, succulent steaks (Baseball steak!!!!!',Positive
+'The restaurant atmosphere was exquisite.',Positive
+'They will customize your order any way you\'d like, my usual is Eggplant with Green Bean stir fry, love it!',Positive
+'I love the Pho and the spring rolls oh so yummy you have to try.',Positive
+'Great service and food.',Positive
+'The pancake was also really good and pretty large at that.',Positive
+'The turkey and roast beef were bland.',Negative
+'They also now serve Indian naan bread with hummus and some spicy pine nut sauce that was out of this world.',Positive
+'Kind of hard to mess up a steak but they did.',Negative
+'This place is way too overpriced for mediocre food.',Negative
+'We asked for the bill to leave without eating and they didn\'t bring that either.',Negative
+'The Wife hated her meal (coconut shrimp), and our friends really did not enjoy their meals, either.',Negative
+'I\'m not impressed with the concept or the food.',Negative
+'The waitress was friendly and happy to accomodate for vegan/veggie options.',Positive
+'I had strawberry tea, which was good.',Positive
+'Appetite instantly gone.',Negative
+'The staff is great, the food is delish, and they have an incredible beer selection.',Positive
+'The RI style calamari was a joke.',Negative
+'The food was terrible.',Negative
+'The Heart Attack Grill in downtown Vegas is an absolutely flat-lined excuse for a restaurant.',Negative
+'The grilled chicken was so tender and yellow from the saffron seasoning.',Positive
+'Great brunch spot.',Positive
+'The fried rice was dry as well.',Negative
+'Won\'t ever go here again.',Negative
+'I was disgusted because I was pretty sure that was human hair.',Negative
+'The best place in Vegas for breakfast (just check out a Sat, or Sun.',Positive
+'I found a six inch long piece of wire in my salsa.',Negative
+'This place is awesome if you want something light and healthy during the summer.',Positive
+'I find wasting food to be despicable, but this just wasn\'t food.',Negative
+'The chefs were friendly and did a good job.',Positive
+'On the up side, their cafe serves really good food.',Positive
+'I guess maybe we went on an off night but it was disgraceful.',Negative
+'Phenomenal food, service and ambiance.',Positive
+'AVOID THIS ESTABLISHMENT!',Negative
+'It was way over fried.',Negative
+'Overall I wasn\'t very impressed with Noca.',Negative
+'The food was delicious, our bartender was attentive and personable AND we got a great deal!',Positive
+'I will be back many times soon.',Positive
+'Don\'t do it!!!!',Negative
+'I am far from a sushi connoisseur but I can definitely tell the difference between good food and bad food and this was certainly bad food.',Negative
+'And the red curry had so much bamboo shoots and wasn\'t very tasty to me.',Negative
+'An extensive menu provides lots of options for breakfast.',Positive
+'Overall, I like this place a lot.',Positive
+'Good value, great food, great service.',Positive
+'!....THE OWNERS REALLY REALLY need to quit being soooooo cheap let them wrap my freaking sandwich in two papers not one!',Negative
+'We made the drive all the way from North Scottsdale... and I was not one bit disappointed!',Positive
+'Now the pizza itself was good the peanut sauce was very tasty.',Positive
+'Food is way overpriced and portions are fucking small.',Negative
+'Both of the egg rolls were fantastic.',Positive
+'Very Very Disappointed ordered the $35 Big Bay Plater.',Negative
+'And the drinks are WEAK, people!',Negative
+'Food was good, service was good, Prices were good.',Positive
+'There is really nothing for me at postinos, hope your experience is better',Negative
+'Reasonably priced also!',Positive
+'It wasn\'t busy at all and now we know why.',Negative
+'The service was terrible, food was mediocre.',Negative
+'Tonight I had the Elk Filet special...and it sucked.',Negative
+'Very poor service.',Negative
+'A great touch.',Positive
+'The sweet potato tots were good but the onion rings were perfection or as close as I have had.',Positive
+'I have eaten here multiple times, and each time the food was delicious.',Positive
+'The food is delicious and just spicy enough, so be sure to ask for spicier if you prefer it that way.',Positive
+'The staff are also very friendly and efficient.',Positive
+'Worst Thai ever.',Negative
+'Good beer & drink selection and good food selection.',Positive
+'Good service, very clean, and inexpensive, to boot!',Positive
+'Great food and great service in a clean and friendly setting.',Positive
+'I immediately said I wanted to talk to the manager but I did not want to talk to the guy who was doing shots of fireball behind the bar.',Negative
+'If there were zero stars I would give it zero stars.',Negative
+'Lobster Bisque, Bussell Sprouts, Risotto, Filet ALL needed salt and pepper..and of course there is none at the tables.',Negative
+'Very convenient, since we were staying at the MGM!',Positive
+'The only reason to eat here would be to fill up before a night of binge drinking just to get some carbs in your stomach.',Negative
+'This was my first and only Vegas buffet and it did not disappoint.',Positive
+'Probably not in a hurry to go back.',Negative
+'The food came out at a good pace.',Positive
+'The warm beer didn\'t help.',Negative
+'This is one of the better buffets that I have been to.',Positive
+'Not my thing.',Negative
+'Not much seafood and like 5 strings of pasta at the bottom.',Negative
+'All in all an excellent restaurant highlighted by great service, a unique menu, and a beautiful setting.',Positive
+'The only redeeming quality of the restaurant was that it was very inexpensive.',Positive
+'I had the chicken Pho and it tasted very bland.',Negative
+'The dining space is tiny, but elegantly decorated and comfortable.',Positive
+'We won\'t be returning.',Negative
+'I\'d say that would be the hardest decision... Honestly, all of M\'s dishes taste how they are supposed to taste (amazing).',Positive
+'Very, very sad.',Negative
+'We recently witnessed her poor quality of management towards other guests as well.',Negative
+'Hawaiian Breeze, Mango Magic, and Pineapple Delight are the smoothies that I\'ve tried so far and they\'re all good.',Positive
+'I probably won\'t be coming back here.',Negative
+'The crêpe was delicate and thin and moist.',Positive
+'Both of them were truly unbelievably good, and I am so glad we went back.',Positive
+'So in a nutshell: 1) The restaraunt smells like a combination of a dirty fish market and a sewer.',Negative
+'The selection was probably the worst I\'ve seen in Vegas.....there was none.',Negative
+'Any grandmother can make a roasted chicken better than this one.',Negative
+'Food arrived quickly!',Positive
+'the potatoes were great and so was the biscuit.',Positive
+'My drink was never empty and he made some really great menu suggestions.',Positive
+'The folks at Otto always make us feel so welcome and special.',Positive
+'Cant say enough good things about this place.',Positive
+'I left with a stomach ache and felt sick the rest of the day.',Negative
+'I love their fries and their beans.',Positive
+'Very good lunch spot.',Positive
+'The fries were not hot, and neither was my burger.',Negative
+'It shouldn\'t take 30 min for pancakes and eggs.',Negative
+'I will not return.',Negative
+'Although I very much liked the look and sound of this place, the actual experience was a bit disappointing.',Negative
+'Our server was super nice and checked on us many times.',Positive
+'We ordered some old classics and some new dishes after going there a few times and were sorely disappointed with everything.',Negative
+'Plus, it\'s only 8 bucks.',Positive
+'Must have been an off night at this place.',Negative
+'The only downside is the service.',Negative
+'I don\'t think we\'ll be going back anytime soon.',Negative
+'the food is not tasty at all, not to say its "real traditional Hunan style".',Negative
+'Do not waste your money here!',Negative
+'Maybe if they weren\'t cold they would have been somewhat edible.',Negative
+'This place is like Chipotle, but BETTER.',Positive
+'There was a warm feeling with the service and I felt like their guest for a special treat.',Positive
+'We sat another ten minutes and finally gave up and left.',Negative
+'Best tacos in town by far!!',Positive
+'Will not be back!',Negative
+'On a positive note, our server was very attentive and provided great service.',Positive
+'My sashimi was poor quality being soggy and tasteless.',Negative
+'This place was such a nice surprise!',Positive
+'AN HOUR... seriously?',Negative
+'Food was average at best.',Negative
+'I\'d rather eat airline food, seriously.',Negative
+'These were so good we ordered them twice.',Positive
+'Nothing special.',Negative
+'Nargile - I think you are great.',Positive
+'I think food should have flavor and texture and both were lacking.',Negative
+'The chains, which I\'m no fan of, beat this place easily.',Negative
+'After one bite, I was hooked.',Positive
+'The sergeant pepper beef sandwich with auju sauce is an excellent sandwich as well.',Positive
+'But then they came back cold.',Negative
+'The staff are now not as friendly, the wait times for being served are horrible, no one even says hi for the first 10 minutes.',Negative
+'I can take a little bad service but the food sucks.',Negative
+'Dessert: Panna Cotta was amazing.',Positive
+'On the good side, the staff was genuinely pleasant and enthusiastic - a real treat.',Positive
+'What did bother me, was the slow service.',Negative
+'Best fish I\'ve ever had in my life!',Positive
+'Their frozen margaritas are WAY too sugary for my taste.',Negative
+'Pretty cool I would say.',Positive
+'If you look for authentic Thai food, go else where.',Negative
+'Good prices.',Positive
+'Check it out.',Positive
+'How can you call yourself a steakhouse if you can\'t properly cook a steak, I don\'t understand!',Negative
+'Service is quick and friendly.',Positive
+'Best Buffet in town, for the price you cannot beat it.',Positive
+'Wonderful lil tapas and the ambience made me feel all warm and fuzzy inside.',Positive
+'I\'m not sure how long we stood there but it was long enough for me to begin to feel awkwardly out of place.',Negative
+'REAL sushi lovers, let\'s be honest - Yama is not that good.',Negative
+'This place is amazing!',Positive
+'I promise they won\'t disappoint.',Positive
+'Waitress was sweet and funny.',Positive
+'Won\'t go back.',Negative
+'I ate there twice on my last visit, and especially enjoyed the salmon salad.',Positive
+'My friend did not like his Bloody Mary.',Negative
+'Today is the second time I\'ve been to their lunch buffet and it was pretty good.',Positive
+'Cooked to perfection and the service was impeccable.',Positive
+'I got home to see the driest damn wings ever!',Negative
+'Waitress was a little slow in service.',Negative
+'I *heart* this place.',Positive
+'It is PERFECT for a sit-down family meal or get together with a few friends.',Positive
+'Now I am getting angry and I want my damn pho.',Negative
+'The potatoes were like rubber and you could tell they had been made up ahead of time being kept under a warmer.',Negative
+'The cashier had no care what so ever on what I had to say it still ended up being wayyy overpriced.',Negative
+'The portion was huge!',Positive
+'The service was outshining & I definitely recommend the Halibut.',Positive
+'I liked the patio and the service was outstanding.',Positive
+'So flavorful and has just the perfect amount of heat.',Positive
