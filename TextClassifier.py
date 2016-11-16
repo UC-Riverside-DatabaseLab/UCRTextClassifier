@@ -177,12 +177,13 @@ if len(sys.argv) < 2:
 
 data = TextDatasetFileParser().parse(sys.argv[1])
 text_classifier = TextClassifier(VotingMethod.maximum)
-training_set_ratio = 0.9
-test_set = data[int(len(data) * training_set_ratio):]
+training_set_end = int(len(data) * 0.9)
 classifiers = ["Random Forest", "Regular Expression Classifier"]
 
 shuffle(data)
-text_classifier.train(data[0:int(len(data) * training_set_ratio)])
+text_classifier.train(data[0:training_set_end])
+
+test_set = data[training_set_end:]
 
 for i in range(0, len(classifiers)):
     print(classifiers[i] + ":")
