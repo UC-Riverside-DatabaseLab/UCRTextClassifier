@@ -2,15 +2,48 @@ from abc import ABC, abstractmethod
 
 
 class AbstractTextClassifier(ABC):
+    """Abstract class for text classifiers."""
     @abstractmethod
     def train(self, data):
+        """Train the classifier on the given training set.
+
+        Arguments:
+        data - A list of Instance objects (defined in TextDataSetFileParser.py)
+
+        Returns:
+        Nothing
+        """
         pass
 
     @abstractmethod
     def classify(self, instance):
+        """Determine the probability distribution of the given instance.
+
+        Arguments:
+        instance - An instance object (defined in TextDataSetFileParser.py)
+
+        Returns:
+        A dictionary with class strings as keys and probabilities as values
+        """
         pass
 
     def evaluate(self, test_set, verbose=False):
+        """Evaluate the classifier's performance on the given test set.
+
+        Arguments:
+        test_set - A list of Instance objects (defined in
+            TextDataSetFileParser.py)
+        verbose (default False) - If True, print the results of the evaluation
+
+        Returns:
+        A dictionary with the following key-value pairs:
+            accuracy - The ratio of correctly classified instances
+            weightedaccuracy - The ratio of weights of correctly classified
+                instances
+            confusionmatrix - A "two-dimensional dictionary" where matrix[A][B]
+                yields the number of instances of class A that were classified
+                as class B by the classifier
+        """
         correct = 0
         weighted_correct = 0
         weighted_total = 0
@@ -49,7 +82,7 @@ class AbstractTextClassifier(ABC):
                 for class_value in classes:
                     confusion_matrix[instance.class_value][class_value] = 0
 
-                self.classes.add(instance.class_value)
+                classes.add(instance.class_value)
 
                 for class_value in classes:
                     confusion_matrix[class_value][instance.class_value] = 0

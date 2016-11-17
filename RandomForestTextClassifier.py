@@ -1,10 +1,14 @@
+import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction.text import TfidfVectorizer
 from AbstractTextClassifier import AbstractTextClassifier
-import numpy as np
 
 
 class RandomForestTextClassifier(AbstractTextClassifier):
+    """Random forest classifier that converts text to the bag-of-words model
+    before training/classification. For further information, including
+    constructor arguments, see scikit-learn's random forest documentation.
+    """
     def __init__(self, num_trees=10, criterion="gini", max_depth=None,
                  min_samples_split=2, min_samples_leaf=1,
                  min_weight_fraction_leaf=0.0, max_features="auto",

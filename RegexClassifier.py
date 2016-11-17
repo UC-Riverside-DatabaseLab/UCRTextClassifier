@@ -4,11 +4,27 @@ from AbstractTextClassifier import AbstractTextClassifier
 
 
 class ScoringMethod(Enum):
+    """Enumeration of regular expression scoring methods. Information gain has
+    not yet been implemented.
+    """
     accuracy = 1
-    informationGain = 2
+    information_gain = 2
 
 
 class RegexRule(object):
+    """Container for a regular expression, its associated class, etc.
+
+    Constructor arguments:
+    regex - The regular expression
+    phrase - The phrase the regular expression was based on
+    matched - A list of instance objects (defined in TextDataSetFileParser.py)
+        whose text is matched by the regular expression
+    distribution - The class distribution among matched instances
+    class_value - The class that matched instances will be classified as
+    num_correct - The number of classified instances in matched of class
+        class_value
+    score - Accuracy or information gain, according to the scoring method
+    """
     def __init__(self, regex, phrase, matched, distribution, class_value,
                  num_correct, score):
         self.regex = regex
@@ -22,10 +38,32 @@ class RegexRule(object):
         self.score = score
 
     def matches(self, text):
+        """Determine whether the regular expression matches the given text.
+
+        Arguments:
+        text - The text to compare to the regular expression
+
+        Returns:
+        True if the regular expression matched the given text, False otherwise.
+        """
         return self.regex.match(text)
 
 
 class RegexClassifier(AbstractTextClassifier):
+    """Classifier that generates regular expressions based on training data.
+
+    Constructor arguments:
+    scoring_method (default accuracy) - The scoring method to use while
+        expanding regular expressions
+    score_threshold (default 1) - The minimum score of maximally-expanded
+        regular expressions to accept for classification
+    jump_length (default 2) - The maximum number of consecutive nearby words to
+        skip when expanding a regular expression
+    root_words (default 1) - The number of initial words to expand regular
+        expressions from
+    min_root_word_frequency (default auto) - The minimum frequency of words to
+        consider as root words; half the size of the training data if auto
+    """
     def __init__(self, scoring_method=ScoringMethod.accuracy,
                  score_threshold=1, jump_length=2, root_words=1,
                  min_root_word_frequency="auto"):
@@ -102,9 +140,6 @@ class RegexClassifier(AbstractTextClassifier):
                 return regex_rule.distribution
 
         return {}
-
-    def set_score_threshold(self, score_threshold):
-        self.score_threshold = score_threshold
 
     def __create_default_regex_rule(self, data):
         distribution = {}

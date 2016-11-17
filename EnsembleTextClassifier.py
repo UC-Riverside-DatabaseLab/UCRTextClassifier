@@ -10,6 +10,20 @@ from RegexClassifier import RegexClassifier
 
 
 class VotingMethod(Enum):
+    """Enumeration of ensemble combination methods. Given an instance to
+    classify, the classifier returns a probability distribution as follows:
+
+    average - The predicted probability of each class is the average of
+        predicted probabilities for that class among all the classifiers.
+    majority - The predicted probability of each class is the ratio of
+        classifiers that predicted the instance as that class.
+    maximum - The predicted probability of each class is the maximum
+    probability for that class among all the classifiers.
+    median - The predicted probability of each class is the median of
+        predicted probabilities for that class among all the classifiers.
+    product - The predicted probability of each class is the product of
+        predicted probabilities for that class among all the classifiers.
+    """
     average = 1
     majority = 2
     maximum = 3
@@ -18,6 +32,12 @@ class VotingMethod(Enum):
 
 
 class ClassifierThread(Thread):
+    """Thread class for classifier training.
+
+    Constructor arguments:
+    classifier - The classifier that this thread will run
+    data - A list of Instance objects (defined in TextDataSetFileParser.py)
+    """
     def __init__(self, classifier, data):
         Thread.__init__(self)
 
@@ -29,6 +49,14 @@ class ClassifierThread(Thread):
 
 
 class EnsembleTextClassifier(AbstractTextClassifier):
+    """Combines output of multiple text classifiers based on a user-selected
+    combination method.
+
+    Constructor arguments:
+    voting_method (default majority) - The combination method to use
+    use_weights (default True) - If True, apply a weight to each classifier's
+    output based on its accuracy
+    """
     def __init__(self, voting_method=VotingMethod.majority, use_weights=True):
         self.classifiers = [RandomForestTextClassifier(), RegexClassifier()]
         self.classifier_weights = []
