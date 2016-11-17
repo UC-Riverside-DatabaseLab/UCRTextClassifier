@@ -8,12 +8,14 @@ from AbstractTextClassifier import AbstractTextClassifier
 from RandomForestTextClassifier import RandomForestTextClassifier
 from RegexClassifier import RegexClassifier
 
+
 class VotingMethod(Enum):
     average = 1
     majority = 2
     maximum = 3
     median = 4
     product = 5
+
 
 class ClassifierThread(Thread):
     def __init__(self, classifier, data):
@@ -24,6 +26,7 @@ class ClassifierThread(Thread):
 
     def run(self):
         self.classifier.train(data)
+
 
 class EnsembleTextClassifier(AbstractTextClassifier):
     def __init__(self, voting_method=VotingMethod.majority, use_weights=True):
@@ -56,7 +59,8 @@ class EnsembleTextClassifier(AbstractTextClassifier):
 
         if self.use_weights:
             for i in range(0, len(self.classifiers)):
-                accuracy = self.classifiers[i].evaluate(validation_set)["weightedaccuracy"]
+                key = "weightedaccuracy"
+                accuracy = self.classifiers[i].evaluate(validation_set)[key]
                 self.classifier_weights[i] = accuracy
 
     def classify(self, instance):
@@ -75,13 +79,16 @@ class EnsembleTextClassifier(AbstractTextClassifier):
         distribution = {}
 
         for i in range(0, len(self.classifiers)):
-            predictions = self.__check_distribution(self.classifiers[i].classify(instance))
+            predictions = self.classifiers[i].classify(instance)
+            predictions = self.__check_distribution(predictions)
 
             for prediction, probability in predictions.items():
+                weighted_probability = probability * self.classifier_weights[i]
+
                 if prediction not in distribution:
                     distribution[prediction] = []
 
-                distribution[prediction].append(probability * self.classifier_weights[i])
+                distribution[prediction].append(weighted_probability)
 
         for prediction, probabilities in distribution.items():
             distribution[prediction] = mean(probabilities)
@@ -94,7 +101,8 @@ class EnsembleTextClassifier(AbstractTextClassifier):
         for i in range(0, len(self.classifiers)):
             max_class = None
             max_probability = 0
-            predictions = self.__check_distribution(self.classifiers[i].classify(instance))
+            predictions = self.classifiers[i].classify(instance)
+            predictions = self.__check_distribution(predictions)
 
             for prediction, probability in predictions.items():
                 if probability > max_probability:
@@ -104,7 +112,7 @@ class EnsembleTextClassifier(AbstractTextClassifier):
             if max_class not in distribution:
                 distribution[max_class] = 0
 
-            distribution[max_class] = distribution[max_class] + self.classifier_weights[i]
+            distribution[max_class] += self.classifier_weights[i]
 
         return self.__normalize_distribution(distribution)
 
@@ -112,13 +120,17 @@ class EnsembleTextClassifier(AbstractTextClassifier):
         distribution = {}
 
         for i in range(0, len(self.classifiers)):
-            predictions = self.__check_distribution(self.classifiers[i].classify(instance))
+            predictions = self.classifiers[i].classify(instance)
+            predictions = self.__check_distribution(predictions)
 
             for prediction, probability in predictions.items():
                 probability = probability * self.classifier_weights[i]
 
-                if prediction not in distribution or probability > distribution[prediction]:
-                    distribution[prediction] = probability
+                if prediction in distribution:
+                    if probability < distribution[prediction]:
+                        continue
+
+                distribution[prediction] = probability
 
         return self.__normalize_distribution(distribution)
 
@@ -126,13 +138,16 @@ class EnsembleTextClassifier(AbstractTextClassifier):
         distribution = {}
 
         for i in range(0, len(self.classifiers)):
-            predictions = self.__check_distribution(self.classifiers[i].classify(instance))
+            predictions = self.classifiers[i].classify(instance)
+            predictions = self.__check_distribution(predictions)
 
             for prediction, probability in predictions.items():
+                weighted_probability = probability * self.classifier_weights[i]
+
                 if prediction not in distribution:
                     distribution[prediction] = []
 
-                distribution[prediction].append(probability * self.classifier_weights[i])
+                distribution[prediction].append(weighted_probability)
 
         for prediction, probabilities in distribution.items():
             distribution[prediction] = median(probabilities)
@@ -143,14 +158,15 @@ class EnsembleTextClassifier(AbstractTextClassifier):
         distribution = {}
 
         for i in range(0, len(self.classifiers)):
-            predictions = self.__check_distribution(self.classifiers[i].classify(instance))
+            predictions = self.classifiers[i].classify(instance)
+            predictions = self.__check_distribution(predictions)
 
             for prediction, probability in predictions.items():
                 if prediction not in distribution:
                     distribution[prediction] = 1
 
-                distribution[prediction] = distribution[prediction] * probability
-                distribution[prediction] = distribution[prediction] * self.classifier_weights[i]
+                weighted_probability = probability * self.classifier_weights[i]
+                distribution[prediction] *= weighted_probability
 
         return self.__normalize_distribution(distribution)
 
@@ -165,7 +181,7 @@ class EnsembleTextClassifier(AbstractTextClassifier):
         sum_of_probabilities = 0
 
         for class_value, probability in distribution.items():
-            sum_of_probabilities = sum_of_probabilities + probability
+            sum_of_probabilities += probability
 
         for class_value, probability in distribution.items():
             distribution[class_value] = probability / sum_of_probabilities
@@ -176,7 +192,7 @@ if len(sys.argv) < 2:
     sys.exit()
 
 data = TextDatasetFileParser().parse(sys.argv[1])
-text_classifier = TextClassifier(VotingMethod.maximum)
+text_classifier = EnsembleTextClassifier(VotingMethod.maximum)
 training_set_end = int(len(data) * 0.9)
 classifiers = ["Random Forest", "Regular Expression Classifier"]
 
