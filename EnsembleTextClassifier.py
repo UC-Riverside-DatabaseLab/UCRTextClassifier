@@ -25,7 +25,7 @@ class ClassifierThread(Thread):
     def run(self):
         self.classifier.train(data)
 
-class TextClassifier(AbstractTextClassifier):
+class EnsembleTextClassifier(AbstractTextClassifier):
     def __init__(self, voting_method=VotingMethod.majority, use_weights=True):
         self.classifiers = [RandomForestTextClassifier(), RegexClassifier()]
         self.classifier_weights = []
