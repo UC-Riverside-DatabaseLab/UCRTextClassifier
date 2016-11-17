@@ -66,12 +66,28 @@ class EnsembleTextClassifier(AbstractTextClassifier):
         while len(self.classifier_weights) < len(self.classifiers):
             self.classifier_weights.append(1)
 
-    def train(self, data):
+    def train(self, data, calculate_training_weights=False):
         self.classes = set()
         threads = []
 
         for instance in data:
             self.classes.add(instance.class_value)
+
+        if calculate_training_weights:
+            freq = {}
+            max_class = None
+
+            for class_value in self.classes:
+                freq[class_value] = 0
+
+            for instance in data:
+                freq[class_value] += 1
+
+                if max_class is None or freq[class_value] > freq[max_class]:
+                    max_class = class_value
+
+            for instance in data:
+                instance.weight = freq[max_class] / freq[instance.class_value]
 
         if self.use_weights:
             training_set_size = int(0.9 * len(data))
