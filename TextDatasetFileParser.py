@@ -70,41 +70,23 @@ class TextDatasetFileParser(object):
         parsing_data = False
         dataset = []
 
-        while True:
-            line = file.readline()
+        with open(filename, newline="", errors="ignore") as file:
+            reader = csv.reader(file, quotechar="'")
 
-            if line == "":
-                break
-            elif line.startswith("@DATA") and not parsing_data:
-                parsing_data = True
-            elif parsing_data:
-                line = line[0:len(line) - 1]
+            for line in reader:
+                if not parsing_data and len(line) > 0 and line[0] == "@DATA":
+                    parsing_data = True
+                elif parsing_data:
+                    if self.verbose:
+                        print(line)
 
-                if self.verbose:
-                    print(line)
+                    if len(line) > 2:
+                        weight = float(line[2][1:len(line[2]) - 1])
+                    else:
+                        weight = 1
 
-                weight = 1
-                last_comma_index = line.rfind(",")
-                last_column = line[last_comma_index + 1:]
+                    dataset.append(Instance(line[0], line[1], weight))
 
-                if last_column.startswith("{") and last_column.endswith("}"):
-                    weight = float(last_column[1:len(last_column) - 1])
-                    line = line[0:last_comma_index]
-                    last_comma_index = line.rfind(",")
-                    last_column = line[last_comma_index + 1:]
-
-                class_value = last_column
-                text = line[0:last_comma_index]
-
-                if (text.startswith("'") and text.endswith("'") or
-                        text.startswith('"') and text.endswith('"')):
-                    text = text[1:len(text) - 1]
-
-                dataset.append(Instance(text, class_value, weight))
-            elif line == "\n":
-                continue
-
-        file.close()
         return dataset
 
     def __parse_csv_file(self, filename, delimit, quote_char):
@@ -117,14 +99,11 @@ class TextDatasetFileParser(object):
                 if self.verbose:
                     print(line)
 
-                text = line[0]
-                class_value = line[1]
-
                 if len(line) > 2:
                     weight = float(line[2])
                 else:
                     weight = 1
 
-                dataset.append(Instance(text, class_value, weight))
+                dataset.append(Instance(line[0], line[1], weight))
 
         return dataset
