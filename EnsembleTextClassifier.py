@@ -3,6 +3,7 @@ from enum import Enum
 from random import shuffle
 from threading import Thread
 from statistics import mean, median
+from Word2VecSimilarity import Word2VecSimilarity
 from TextDatasetFileParser import TextDatasetFileParser
 from AbstractTextClassifier import AbstractTextClassifier
 from RandomForestTextClassifier import RandomForestTextClassifier
@@ -56,17 +57,33 @@ class EnsembleTextClassifier(AbstractTextClassifier):
     voting_method (default majority) - The combination method to use
     use_weights (default True) - If True, apply a weight to each classifier's
     output based on its accuracy
+    unlabeled_data (default None) - Path to a file containing unlabeled data
+    for classifiers with unsupervised learning. If None, those classifers won't
+    be used.
     """
-    def __init__(self, voting_method=VotingMethod.majority, use_weights=True):
+    def __init__(self, voting_method=VotingMethod.majority, use_weights=True,
+                 unlabeled_data=None):
         self.classifiers = [RandomForestTextClassifier(), RegexClassifier()]
         self.classifier_weights = []
         self.voting_method = voting_method
         self.use_weights = use_weights
 
+        if unlabeled_data is not None:
+            self.classifiers.append(Word2VecSimilarity(unlabeled_data))
+
         while len(self.classifier_weights) < len(self.classifiers):
             self.classifier_weights.append(1)
 
     def train(self, data, calculate_training_weights=False):
+        """Train the classifier on the given training set.
+
+        Arguments:
+        data - A list of Instance objects (defined in TextDataSetFileParser.py)
+        calculate_training_weights (default False) - If True, calculate weights
+        based on the distribution of classes in the training data
+        Returns:
+        Nothing
+        """
         self.classes = set()
         threads = []
 
@@ -137,7 +154,7 @@ class EnsembleTextClassifier(AbstractTextClassifier):
         for prediction, probabilities in distribution.items():
             distribution[prediction] = mean(probabilities)
 
-        return self.__normalize_distribution(distribution)
+        return self._normalize_distribution(distribution)
 
     def __majority(self, instance):
         distribution = {}
@@ -158,7 +175,7 @@ class EnsembleTextClassifier(AbstractTextClassifier):
 
             distribution[max_class] += self.classifier_weights[i]
 
-        return self.__normalize_distribution(distribution)
+        return self._normalize_distribution(distribution)
 
     def __maximum(self, instance):
         distribution = {}
@@ -176,7 +193,7 @@ class EnsembleTextClassifier(AbstractTextClassifier):
 
                 distribution[prediction] = probability
 
-        return self.__normalize_distribution(distribution)
+        return self._normalize_distribution(distribution)
 
     def __median(self, instance):
         distribution = {}
@@ -196,7 +213,7 @@ class EnsembleTextClassifier(AbstractTextClassifier):
         for prediction, probabilities in distribution.items():
             distribution[prediction] = median(probabilities)
 
-        return self.__normalize_distribution(distribution)
+        return self._normalize_distribution(distribution)
 
     def __product(self, instance):
         distribution = {}
@@ -212,7 +229,7 @@ class EnsembleTextClassifier(AbstractTextClassifier):
                 weighted_probability = probability * self.classifier_weights[i]
                 distribution[prediction] *= weighted_probability
 
-        return self.__normalize_distribution(distribution)
+        return self._normalize_distribution(distribution)
 
     def __check_distribution(self, distribution):
         for class_value in self.classes:
@@ -221,31 +238,21 @@ class EnsembleTextClassifier(AbstractTextClassifier):
 
         return distribution
 
-    def __normalize_distribution(self, distribution):
-        sum_of_probabilities = 0
-
-        for class_value, probability in distribution.items():
-            sum_of_probabilities += probability
-
-        for class_value, probability in distribution.items():
-            distribution[class_value] = probability / sum_of_probabilities
-
-        return distribution
-
-if len(sys.argv) < 2:
+if len(sys.argv) < 3:
     sys.exit()
 
 data = TextDatasetFileParser().parse(sys.argv[1])
-text_classifier = EnsembleTextClassifier(VotingMethod.maximum)
+text_classifier = EnsembleTextClassifier(VotingMethod.maximum, True,
+                                         sys.argv[2])
 training_set_end = int(len(data) * 0.9)
-classifiers = ["Random Forest", "Regular Expression Classifier"]
+classifiers = ["Random Forest", "Regular Expressions", "Word2Vec"]
 
 shuffle(data)
 text_classifier.train(data[0:training_set_end])
 
 test_set = data[training_set_end:]
 
-for i in range(0, len(classifiers)):
+for i in range(0, len(text_classifier.classifiers)):
     print(classifiers[i] + ":")
     text_classifier.classifiers[i].evaluate(test_set, True)
     print("")

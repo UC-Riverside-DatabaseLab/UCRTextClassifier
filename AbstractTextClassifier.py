@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from random import random
 
 
 class AbstractTextClassifier(ABC):
@@ -53,11 +54,12 @@ class AbstractTextClassifier(ABC):
 
         for instance in test_set:
             max_class = None
-            max_probability = 0
+            max_probability = -1
             weighted_total += instance.weight
 
             for class_value, probability in self.classify(instance).items():
-                if probability > max_probability:
+                if (probability > max_probability or
+                        probability == max_probability and random() < 0.5):
                     max_class = class_value
                     max_probability = probability
 
@@ -142,3 +144,15 @@ class AbstractTextClassifier(ABC):
 
         return {"accuracy": accuracy, "weightedaccuracy": weighted_acc,
                 "confusionmatrix": confusion_matrix}
+
+    def _normalize_distribution(self, distribution):
+        sum_of_probabilities = 0
+
+        for class_value, probability in distribution.items():
+            sum_of_probabilities += probability
+
+        if sum_of_probabilities > 0:
+            for class_value, probability in distribution.items():
+                distribution[class_value] = probability / sum_of_probabilities
+
+        return distribution
