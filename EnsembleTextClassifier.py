@@ -55,18 +55,19 @@ class EnsembleTextClassifier(AbstractTextClassifier):
 
     Constructor arguments:
     voting_method (default majority) - The combination method to use
-    use_weights (default True) - If True, apply a weight to each classifier's
-    output based on its accuracy
+    weight_penalty (default 4) - If > 0, apply a weight to each classifier's
+    output based on its accuracy. Higher numbers increase the penalty for lower
+    accuracy.
     unlabeled_data (default None) - Path to a file containing unlabeled data
     for classifiers with unsupervised learning. If None, those classifers won't
     be used.
     """
-    def __init__(self, voting_method=VotingMethod.majority, use_weights=True,
+    def __init__(self, voting_method=VotingMethod.majority, weight_penalty=4,
                  unlabeled_data=None):
         self.classifiers = [RandomForestTextClassifier(), RegexClassifier()]
         self.classifier_weights = []
         self.voting_method = voting_method
-        self.use_weights = use_weights
+        self.weight_penalty = weight_penalty
 
         if unlabeled_data is not None:
             self.classifiers.append(Word2VecSimilarity(unlabeled_data))
@@ -106,7 +107,7 @@ class EnsembleTextClassifier(AbstractTextClassifier):
             for instance in data:
                 instance.weight = freq[max_class] / freq[instance.class_value]
 
-        if self.use_weights:
+        if self.weight_penalty > 0:
             training_set_size = int(0.9 * len(data))
             validation_set = data[training_set_size:]
             data = data[0:training_set_size]
@@ -118,11 +119,11 @@ class EnsembleTextClassifier(AbstractTextClassifier):
         for thread in threads:
             thread.join()
 
-        if self.use_weights:
+        if self.weight_penalty > 0:
             for i in range(0, len(self.classifiers)):
                 key = "weightedaccuracy"
                 accuracy = self.classifiers[i].evaluate(validation_set)[key]
-                self.classifier_weights[i] = accuracy
+                self.classifier_weights[i] = pow(accuracy, self.weight_penalty)
 
     def classify(self, instance):
         if self.voting_method == VotingMethod.average:
