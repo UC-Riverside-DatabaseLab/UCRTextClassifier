@@ -66,7 +66,7 @@ class TextDatasetFileParser(object):
         return dataset
 
     def __parse_arff_file(self, filename):
-        file = open(filename, 'r')
+        file = open(filename, 'r', errors='ignore')
         parsing_data = False
         dataset = []
 
