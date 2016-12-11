@@ -4,10 +4,10 @@ from random import shuffle
 from threading import Thread
 from statistics import mean, median
 from Word2VecSimilarity import Word2VecSimilarity
+from RegexClassifier import RegexClassifier
 from TextDatasetFileParser import TextDatasetFileParser
 from AbstractTextClassifier import AbstractTextClassifier
 from RandomForestTextClassifier import RandomForestTextClassifier
-from RegexClassifier import RegexClassifier
 
 
 class VotingMethod(Enum):
@@ -239,12 +239,18 @@ class EnsembleTextClassifier(AbstractTextClassifier):
 
         return distribution
 
-if len(sys.argv) < 3:
+if len(sys.argv) < 2:
     sys.exit()
 
 data = TextDatasetFileParser().parse(sys.argv[1])
-text_classifier = EnsembleTextClassifier(VotingMethod.maximum, True,
-                                         sys.argv[2])
+
+if len(sys.argv) > 2:
+    unlabeled_data_file = sys.argv[2]
+else:
+    unlabeled_data_file = None
+
+text_classifier = EnsembleTextClassifier(voting_method=VotingMethod.maximum,
+                                         unlabeled_data=unlabeled_data_file)
 training_set_end = int(len(data) * 0.9)
 classifiers = ["Random Forest", "Regular Expressions", "Word2Vec"]
 
