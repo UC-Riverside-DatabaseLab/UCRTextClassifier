@@ -11,6 +11,7 @@ from gensim import utils
 from gensim.models import Doc2Vec
 from gensim.test.test_doc2vec import ConcatenatedDoc2Vec
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.neighbors import KNeighborsClassifier
 
 from AbstractTextClassifier import AbstractTextClassifier
 
@@ -64,7 +65,8 @@ class DocVecClassifier(AbstractTextClassifier):
                     sample=1e-4, hs=0, negative=5, min_count=2, workers=cores)
                 }
         # For classifying class using trained document's vector
-        self.random_forest = RandomForestClassifier()
+        # self.random_forest = RandomForestClassifier()
+        self.neigh = KNeighborsClassifier(n_neighbors=1)
 
     def train(self, data):
 
@@ -88,9 +90,10 @@ class DocVecClassifier(AbstractTextClassifier):
         logger.debug("# labeled_vecs={}, # labels={}, # weights={}" \
                 .format(len(labeled_vecs), len(labels), len(weights)))
 
-        self.random_forest.fit(labeled_vecs,
-                               np.array(labels),
-                               np.array(weights))
+        # self.random_forest.fit(labeled_vecs,
+                               # np.array(labels),
+                               # np.array(weights))
+        self.neigh.fit(labeled_vecs, np.array(labels))
 
     def classify(self, instance):
         """Classify a text instance
@@ -103,11 +106,13 @@ class DocVecClassifier(AbstractTextClassifier):
 
         words = self.normalize_text(instance.text).split()
         test_vec = self.model.infer_vector(words, steps=self.infer_num_passes)
-        ordered_distribution = self.random_forest.predict_proba(test_vec)
+        # ordered_distribution = self.random_forest.predict_proba(test_vec) 
+        ordered_distribution = self.neigh.predict_proba(test_vec)
 
         for i in range(0, len(ordered_distribution[0])):
             if ordered_distribution[0, i] > 0:
-                class_value = self.random_forest.classes_[i]
+                # class_value = self.random_forest.classes_[i]
+                class_value = self.neigh.classes_[i]
                 distribution[class_value] = ordered_distribution[0, i]
 
         #logger.debug("classify \"{}\": {}".format(instance.text, distribution))
