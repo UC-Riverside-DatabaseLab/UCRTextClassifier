@@ -5,13 +5,13 @@ import argparse
 from timeit import default_timer 
 import multiprocessing 
 from collections import namedtuple
+from collections import defaultdict
 
 import numpy as np
-from gensim import utils
+from gensim import utils 
+from gensim.matutils import unitvec
 from gensim.models import Doc2Vec
 from gensim.test.test_doc2vec import ConcatenatedDoc2Vec
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.neighbors import KNeighborsClassifier
 
 from AbstractTextClassifier import AbstractTextClassifier
 
@@ -64,9 +64,8 @@ class DocVecClassifier(AbstractTextClassifier):
                 "dbow": Doc2Vec(dm=0, size=model_vec_size, window=10,
                     sample=1e-4, hs=0, negative=5, min_count=2, workers=cores)
                 }
-        # For classifying class using trained document's vector
-        # self.random_forest = RandomForestClassifier()
-        self.neigh = KNeighborsClassifier(n_neighbors=1)
+
+        self.training_data = {}
 
     def train(self, data):
 
@@ -90,10 +89,10 @@ class DocVecClassifier(AbstractTextClassifier):
         logger.debug("# labeled_vecs={}, # labels={}, # weights={}" \
                 .format(len(labeled_vecs), len(labels), len(weights)))
 
-        # self.random_forest.fit(labeled_vecs,
-                               # np.array(labels),
-                               # np.array(weights))
-        self.neigh.fit(labeled_vecs, np.array(labels))
+        # Prepare for 1-nearest neighbor
+        self.training_data = defaultdict(list)
+        for i, labeled_vec in enumerate(labeled_vecs):
+            self.training_data[labels[i]].append(unitvec(labeled_vec))
 
     def classify(self, instance):
         """Classify a text instance
@@ -106,17 +105,17 @@ class DocVecClassifier(AbstractTextClassifier):
 
         words = self.normalize_text(instance.text).split()
         test_vec = self.model.infer_vector(words, steps=self.infer_num_passes)
-        # ordered_distribution = self.random_forest.predict_proba(test_vec) 
-        ordered_distribution = self.neigh.predict_proba(test_vec)
+        test_vec = unitvec(test_vec)
+        for class_value, training_instances in self.training_data.items():
+            best_score = 0 
+            for training_instance in training_instances:
+                score = np.dot(test_vec, training_instance) 
+                if score > best_score:
+                    best_score = score
 
-        for i in range(0, len(ordered_distribution[0])):
-            if ordered_distribution[0, i] > 0:
-                # class_value = self.random_forest.classes_[i]
-                class_value = self.neigh.classes_[i]
-                distribution[class_value] = ordered_distribution[0, i]
+            distribution[class_value] = max(0, best_score) 
 
-        #logger.debug("classify \"{}\": {}".format(instance.text, distribution))
-        return distribution
+        return self._normalize_distribution(distribution)
 
     def train_doc_vec(self, line_documents, model_dir, num_epoch=10):
         """Train the vectors of line_documents
@@ -232,9 +231,8 @@ def main(args):
             args.unlabeled_data) if args.unlabeled_data else None 
 
     docvec_classifier = DocVecClassifier(unlabeled_data=unlabeled_data)
-    #docvec_classifier = DocVecClassifier()
 
-    np.random.shuffle(data)
+    # np.random.shuffle(data)
     training_set_end = int(len(data) * 0.9) 
     docvec_classifier.train(data[0:training_set_end])
 
