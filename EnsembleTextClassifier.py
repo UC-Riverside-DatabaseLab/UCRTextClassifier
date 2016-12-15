@@ -1,7 +1,6 @@
 import sys
 from enum import Enum
 from random import shuffle
-from threading import Thread
 from statistics import mean, median
 from Word2VecSimilarity import Word2VecSimilarity
 from RegexClassifier import RegexClassifier
@@ -30,23 +29,6 @@ class VotingMethod(Enum):
     maximum = 3
     median = 4
     product = 5
-
-
-class ClassifierThread(Thread):
-    """Thread class for classifier training.
-
-    Constructor arguments:
-    classifier - The classifier that this thread will run
-    data - A list of Instance objects (defined in TextDataSetFileParser.py)
-    """
-    def __init__(self, classifier, data):
-        Thread.__init__(self)
-
-        self.classifier = classifier
-        self.data = data
-
-    def run(self):
-        self.classifier.train(data)
 
 
 class EnsembleTextClassifier(AbstractTextClassifier):
@@ -113,8 +95,7 @@ class EnsembleTextClassifier(AbstractTextClassifier):
             data = data[0:training_set_size]
 
         for classifier in self.classifiers:
-            threads.append(ClassifierThread(classifier, data))
-            threads[len(threads) - 1].start()
+            classifier.train(data)
 
         for thread in threads:
             thread.join()
@@ -241,20 +222,19 @@ class EnsembleTextClassifier(AbstractTextClassifier):
 
 if len(sys.argv) < 2:
     sys.exit()
-
-data = TextDatasetFileParser().parse(sys.argv[1])
-
-if len(sys.argv) > 2:
+elif len(sys.argv) > 2:
     unlabeled_data_file = sys.argv[2]
 else:
     unlabeled_data_file = None
 
+data = TextDatasetFileParser().parse(sys.argv[1])
 text_classifier = EnsembleTextClassifier(voting_method=VotingMethod.maximum,
                                          unlabeled_data=unlabeled_data_file)
 training_set_end = int(len(data) * 0.9)
 classifiers = ["Random Forest", "Regular Expressions", "Word2Vec"]
 
 shuffle(data)
+
 text_classifier.train(data[0:training_set_end])
 
 test_set = data[training_set_end:]
