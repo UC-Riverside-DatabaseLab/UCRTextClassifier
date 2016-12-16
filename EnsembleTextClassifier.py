@@ -68,7 +68,6 @@ class EnsembleTextClassifier(AbstractTextClassifier):
         Nothing
         """
         self.classes = set()
-        threads = []
 
         for instance in data:
             self.classes.add(instance.class_value)
@@ -96,9 +95,6 @@ class EnsembleTextClassifier(AbstractTextClassifier):
 
         for classifier in self.classifiers:
             classifier.train(data)
-
-        for thread in threads:
-            thread.join()
 
         if self.weight_penalty > 0:
             for i in range(0, len(self.classifiers)):
