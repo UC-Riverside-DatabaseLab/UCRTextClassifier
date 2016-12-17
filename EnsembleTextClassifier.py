@@ -7,6 +7,7 @@ from RegexClassifier import RegexClassifier
 from TextDatasetFileParser import TextDatasetFileParser
 from AbstractTextClassifier import AbstractTextClassifier
 from RandomForestTextClassifier import RandomForestTextClassifier
+from CNNClassifier import CNNClassifier
 
 
 class VotingMethod(Enum):
@@ -46,7 +47,7 @@ class EnsembleTextClassifier(AbstractTextClassifier):
     """
     def __init__(self, voting_method=VotingMethod.majority, weight_penalty=4,
                  unlabeled_data=None):
-        self.classifiers = [RandomForestTextClassifier(), RegexClassifier()]
+        self.classifiers = [CNNClassifier(), RandomForestTextClassifier(), RegexClassifier()]
         self.classifier_weights = []
         self.voting_method = voting_method
         self.weight_penalty = weight_penalty
@@ -96,9 +97,6 @@ class EnsembleTextClassifier(AbstractTextClassifier):
 
         for classifier in self.classifiers:
             classifier.train(data)
-
-        for thread in threads:
-            thread.join()
 
         if self.weight_penalty > 0:
             for i in range(0, len(self.classifiers)):
@@ -220,29 +218,3 @@ class EnsembleTextClassifier(AbstractTextClassifier):
 
         return distribution
 
-if len(sys.argv) < 2:
-    sys.exit()
-elif len(sys.argv) > 2:
-    unlabeled_data_file = sys.argv[2]
-else:
-    unlabeled_data_file = None
-
-data = TextDatasetFileParser().parse(sys.argv[1])
-text_classifier = EnsembleTextClassifier(voting_method=VotingMethod.maximum,
-                                         unlabeled_data=unlabeled_data_file)
-training_set_end = int(len(data) * 0.9)
-classifiers = ["Random Forest", "Regular Expressions", "Word2Vec"]
-
-shuffle(data)
-
-text_classifier.train(data[0:training_set_end])
-
-test_set = data[training_set_end:]
-
-for i in range(0, len(text_classifier.classifiers)):
-    print(classifiers[i] + ":")
-    text_classifier.classifiers[i].evaluate(test_set, True)
-    print("")
-
-print("Overall:")
-text_classifier.evaluate(test_set, True)
