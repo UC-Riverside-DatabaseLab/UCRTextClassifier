@@ -69,7 +69,6 @@ class EnsembleTextClassifier(AbstractTextClassifier):
         Nothing
         """
         self.classes = set()
-        threads = []
 
         for instance in data:
             self.classes.add(instance.class_value)
