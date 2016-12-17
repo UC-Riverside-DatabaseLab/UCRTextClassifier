@@ -42,18 +42,27 @@ def load_data_and_labels_from_file(dataAddress):
 	y = np.concatenate([labels], 0)
 	return [x, y]
 
-def load_data_and_labels_from_instances(instances):
+def load_data_and_labels_from_instances(instances, classes):
 	x = []
 	labels = []
 	for i in instances:
 		if i.class_value != -1:
 			labels.append(i.class_value)
 			x.append(i.text)
+
+	def getLabelVector(label, class_names):
+		vector = [0] * len(class_names)
+		for i in range(len(class_names)):
+			if label == class_names[i]:
+				vector[i] = 1
+			return vector
+		return vector
+
 	# Split by words
 	x = [clean_str(sent) for sent in x]
 	# Generate labels
-	labels = [[0, 1] if l == 1 else [1, 0] for l in labels]
-	y = np.concatenate([labels], 0)
+	labels = [getLabelVector(l, classes) for l in labels]
+	y = np.concatenate([labels], 0) #why is this?
 	return [x, y]
 
 def batch_iter(data, batch_size, num_epochs, shuffle=True):

@@ -10,7 +10,7 @@ from tensorflow.contrib import learn
 from AbstractTextClassifier import AbstractTextClassifier
 
 class CNNClassifier(AbstractTextClassifier):
-	def __init__(self, embedding_dim=128,filter_sizes="3,4,5",num_filters=128,dropout_keep_prob=0.5,l2_reg_lambda=0.0,batch_size=64,num_epochs=100,evaluate_every=100,checkpoint_every=100,allow_soft_placement=True,log_device_placement=False):
+	def __init__(self, embedding_dim=128,filter_sizes="2,3,4,5",num_filters=128,dropout_keep_prob=0.5,l2_reg_lambda=0.0,batch_size=64,num_epochs=20,evaluate_every=100,checkpoint_every=100,allow_soft_placement=True,log_device_placement=False):
 		self.sess = None
 		vocab_processor = None
 		self.cnn = None
@@ -32,6 +32,7 @@ class CNNClassifier(AbstractTextClassifier):
 		# Misc Parameters
 		tf.flags.DEFINE_boolean("allow_soft_placement", allow_soft_placement, "Allow device soft device placement")
 		tf.flags.DEFINE_boolean("log_device_placement", log_device_placement, "Log placement of ops on devices")
+		self.class_names = []
 
 	def train(self, data):
 		FLAGS = tf.flags.FLAGS
@@ -39,7 +40,11 @@ class CNNClassifier(AbstractTextClassifier):
 		# Data Preparatopn
 		# ==================================================
 		#Load Data
-		x_text, y = data_helpers.load_data_and_labels_from_instances(data)
+		labels = set()
+		for i in data:
+			labels.add(i.class_value)
+		self.class_names = list(labels)
+		x_text, y = data_helpers.load_data_and_labels_from_instances(data, self.class_names)
 
 		# Build vocabulary
 		max_document_length = max([len(x.split(" ")) for x in x_text])
@@ -116,7 +121,7 @@ class CNNClassifier(AbstractTextClassifier):
 		"""
 		Evaluates model on a dev set
 		"""
-		x_text, y = data_helpers.load_data_and_labels_from_instances([instance])
+		x_text, y = data_helpers.load_data_and_labels_from_instances([instance], self.class_names)
 		x = np.array(list(self.vocab_processor.fit_transform(x_text)))
 		# Build vocabulary
 		feed_dict = {
@@ -128,5 +133,5 @@ class CNNClassifier(AbstractTextClassifier):
 		#print(scores,distributions)
 		distribution = {}
 		for i in range(len(distributions[0])):
-			distribution[i] = distributions[0][i] 
+			distribution[self.class_names[i]] = distributions[0][i]
 		return distribution
