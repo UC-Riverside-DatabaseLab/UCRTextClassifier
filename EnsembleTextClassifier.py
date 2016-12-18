@@ -1,13 +1,10 @@
-import sys
 from enum import Enum
-from random import shuffle
 from statistics import mean, median
-from Word2VecSimilarity import Word2VecSimilarity
+from CNNClassifier import CNNClassifier
 from RegexClassifier import RegexClassifier
-from TextDatasetFileParser import TextDatasetFileParser
+from Word2VecSimilarity import Word2VecSimilarity
 from AbstractTextClassifier import AbstractTextClassifier
 from RandomForestTextClassifier import RandomForestTextClassifier
-from CNNClassifier import CNNClassifier
 
 
 class VotingMethod(Enum):
@@ -47,7 +44,8 @@ class EnsembleTextClassifier(AbstractTextClassifier):
     """
     def __init__(self, voting_method=VotingMethod.majority, weight_penalty=4,
                  unlabeled_data=None):
-        self.classifiers = [CNNClassifier(), RandomForestTextClassifier(), RegexClassifier()]
+        self.classifiers = [CNNClassifier(), RandomForestTextClassifier(),
+                            RegexClassifier()]
         self.classifier_weights = []
         self.voting_method = voting_method
         self.weight_penalty = weight_penalty
@@ -216,4 +214,3 @@ class EnsembleTextClassifier(AbstractTextClassifier):
                 distribution[class_value] = 0
 
         return distribution
-

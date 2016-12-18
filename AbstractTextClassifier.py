@@ -101,7 +101,7 @@ class AbstractTextClassifier(ABC):
             TC = confusion_matrix[c1][c1]
             C = 0.0
 
-            for c2 in confusion_matrix:
+            for c2 in confusion_matrix[c1]:
                 C += confusion_matrix[c1][c2]
 
             sum_accuracies += TC / C
