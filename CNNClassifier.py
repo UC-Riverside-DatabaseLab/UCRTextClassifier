@@ -87,14 +87,14 @@ class CNNClassifier(AbstractTextClassifier):
 			grad_summaries = []
 			for g, v in grads_and_vars:
 				if g is not None:
-					grad_hist_summary = tf.histogram_summary("{}/grad/hist".format(v.name), g)
-					sparsity_summary = tf.scalar_summary("{}/grad/sparsity".format(v.name), tf.nn.zero_fraction(g))
+					grad_hist_summary = tf.summary.histogram("{}/grad/hist".format(v.name.replace(":", "_")), g)
+					sparsity_summary = tf.summary.scalar("{}/grad/sparsity".format(v.name.replace(":", "_")), tf.nn.zero_fraction(g))
 					grad_summaries.append(grad_hist_summary)
 					grad_summaries.append(sparsity_summary)
-			grad_summaries_merged = tf.merge_summary(grad_summaries)
+			grad_summaries_merged = tf.summary.merge(grad_summaries)
 
 			# Initialize all variables
-			self.sess.run(tf.initialize_all_variables())
+			self.sess.run(tf.global_variables_initializer())
 
 			def train_step(x_batch, y_batch):
 				"""
