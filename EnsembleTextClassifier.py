@@ -1,5 +1,6 @@
 from enum import Enum
 from statistics import mean, median
+from doc2vec import DocVecClassifier
 from CNNClassifier import CNNClassifier
 from RegexClassifier import RegexClassifier
 from Word2VecSimilarity import Word2VecSimilarity
@@ -44,14 +45,18 @@ class EnsembleTextClassifier(AbstractTextClassifier):
     """
     def __init__(self, voting_method=VotingMethod.majority, weight_penalty=4,
                  unlabeled_data=None):
-        self.classifiers = [CNNClassifier(), RandomForestTextClassifier(),
-                            RegexClassifier()]
+        self.classifiers = [CNNClassifier(),
+                            RandomForestTextClassifier(num_jobs=-1),
+                            RegexClassifier(root_words=2)]
         self.classifier_weights = []
         self.voting_method = voting_method
         self.weight_penalty = weight_penalty
 
         if unlabeled_data is not None:
+            d2v = DocVecClassifier(unlabeled_data=unlabeled_data)
+
             self.classifiers.append(Word2VecSimilarity(unlabeled_data))
+            self.classifiers.append(d2v)
 
         while len(self.classifier_weights) < len(self.classifiers):
             self.classifier_weights.append(1)

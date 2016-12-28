@@ -12,7 +12,7 @@ unlabeled_data_file = sys.argv[2] if len(sys.argv) > 2 else None
 text_classifier = EnsembleTextClassifier(voting_method=VotingMethod.maximum,
                                          unlabeled_data=unlabeled_data_file)
 training_set_end = int(len(data) * 0.9)
-classifiers = ["CNN", "Random Forest", "Regular Expressions", "Word2Vec"]
+classifiers = ["CNN", "Random Forest", "RegEx", "Word2Vec", "Doc2Vec"]
 
 shuffle(data)
 text_classifier.train(data[0:training_set_end])
