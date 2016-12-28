@@ -61,12 +61,13 @@ class RegexClassifier(AbstractTextClassifier):
         skip when expanding a regular expression
     root_words (default 1) - The number of initial words to expand regular
         expressions from
-    min_root_word_frequency (default auto) - The minimum frequency of words to
-        consider as root words; half the size of the training data if auto
+    min_root_word_frequency (default 0.25) - The minimum frequency of words (as
+        a percentage of the sum of the dataset's weights) to consider as root
+        words
     """
     def __init__(self, scoring_method=ScoringMethod.accuracy,
                  score_threshold=1, jump_length=2, root_words=1,
-                 min_root_word_frequency="auto"):
+                 min_root_word_frequency=0.25):
         self.regex_prefix = "(^|^.* )"
         self.regex_suffix = "($| .*$)"
         self.gap = " (\\S+ )"
@@ -75,7 +76,7 @@ class RegexClassifier(AbstractTextClassifier):
         self.jump_length = max(0, jump_length)
         self.score_threshold = score_threshold
         self.root_words = max(1, root_words)
-        self.min_root_word_frequency = min_root_word_frequency
+        self.min_root_word_frequency = min(1, max(0, min_root_word_frequency))
         self.scoring_method = scoring_method
         self.regex_rules = []
 
@@ -160,7 +161,7 @@ class RegexClassifier(AbstractTextClassifier):
                 else:
                     distribution[instance.class_value] = instance.weight
 
-                total = total + instance.weight
+                total += instance.weight
 
                 if distribution[instance.class_value] > max_value:
                     max_value = distribution[instance.class_value]
@@ -184,7 +185,7 @@ class RegexClassifier(AbstractTextClassifier):
 
         for instance in data:
             if regex.match(instance.text):
-                total = total + instance.weight
+                total += instance.weight
 
                 if instance.class_value in distribution:
                     distribution[instance.class_value] += instance.weight
@@ -257,15 +258,13 @@ class RegexClassifier(AbstractTextClassifier):
         top_words = []
         words = {}
         word_accuracy = {}
+        sum_of_weights = 0
         acc = "accuracy"
         cnt = "count"
 
-        if self.min_root_word_frequency == "auto":
-            min_root_word_frequency = len(data) / 2
-        else:
-            min_root_word_frequency = max(1, self.min_root_word_frequency)
-
         for instance in data:
+            sum_of_weights += instance.weight
+
             for word in instance.text.split(" "):
                 if word == "":
                     continue
@@ -288,7 +287,7 @@ class RegexClassifier(AbstractTextClassifier):
                 if count > max_count:
                     max_count = count
 
-            if total > min_root_word_frequency:
+            if total > sum_of_weights * self.min_root_word_frequency:
                 word_accuracy[word] = {acc: max_count / total, cnt: max_count}
 
         for i in range(0, self.root_words):
