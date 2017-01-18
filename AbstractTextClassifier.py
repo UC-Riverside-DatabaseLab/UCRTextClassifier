@@ -28,7 +28,7 @@ class AbstractTextClassifier(ABC):
         """
         pass
 
-    def evaluate(self, test_set, verbose=False):
+    def evaluate(self, test_set, verbose=False, output_matrix=None):
         """Evaluate the classifier's performance on the given test set.
 
         Arguments:
@@ -77,6 +77,23 @@ class AbstractTextClassifier(ABC):
             if max_class == instance.class_value:
                 correct += 1
                 weighted_correct += instance.weight
+
+                if output_matrix is not None:
+                    if max_class not in output_matrix:
+                        output_matrix[max_class] = {}
+
+                    if instance.text not in output_matrix[max_class]:
+                        output_matrix[max_class][instance.text] = []
+
+                    output_matrix[max_class][instance.text].append("")
+            elif output_matrix is not None:
+                if instance.class_value not in output_matrix:
+                    output_matrix[instance.class_value] = {}
+
+                if instance.text not in output_matrix[instance.class_value]:
+                    output_matrix[instance.class_value][instance.text] = []
+
+                output_matrix[instance.class_value][instance.text].append("X")
 
             if instance.class_value not in confusion_matrix:
                 confusion_matrix[instance.class_value] = {}
