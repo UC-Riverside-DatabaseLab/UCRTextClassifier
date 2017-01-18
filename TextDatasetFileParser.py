@@ -9,7 +9,7 @@ class Instance(object):
     class_value - The class of the text data
     weight - The weight of the text data
     """
-    def __init__(self, text, class_value, weight):
+    def __init__(self, text, class_value, weight=1):
         self.text = text
         self.class_value = class_value
         self.weight = weight
@@ -79,12 +79,17 @@ class TextDatasetFileParser(object):
                     if self.verbose:
                         print(line)
 
+                    if len(line) > 1:
+                        class_value = line[1]
+                    else:
+                        class_value = None
+
                     if len(line) > 2:
                         weight = float(line[2][1:len(line[2]) - 1])
                     else:
                         weight = 1
 
-                    dataset.append(Instance(line[0], line[1], weight))
+                    dataset.append(Instance(line[0], class_value, weight))
 
         return dataset
 
@@ -98,11 +103,16 @@ class TextDatasetFileParser(object):
                 if self.verbose:
                     print(line)
 
+                if len(line) > 1:
+                    class_value = line[1]
+                else:
+                    class_value = None
+
                 if len(line) > 2:
                     weight = float(line[2])
                 else:
                     weight = 1
 
-                dataset.append(Instance(line[0], line[1], weight))
+                dataset.append(Instance(line[0], class_value, weight))
 
         return dataset
