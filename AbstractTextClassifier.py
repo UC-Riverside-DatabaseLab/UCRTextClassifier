@@ -113,6 +113,7 @@ class AbstractTextClassifier(ABC):
 
         accuracy = correct / len(test_set)
         sum_accuracies = 0.0
+        adjustment = 0.0
 
         for c1 in confusion_matrix:
             TC = confusion_matrix[c1][c1]
@@ -121,9 +122,12 @@ class AbstractTextClassifier(ABC):
             for c2 in confusion_matrix[c1]:
                 C += confusion_matrix[c1][c2]
 
-            sum_accuracies += TC / C
+            if C > 0.0:
+                sum_accuracies += TC / C
+            else:
+                adjustment += 1
 
-        weighted_acc = sum_accuracies / len(confusion_matrix)
+        weighted_acc = sum_accuracies / (len(confusion_matrix) - adjustment)
         # weighted_acc = weighted_correct / weighted_total
 
         if verbose:
