@@ -54,7 +54,7 @@ class TextDatasetFileParser(object):
         """
         dataset = []
 
-        with open(filename, newline="") as file:
+        with open(filename, newline="", errors="ignore") as file:
             reader = csv.reader(file, delimiter=delimit, quotechar=quote_char)
 
             for line in reader:
@@ -96,7 +96,7 @@ class TextDatasetFileParser(object):
     def __parse_csv_file(self, filename, delimit, quote_char):
         dataset = []
 
-        with open(filename, newline="") as file:
+        with open(filename, newline="", errors="ignore") as file:
             reader = csv.reader(file, delimiter=delimit, quotechar=quote_char)
 
             for line in reader:

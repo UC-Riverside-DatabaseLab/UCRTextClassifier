@@ -2,9 +2,9 @@ import nltk.data
 from numpy import array, dot
 from nltk import word_tokenize
 from gensim.matutils import unitvec
-from gensim.models.word2vec import LineSentence
 from gensim.models.word2vec import Word2Vec
 from AbstractTextClassifier import AbstractTextClassifier
+from TextDatasetFileParser import TextDatasetFileParser
 
 
 class Word2VecSimilarity(AbstractTextClassifier):
@@ -21,8 +21,11 @@ class Word2VecSimilarity(AbstractTextClassifier):
         self.training_data = {}
 
     def train(self, data):
-        self.word2vec.build_vocab(LineSentence(self.unlabeled_data))
-        self.word2vec.train(LineSentence(self.unlabeled_data))
+        textDatasetFileParser = TextDatasetFileParser()
+        unlabeled = textDatasetFileParser.parse_unlabeled(self.unlabeled_data)
+
+        self.word2vec.build_vocab(unlabeled)
+        self.word2vec.train(unlabeled)
         self.training_data.clear()
 
         for instance in data:
