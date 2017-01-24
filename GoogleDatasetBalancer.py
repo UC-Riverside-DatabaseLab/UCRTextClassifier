@@ -2,8 +2,10 @@ import collections
 import csv
 import sys
 from googleapiclient.discovery import build
-from nltk import word_tokenize
+from googleapiclient.errors import HttpError
+from nltk.corpus import stopwords
 from nltk.data import load
+from nltk.tokenize import RegexpTokenizer
 from numpy import dot
 from random import shuffle
 from RandomForestTextClassifier import RandomForestTextClassifier
@@ -15,7 +17,7 @@ class GoogleDatasetBalancer(object):
     def __init__(self, use_regex=False, snippet_parsing="sentence",
                  similarity="jaccard", doc2vec=None, threshold=0.25,
                  quotes=False, site=None, keys=None, engine_id=None,
-                 outfile=None, verbose=False):
+                 pages_per_query=1, outfile=None, verbose=False):
         self.use_regex = use_regex
         self.snippet_parsing = snippet_parsing
         self.similarity = similarity
@@ -25,11 +27,12 @@ class GoogleDatasetBalancer(object):
         self.site = site
         self.keys = keys
         self.key_index = 0 if keys and len(keys) > 0 else -1
-        self.queries_remaining = 90 if self.key_index >= 0 else 0
         self.engine_id = engine_id
+        self.pages_per_query = pages_per_query
         self.outfile = outfile
         self.verbose = verbose
-        self.sentence_tokenizer = load('tokenizers/punkt/english.pickle')
+        self.sentence_tokenizer = None
+        self.stopwords = None
 
     def balance(self, data):
         classes = []
@@ -40,22 +43,8 @@ class GoogleDatasetBalancer(object):
 
         counter = collections.Counter(classes)
         most_common = counter.most_common(1)[0][0]
+        queries = self.__regex_queries(data) if self.use_regex else data
         search = True
-
-        for class_value, count in counter.items():
-            self.__print(class_value + ": " + str(count) + " instances.")
-
-        self.__print("")
-
-        if self.use_regex:
-            regex_classifier = RegexClassifier()
-
-            regex_classifier.train(data)
-
-            regex_rules = regex_classifier.regex_rules
-            queries = regex_rules[0:len(regex_rules) - 1]
-        else:
-            queries = data
 
         for class_value in sorted(counter, key=counter.get, reverse=False):
             if counter[class_value] >= counter[most_common]:
@@ -63,19 +52,21 @@ class GoogleDatasetBalancer(object):
 
             for query in queries:
                 if query.class_value == class_value:
-                    sentences = self.__search_for_sentences(query.text)
+                    for i in range(0, self.pages_per_query):
+                        sentences = self.__search_for_sentences(query.text, i)
 
-                    if sentences is None:
-                        search = False
-                        break
-
-                    for sentence in sentences:
-                        new_instances.append(Instance(sentence, class_value))
-
-                        counter[class_value] += 1
-
-                        if counter[class_value] >= counter[most_common]:
+                        if sentences is None:
+                            search = False
                             break
+
+                        for sentence in sentences:
+                            counter[class_value] += 1
+                            instance = Instance(sentence, class_value)
+
+                            new_instances.append(instance)
+
+                            if counter[class_value] >= counter[most_common]:
+                                break
 
                 if counter[class_value] >= counter[most_common] or not search:
                     break
@@ -101,49 +92,94 @@ class GoogleDatasetBalancer(object):
         similar_sentences.append(sentence)
 
     def __google_search(self, sentence, **kwargs):
+        if self.key_index < 0:
+            return None
+
         g = build("customsearch", "v1", developerKey=self.keys[self.key_index])
         q = ('"' + sentence + '"' if self.quotes else sentence)
         q += (" site:" + self.site if self.site and len(self.site) > 0 else "")
-        return g.cse().list(q=q, cx=self.engine_id, **kwargs).execute()
+
+        try:
+            response = g.cse().list(q=q, cx=self.engine_id, **kwargs).execute()
+        except HttpError:
+            self.key_index += 1
+
+            if self.key_index >= len(keys):
+                self.key_index = -1
+
+            response = self.__google_search(sentence, **kwargs)
+
+        return response
 
     def __parse_snippet(self, sentence, snippet, similar_sentences):
+        sentence = sentence.replace("\n", "")
+
         if self.snippet_parsing == "sentence":
             self.__parse_sentences(sentence, snippet, similar_sentences)
         elif self.snippet_parsing == "ellipsis":
             self.__parse_ellipses(sentence, snippet, similar_sentences)
-        elif self.snippet_parsing == "snippet" and self.__similar(sentence,
-                                                                  snippet):
+        elif self.snippet_parsing == "snippet" and \
+                self.__similar(sentence, self.__tokenize(snippet)):
             self.__append(similar_sentences, snippet)
 
     def __parse_ellipses(self, sentence, snippet, similar_sentences):
         for result_sentence in snippet.split(" ... "):
-            while result_sentence.endswith(" ..."):
-                result_sentence = result_sentence.replace(" ...", "")
+            result_sentence = self.__remove_ellipses(result_sentence)
 
-                if self.__similar(sentence, word_tokenize(result_sentence)):
-                    self.__append(similar_sentences, result_sentence)
+            if self.__similar(sentence, self.__tokenize(result_sentence)):
+                self.__append(similar_sentences, result_sentence)
 
     def __parse_sentences(self, sentence, snippet, similar_sentences):
+        if not self.sentence_tokenizer:
+            self.sentence_tokenizer = load('tokenizers/punkt/english.pickle')
+
         for result_sentence in self.sentence_tokenizer.tokenize(snippet):
-            if result_sentence.starts_with("... "):
-                result_sentence = result_sentence.replace("... ", "", 1)
-            elif result_sentence.ends_with(" ..."):
-                end = result_sentence.rfind(" ...")
-                result_sentence = result_sentence[0:end]
+            result_sentence = self.__remove_ellipses(result_sentence)
 
-            result_sentence = result_sentence.strip()
-
-            if self.__similar(sentence, word_tokenize(result_sentence)):
+            if self.__similar(sentence, self.__tokenize(result_sentence)):
                 self.__append(similar_sentences, result_sentence)
 
     def __print(self, s):
         if self.verbose:
             print(s)
 
+    def __regex_queries(self, data):
+        regex_classifier = RegexClassifier(jump_length=0)
+
+        regex_classifier.train(data)
+
+        regex_rules = regex_classifier.regex_rules
+        query_dictionary = {}
+        queries = []
+
+        for regex_rule in regex_rules[0:len(regex_rules) - 1]:
+            if regex_rule.class_value not in query_dictionary.keys():
+                query_dictionary[regex_rule.class_value] = set()
+
+            query_dictionary[regex_rule.class_value].add(regex_rule.phrase)
+
+        for class_value in regex_rules.keys():
+            for query in regex_rules[class_value]:
+                queries.append(Instance(query, class_value))
+
+        return queries
+
+    def __remove_ellipses(self, sentence):
+        leading_ellipse = "... "
+        trailing_ellipse = " ..."
+
+        if sentence.startswith(leading_ellipse):
+            sentence = sentence.replace(leading_ellipse, "", 1)
+
+        if sentence.endswith(trailing_ellipse):
+            result_sentence = sentence[0:sentence.rfind(trailing_ellipse)]
+
+        return result_sentence.strip()
+
     def __search_for_sentences(self, sentence, page=0):
         if self.key_index < 0 or not self.engine_id or len(sentence) == 0 \
                 or (self.similarity == "cosine" and not self.doc2vec):
-            self.__print("    No valid keys.")
+            self.__print("No valid keys.")
             return []
 
         self.__print(sentence)
@@ -154,13 +190,12 @@ class GoogleDatasetBalancer(object):
         response = self.__google_search(sentence, num=num, start=start)
 
         if not response:
-            self.__print("    No response.")
+            self.__print("Query limit reached.")
             return None
-        elif not response.has_key("items"):
-            self.__print("    No results.")
+        elif "items" not in response.keys():
             return similar_sentences
 
-        sentence = word_tokenize(sentence)
+        sentence = self.__tokenize(sentence)
 
         if self.similarity == "cosine" and self.doc2vec:
             sentence = self.doc2vec.infer_vector(sentence)
@@ -169,26 +204,16 @@ class GoogleDatasetBalancer(object):
             self.__parse_snippet(sentence, search_result["snippet"],
                                  similar_sentences)
 
-        self.queries_remaining -= 1
-
-        if self.queries_remaining == 0:
-            self.key_index += 1
-            self.queries_remaining = 100
-
-            if self.key_index >= len(self.keys):
-                self.__print("    Query limit reached.")
-
-                self.key_index = -1
-                return similar_sentences
-
         self.__print("")
-
         return similar_sentences
 
     def __similar(self, a, b):
         if self.similarity == "jaccard":
-            a = set(a)
-            b = set(b)
+            if not self.stopwords:
+                self.stopwords = set(stopwords.words("english"))
+
+            a = set(a) - self.stopwords
+            b = set(b) - self.stopwords
             i = a.intersection(b)
             u = a.union(b)
             return float(len(i)) / float(len(u)) >= self.threshold
@@ -196,6 +221,9 @@ class GoogleDatasetBalancer(object):
             return dot(a, self.doc2vec.infer_vector(b)) >= self.threshold
 
         return False
+
+    def __tokenize(self, sentence):
+        return RegexpTokenizer(r"\w+").tokenize(sentence.lower())
 
 
 if len(sys.argv) < 2:
