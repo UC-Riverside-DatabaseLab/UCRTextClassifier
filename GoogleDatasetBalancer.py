@@ -77,14 +77,9 @@ class GoogleDatasetBalancer(object):
         data += new_instances
 
         if self.outfile and len(new_instances) > 0:
-            with open(self.outfile, 'w', newline="") as file:
-                writer = csv.writer(file)
-
-                for instance in data:
-                    writer.writerow([instance.text, instance.class_value])
+            self.__write_dataset_file(data)
 
         self.__print("Added " + str(len(new_instances)) + " new instances.")
-
         return data
 
     def __append(self, similar_sentences, sentence):
@@ -112,7 +107,7 @@ class GoogleDatasetBalancer(object):
         return response
 
     def __parse_snippet(self, sentence, snippet, similar_sentences):
-        sentence = sentence.replace("\n", "")
+        snippet = snippet.replace("\n", "")
 
         if self.snippet_parsing == "sentence":
             self.__parse_sentences(sentence, snippet, similar_sentences)
@@ -166,15 +161,15 @@ class GoogleDatasetBalancer(object):
 
     def __remove_ellipses(self, sentence):
         leading_ellipse = "... "
-        trailing_ellipse = " ..."
+        trailing_ellipse = " ..."
 
         if sentence.startswith(leading_ellipse):
             sentence = sentence.replace(leading_ellipse, "", 1)
 
         if sentence.endswith(trailing_ellipse):
-            result_sentence = sentence[0:sentence.rfind(trailing_ellipse)]
+            sentence = sentence[0:sentence.rfind(trailing_ellipse)]
 
-        return result_sentence.strip()
+        return sentence.strip()
 
     def __search_for_sentences(self, sentence, page=0):
         if self.key_index < 0 or not self.engine_id or len(sentence) == 0 \
@@ -224,6 +219,13 @@ class GoogleDatasetBalancer(object):
 
     def __tokenize(self, sentence):
         return RegexpTokenizer(r"\w+").tokenize(sentence.lower())
+
+    def __write_dataset_file(self, data):
+        with open(self.outfile, 'w', newline="", errors="ignore") as file:
+            writer = csv.writer(file)
+
+            for instance in data:
+                writer.writerow([instance.text, instance.class_value])
 
 
 if len(sys.argv) < 2:
