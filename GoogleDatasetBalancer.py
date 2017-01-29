@@ -15,7 +15,7 @@ from TextDatasetFileParser import Instance, TextDatasetFileParser
 
 class GoogleDatasetBalancer(object):
     def __init__(self, use_regex=False, snippet_parsing="sentence",
-                 similarity="jaccard", doc2vec=None, threshold=0.25,
+                 similarity="jaccard", doc2vec=None, threshold=1/3,
                  quotes=False, site=None, keys=None, engine_id=None,
                  pages_per_query=1, outfile=None, verbose=False):
         self.use_regex = use_regex
@@ -43,7 +43,8 @@ class GoogleDatasetBalancer(object):
 
         counter = collections.Counter(classes)
         most_common = counter.most_common(1)[0][0]
-        queries = self.__regex_queries(data) if self.use_regex else data
+        queries = self.__regex_queries(data, counter, most_common) if \
+            self.use_regex else data
         search = True
 
         for class_value in sorted(counter, key=counter.get, reverse=False):
@@ -138,10 +139,17 @@ class GoogleDatasetBalancer(object):
         if self.verbose:
             print(s)
 
-    def __regex_queries(self, data):
+    def __regex_queries(self, data, counter, most_common):
         regex_classifier = RegexClassifier(jump_length=0)
+        training_data = []
 
-        regex_classifier.train(data)
+        for instance in data:
+            text = instance.text
+            weight = counter[most_common] / counter[instance.class_value]
+
+            training_data.append(Instance(text, instance.class_value, weight))
+
+        regex_classifier.train(training_data)
 
         regex_rules = regex_classifier.regex_rules
         query_dictionary = {}
@@ -153,8 +161,8 @@ class GoogleDatasetBalancer(object):
 
             query_dictionary[regex_rule.class_value].add(regex_rule.phrase)
 
-        for class_value in regex_rules.keys():
-            for query in regex_rules[class_value]:
+        for class_value in query_dictionary.keys():
+            for query in query_dictionary[class_value]:
                 queries.append(Instance(query, class_value))
 
         return queries
@@ -209,9 +217,11 @@ class GoogleDatasetBalancer(object):
 
             a = set(a) - self.stopwords
             b = set(b) - self.stopwords
-            i = a.intersection(b)
-            u = a.union(b)
-            return float(len(i)) / float(len(u)) >= self.threshold
+            intersection_count = float(len(a.intersection(b)))
+            union_count = float(len(a.union(b)))
+
+            return intersection_count / union_count >= self.threshold if \
+                union_count > 0.0 else 0.0
         elif self.similarity == "cosine":
             return dot(a, self.doc2vec.infer_vector(b)) >= self.threshold
 
@@ -238,14 +248,15 @@ engine_id = "010254973031167365908:s-lpifpdmgs"
 outfile = sys.argv[1].replace(".arff", "_balanced.csv")
 balancer = GoogleDatasetBalancer(keys=keys, engine_id=engine_id,
                                  outfile=outfile, verbose=True)
-text_classifier = RandomForestTextClassifier(num_jobs=-1)
-training_set_end = int(len(data) * 0.9)
+
+shuffle(data)
 
 for instance in data:
     instance.weight = 1
 
-data = balancer.balance(data)
+training_set_end = int(len(data) * 0.9)
+training_set = balancer.balance(data[0:training_set_end])
+text_classifier = RandomForestTextClassifier(num_jobs=-1)
 
-shuffle(data)
-text_classifier.train(data[0:training_set_end])
+text_classifier.train(training_set)
 text_classifier.evaluate(data[training_set_end:], True)
