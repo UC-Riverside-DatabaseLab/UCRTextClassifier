@@ -3,6 +3,7 @@ import csv
 import sys
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
+from httplib2 import Http, ProxyInfo, socks
 from nltk.corpus import stopwords
 from nltk.data import load
 from nltk.tokenize import RegexpTokenizer
@@ -16,8 +17,9 @@ from TextDatasetFileParser import Instance, TextDatasetFileParser
 class GoogleDatasetBalancer(object):
     def __init__(self, use_regex=False, snippet_parsing="sentence",
                  similarity="jaccard", doc2vec=None, threshold=1/3,
-                 quotes=False, site=None, keys=None, engine_id=None,
-                 pages_per_query=1, outfile=None, verbose=False):
+                 quotes=False, site=None, keys=None, proxies=None,
+                 engine_id=None, pages_per_query=1, outfile=None,
+                 verbose=False):
         self.use_regex = use_regex
         self.snippet_parsing = snippet_parsing
         self.similarity = similarity
@@ -26,6 +28,7 @@ class GoogleDatasetBalancer(object):
         self.quotes = quotes
         self.site = site
         self.keys = keys
+        self.proxies = proxies
         self.key_index = 0 if keys and len(keys) > 0 else -1
         self.engine_id = engine_id
         self.pages_per_query = pages_per_query
@@ -88,10 +91,18 @@ class GoogleDatasetBalancer(object):
         similar_sentences.append(sentence)
 
     def __google_search(self, sentence, **kwargs):
+        http = None
+
         if self.key_index < 0:
             return None
+        elif self.key_index > 0:
+            proxy = self.proxies[self.key_index - 1]
+            http = Http(proxy_info=ProxyInfo(socks.PROXY_TYPE_HTTP,
+                                             proxy_host=proxy[0],
+                                             proxy_port=proxy[1]))
 
-        g = build("customsearch", "v1", developerKey=self.keys[self.key_index])
+        g = build(serviceName="customsearch", version="v1", http=http,
+                  developerKey=self.keys[self.key_index])
         q = ('"' + sentence + '"' if self.quotes else sentence)
         q += (" site:" + self.site if self.site and len(self.site) > 0 else "")
 
