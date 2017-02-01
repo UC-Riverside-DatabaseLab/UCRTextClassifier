@@ -44,7 +44,7 @@ class EnsembleTextClassifier(AbstractTextClassifier):
     be used.
     """
     def __init__(self, voting_method=VotingMethod.majority, weight_penalty=4,
-                 unlabeled_data=None):
+                 doc2vec_dir=None, unlabeled_data=None):
         self.classifiers = [CNNClassifier(),
                             RandomForestTextClassifier(num_jobs=-1),
                             RegexClassifier(root_words=2)]
@@ -52,11 +52,15 @@ class EnsembleTextClassifier(AbstractTextClassifier):
         self.voting_method = voting_method
         self.weight_penalty = weight_penalty
 
-        if unlabeled_data is not None:
-            d2v = DocVecClassifier(unlabeled_data=unlabeled_data)
-
+        if unlabeled_data:
             self.classifiers.append(Word2VecSimilarity(unlabeled_data))
-            self.classifiers.append(d2v)
+
+            if not doc2vec_dir:
+                d2v = DocVecClassifier(unlabeled_data=unlabeled_data)
+                self.classifiers.append(d2v)
+
+        if doc2vec_dir:
+            self.classifiers.append(DocVecClassifier(saved_model=doc2vec_dir))
 
         while len(self.classifier_weights) < len(self.classifiers):
             self.classifier_weights.append(1)
