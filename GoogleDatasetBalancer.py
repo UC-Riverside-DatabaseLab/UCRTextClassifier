@@ -62,6 +62,8 @@ class GoogleDatasetBalancer(object):
                         if sentences is None:
                             search = False
                             break
+                        elif len(sentences) == 0:
+                            break
 
                         for sentence in sentences:
                             counter[class_value] += 1
@@ -194,7 +196,7 @@ class GoogleDatasetBalancer(object):
         if self.key_index < 0 or not self.engine_id or len(sentence) == 0 \
                 or (self.similarity == "cosine" and not self.doc2vec):
             self.__print("No valid keys.")
-            return []
+            return None
 
         self.__print(sentence)
 
@@ -254,11 +256,22 @@ if len(sys.argv) < 2:
     sys.exit()
 
 data = TextDatasetFileParser().parse(sys.argv[1])
-keys = ["AIzaSyC0MlmDjTS_XLBJWAdIyGniDR3iMhkIT3k"]
+# keys = ["AIzaSyC0MlmDjTS_XLBJWAdIyGniDR3iMhkIT3k"]
+keys = []
+proxies = []
+
+with open("keys.txt", "r") as file:
+    for line in file.readlines():
+        split_line = line.replace("\n", "").split(",")
+
+        keys.append(split_line[0])
+        proxies.append((split_line[1], 3306))
+
 engine_id = "010254973031167365908:s-lpifpdmgs"
 outfile = sys.argv[1].replace(".arff", "_balanced.csv")
-balancer = GoogleDatasetBalancer(keys=keys, engine_id=engine_id,
-                                 outfile=outfile, verbose=True)
+balancer = GoogleDatasetBalancer(keys=keys, proxies=proxies, verbose=True,
+                                 engine_id=engine_id, pages_per_query=2,
+                                 outfile=outfile)
 
 shuffle(data)
 
