@@ -19,9 +19,13 @@ class TextDatasetFileParser(object):
     """Reader for text dataset files.
 
     Constructor arguments:
+    merge_extra_columns (default False) - If True, columns between the first
+    and the class attribute column in .arff files are concatenated to the first
+    column, separated by a comma. Otherwise, they're ignored.
     verbose (default False) - If True, print each line of the file as it's read
     """
-    def __init__(self, verbose=False):
+    def __init__(self, merge_extra_columns=False, verbose=False):
+        self.merge_extra_columns = merge_extra_columns
         self.verbose = verbose
 
     def parse(self, filename, delimiter=",", quotechar='"'):
@@ -73,23 +77,30 @@ class TextDatasetFileParser(object):
             reader = csv.reader(file, quotechar="'")
 
             for line in reader:
-                if not parsing_data and len(line) > 0 and line[0] == "@DATA":
+                length = len(line)
+                weight = 1
+
+                if not parsing_data and length > 0 and line[0] == "@DATA":
                     parsing_data = True
-                elif parsing_data:
+                elif parsing_data and length > 0:
                     if self.verbose:
                         print(line)
 
-                    if len(line) > 1:
-                        class_value = line[1]
-                    else:
-                        class_value = None
+                    if length > 2:
+                        weighted = False
 
-                    if len(line) > 2:
-                        weight = float(line[2][1:len(line[2]) - 1])
-                    else:
-                        weight = 1
+                        if line[length - 1].startswith("{") and \
+                                line[length - 1].endswith("}"):
+                            weight = float(line[2][1:len(line[2]) - 1])
+                            weighted = True
 
-                    dataset.append(Instance(line[0], class_value, weight))
+                        if self.merge_extra_columns:
+                            for i in range(1, length - (2 if weighted else 1)):
+                                line[0] += "," + line[i]
+
+                            line[1] = line[length - (2 if weighted else 1)]
+
+                    dataset.append(Instance(line[0], line[1], weight))
 
         return dataset
 
