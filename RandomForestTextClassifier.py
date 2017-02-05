@@ -1,7 +1,7 @@
 import numpy as np
 from nltk.stem.snowball import EnglishStemmer
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from AbstractTextClassifier import AbstractTextClassifier
 
 
@@ -16,17 +16,33 @@ class RandomForestTextClassifier(AbstractTextClassifier):
                  max_leaf_nodes=None, min_impurity_split=1e-07, bootstrap=True,
                  oob_score=False, num_jobs=1, random_state=None, verbose=0,
                  warm_start=False, class_weight=None, ngram_range=(1, 3),
-                 min_df=0.03):
+                 min_df=0.03, max_word_features=None, tf_idf=True):
         stemmer = EnglishStemmer()
-        analyzer = TfidfVectorizer(ngram_range=ngram_range, min_df=min_df,
-                                   stop_words="english").build_analyzer()
+
+        if tf_idf:
+            analyzer = TfidfVectorizer(ngram_range=ngram_range, min_df=min_df,
+                                       max_features=max_word_features,
+                                       stop_words="english").build_analyzer()
+        else:
+            analyzer = CountVectorizer(ngram_range=ngram_range, min_df=min_df,
+                                       max_features=max_word_features,
+                                       stop_words="english").build_analyzer()
 
         def stemmed_words(text):
             return (stemmer.stem(word) for word in analyzer(text))
 
-        self.vectorizer = TfidfVectorizer(ngram_range=ngram_range,
-                                          min_df=min_df, stop_words="english",
-                                          analyzer=stemmed_words)
+        if tf_idf:
+            self.vectorizer = TfidfVectorizer(ngram_range=ngram_range,
+                                              min_df=min_df,
+                                              max_features=max_word_features,
+                                              stop_words="english",
+                                              analyzer=stemmed_words)
+        else:
+            self.vectorizer = CountVectorizer(ngram_range=ngram_range,
+                                              min_df=min_df,
+                                              max_features=max_word_features,
+                                              stop_words="english",
+                                              analyzer=stemmed_words)
         self.random_forest = RandomForestClassifier(num_trees, criterion,
                                                     max_depth,
                                                     min_samples_split,
