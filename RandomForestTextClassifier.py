@@ -10,13 +10,13 @@ class RandomForestTextClassifier(AbstractTextClassifier):
     before training/classification. For further information, including
     constructor arguments, see scikit-learn's random forest documentation.
     """
-    def __init__(self, num_trees=3000, criterion="gini", max_depth=None,
+    def __init__(self, num_trees=2000, criterion="gini", max_depth=None,
                  min_samples_split=2, min_samples_leaf=1,
                  min_weight_fraction_leaf=0.0, max_features="auto",
                  max_leaf_nodes=None, min_impurity_split=1e-07, bootstrap=True,
                  oob_score=False, num_jobs=1, random_state=None, verbose=0,
                  warm_start=False, class_weight=None, ngram_range=(1, 3),
-                 min_df=0.03, max_word_features=None, tf_idf=True):
+                 min_df=0.03, max_word_features=1000, tf_idf=True):
         stemmer = EnglishStemmer()
 
         if tf_idf:
