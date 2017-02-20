@@ -15,12 +15,12 @@ from TextDatasetFileParser import Instance, TextDatasetFileParser
 
 
 class GoogleDatasetBalancer(object):
-    def __init__(self, use_regex=False, snippet_parsing="sentence",
+    def __init__(self, query_type="sentence", snippet_parsing="sentence",
                  similarity="jaccard", doc2vec=None, threshold=1/3,
                  quotes=False, site=None, keys=None, proxies=None,
                  engine_id=None, pages_per_query=1, outfile=None,
-                 verbose=False):
-        self.use_regex = use_regex
+                 use_phrase_file=False, verbose=False):
+        self.query_type = query_type
         self.snippet_parsing = snippet_parsing
         self.similarity = similarity
         self.doc2vec = doc2vec
@@ -44,13 +44,25 @@ class GoogleDatasetBalancer(object):
         for instance in data:
             classes.append(instance.class_value)
 
+            instance.weight = 1
+
         counter = collections.Counter(classes)
         most_common = counter.most_common(1)[0][0]
-        queries = self.__regex_queries(data, counter, most_common) if \
-            self.use_regex else data
         search = True
 
-        for class_value in sorted(counter, key=counter.get, reverse=False):
+        if self.query_type == "sentence":
+            queries = data
+        elif self.query_type == "regex":
+            queries = self.__regex_queries(data, counter, most_common)
+        elif self.query_type == "phrase":
+            queries = data
+            most_common = "__ignore__"
+            counter[most_common] = float("inf")
+        else:
+            self.__print("Query type not recognized.")
+            return
+
+        for class_value in set(classes):
             if counter[class_value] >= counter[most_common]:
                 continue
 
@@ -86,7 +98,7 @@ class GoogleDatasetBalancer(object):
             self.__write_dataset_file(data)
 
         self.__print("Added " + str(len(new_instances)) + " new instances.")
-        return data
+        return new_instances if self.query_type == "phrase" else data
 
     def __append(self, similar_sentences, sentence):
         self.__print("    " + sentence)
@@ -268,19 +280,24 @@ with open("keys.txt", "r") as file:
         proxies.append((split_line[1], 3306))
 
 engine_id = "010254973031167365908:s-lpifpdmgs"
-outfile = sys.argv[1].replace(".arff", "_balanced.csv")
 balancer = GoogleDatasetBalancer(keys=keys, proxies=proxies, verbose=True,
-                                 engine_id=engine_id, pages_per_query=2,
-                                 outfile=outfile)
+                                 engine_id=engine_id)
 
 shuffle(data)
 
-for instance in data:
-    instance.weight = 1
-
 training_set_end = int(len(data) * 0.9)
 training_set = balancer.balance(data[0:training_set_end])
-text_classifier = RandomForestTextClassifier(num_jobs=-1)
+text_classifier = RandomForestTextClassifier(num_jobs=-1, ngram_range=(1, 1))
+classes = []
+
+for instance in training_set:
+    classes.append(instance.class_value)
+
+counter = collections.Counter(classes)
+most_common = counter.most_common(1)[0][0]
+
+for instance in training_set:
+    instance.weight = counter[most_common] / counter[instance.class_value]
 
 text_classifier.train(training_set)
 text_classifier.evaluate(data[training_set_end:], True)

@@ -35,6 +35,9 @@ class AbstractTextClassifier(ABC):
         test_set - A list of Instance objects (defined in
         TextDataSetFileParser.py)
         verbose (default False) - If True, print the results of the evaluation
+        output_matrix (default None) - A dictionary that is populated with
+        an X marking each incorrectly classified instance (second key) for each
+        class (first key) for each classifier in the ensemble.
 
         Returns:
         A dictionary with the following key-value pairs:
