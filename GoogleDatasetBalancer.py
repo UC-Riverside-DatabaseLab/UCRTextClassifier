@@ -3,6 +3,7 @@ import csv
 import sys
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
+from httplib2 import Http, ProxyInfo, socks
 from nltk.corpus import stopwords
 from nltk.data import load
 from nltk.tokenize import RegexpTokenizer
@@ -14,11 +15,12 @@ from TextDatasetFileParser import Instance, TextDatasetFileParser
 
 
 class GoogleDatasetBalancer(object):
-    def __init__(self, use_regex=False, snippet_parsing="sentence",
+    def __init__(self, query_type="sentence", snippet_parsing="sentence",
                  similarity="jaccard", doc2vec=None, threshold=1/3,
-                 quotes=False, site=None, keys=None, engine_id=None,
-                 pages_per_query=1, outfile=None, verbose=False):
-        self.use_regex = use_regex
+                 quotes=False, site=None, keys=None, proxies=None,
+                 engine_id=None, pages_per_query=1, outfile=None,
+                 use_phrase_file=False, verbose=False):
+        self.query_type = query_type
         self.snippet_parsing = snippet_parsing
         self.similarity = similarity
         self.doc2vec = doc2vec
@@ -26,6 +28,7 @@ class GoogleDatasetBalancer(object):
         self.quotes = quotes
         self.site = site
         self.keys = keys
+        self.proxies = proxies
         self.key_index = 0 if keys and len(keys) > 0 else -1
         self.engine_id = engine_id
         self.pages_per_query = pages_per_query
@@ -41,13 +44,25 @@ class GoogleDatasetBalancer(object):
         for instance in data:
             classes.append(instance.class_value)
 
+            instance.weight = 1
+
         counter = collections.Counter(classes)
         most_common = counter.most_common(1)[0][0]
-        queries = self.__regex_queries(data, counter, most_common) if \
-            self.use_regex else data
         search = True
 
-        for class_value in sorted(counter, key=counter.get, reverse=False):
+        if self.query_type == "sentence":
+            queries = data
+        elif self.query_type == "regex":
+            queries = self.__regex_queries(data, counter, most_common)
+        elif self.query_type == "phrase":
+            queries = data
+            most_common = "__ignore__"
+            counter[most_common] = float("inf")
+        else:
+            self.__print("Query type not recognized.")
+            return
+
+        for class_value in set(classes):
             if counter[class_value] >= counter[most_common]:
                 continue
 
@@ -58,6 +73,8 @@ class GoogleDatasetBalancer(object):
 
                         if sentences is None:
                             search = False
+                            break
+                        elif len(sentences) == 0:
                             break
 
                         for sentence in sentences:
@@ -81,17 +98,25 @@ class GoogleDatasetBalancer(object):
             self.__write_dataset_file(data)
 
         self.__print("Added " + str(len(new_instances)) + " new instances.")
-        return data
+        return new_instances if self.query_type == "phrase" else data
 
     def __append(self, similar_sentences, sentence):
         self.__print("    " + sentence)
         similar_sentences.append(sentence)
 
     def __google_search(self, sentence, **kwargs):
+        http = None
+
         if self.key_index < 0:
             return None
+        elif self.key_index > 0:
+            proxy = self.proxies[self.key_index - 1]
+            http = Http(proxy_info=ProxyInfo(socks.PROXY_TYPE_HTTP,
+                                             proxy_host=proxy[0],
+                                             proxy_port=proxy[1]))
 
-        g = build("customsearch", "v1", developerKey=self.keys[self.key_index])
+        g = build(serviceName="customsearch", version="v1", http=http,
+                  developerKey=self.keys[self.key_index])
         q = ('"' + sentence + '"' if self.quotes else sentence)
         q += (" site:" + self.site if self.site and len(self.site) > 0 else "")
 
@@ -183,7 +208,7 @@ class GoogleDatasetBalancer(object):
         if self.key_index < 0 or not self.engine_id or len(sentence) == 0 \
                 or (self.similarity == "cosine" and not self.doc2vec):
             self.__print("No valid keys.")
-            return []
+            return None
 
         self.__print(sentence)
 
@@ -243,20 +268,36 @@ if len(sys.argv) < 2:
     sys.exit()
 
 data = TextDatasetFileParser().parse(sys.argv[1])
-keys = ["AIzaSyC0MlmDjTS_XLBJWAdIyGniDR3iMhkIT3k"]
+# keys = ["AIzaSyC0MlmDjTS_XLBJWAdIyGniDR3iMhkIT3k"]
+keys = []
+proxies = []
+
+with open("keys.txt", "r") as file:
+    for line in file.readlines():
+        split_line = line.replace("\n", "").split(",")
+
+        keys.append(split_line[0])
+        proxies.append((split_line[1], 3306))
+
 engine_id = "010254973031167365908:s-lpifpdmgs"
-outfile = sys.argv[1].replace(".arff", "_balanced.csv")
-balancer = GoogleDatasetBalancer(keys=keys, engine_id=engine_id,
-                                 outfile=outfile, verbose=True)
+balancer = GoogleDatasetBalancer(keys=keys, proxies=proxies, verbose=True,
+                                 engine_id=engine_id)
 
 shuffle(data)
 
-for instance in data:
-    instance.weight = 1
-
 training_set_end = int(len(data) * 0.9)
 training_set = balancer.balance(data[0:training_set_end])
-text_classifier = RandomForestTextClassifier(num_jobs=-1)
+text_classifier = RandomForestTextClassifier(num_jobs=-1, ngram_range=(1, 1))
+classes = []
+
+for instance in training_set:
+    classes.append(instance.class_value)
+
+counter = collections.Counter(classes)
+most_common = counter.most_common(1)[0][0]
+
+for instance in training_set:
+    instance.weight = counter[most_common] / counter[instance.class_value]
 
 text_classifier.train(training_set)
 text_classifier.evaluate(data[training_set_end:], True)

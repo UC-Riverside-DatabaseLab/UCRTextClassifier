@@ -46,8 +46,6 @@ class DocVecClassifier(AbstractTextClassifier):
                  unlabeled_data=None, model_vec_size=200, num_epoch=20,
                  infer_num_passes=1000):
 
-        self.model = self.load_model(saved_model) if saved_model \
-                                                  else None
         self.unlabeled_docs = self.import_data(unlabeled_data, labeled=False) \
             if unlabeled_data else []
         self.model_vec_size = model_vec_size
@@ -65,7 +63,7 @@ class DocVecClassifier(AbstractTextClassifier):
                                 sample=1e-4, hs=0, negative=5, min_count=2,
                                 workers=cores)
                 }
-
+        self.model = self.load_model(saved_model) if saved_model else None
         self.training_data = {}
 
     def train(self, data):

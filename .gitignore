@@ -2,3 +2,4 @@
 .env/
 *.csv
 models/
+*.arff
