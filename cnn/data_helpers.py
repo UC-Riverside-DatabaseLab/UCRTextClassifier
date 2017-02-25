@@ -1,3 +1,9 @@
+##########################################################
+##########################################################
+########## Author: Moloud Shahbazi
+##########################################################
+##########################################################
+
 import numpy as np
 import re
 import itertools
@@ -27,6 +33,13 @@ def clean_str(string):
 	string = re.sub(r"\?", " \? ", string)
 	string = re.sub(r"\s{2,}", " ", string)
 	return string.strip().lower()
+
+def extra_clean_str(string, dictionary):
+	outstring = []
+	for w in string,split(" "):
+		if w in dictionary:
+			outstring.append(w)
+	return " ".join(outstring)
 
 def load_data_and_labels_from_file(dataAddress):
 	#Loads data from csv,format is two text columns followed by location and class
@@ -60,6 +73,31 @@ def load_data_and_labels_from_instances(instances, classes):
 
 	# Split by words
 	x = [clean_str(sent) for sent in x]
+	# Generate labels
+	labels = [getLabelVector(l, classes) for l in labels]
+	y = np.concatenate([labels], 0) #why is this?
+	return [x, y]
+
+def load_data_and_labels_from_instances_withWord2vec(instances, classes, word2vec):
+	x = []
+	labels = []
+	dictionary = word2vec.keys()
+	for i in instances:
+		if i.class_value != -1:
+			labels.append(i.class_value)
+			x.append(i.text)
+
+	def getLabelVector(label, class_names):
+		vector = [0] * len(class_names)
+		for i in range(len(class_names)):
+			if label == class_names[i]:
+				vector[i] = 1
+			return vector
+		return vector
+
+	# Split by words
+	x = [clean_str(sent) for sent in x]
+	x = [extra_clean_str(sent, dictionary) for sent in x]
 	# Generate labels
 	labels = [getLabelVector(l, classes) for l in labels]
 	y = np.concatenate([labels], 0) #why is this?

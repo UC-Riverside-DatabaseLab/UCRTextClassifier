@@ -1,3 +1,10 @@
+#######################################################
+#######################################################
+############## Moloud Shahbazi
+############## Convolutional Neural Network implemented by ... extended to include word2vec representations as initial embedding values.
+#######################################################
+#######################################################
+
 import tensorflow as tf
 import numpy as np
 import time
@@ -9,8 +16,17 @@ from text_cnn import TextCNN
 from tensorflow.contrib import learn
 from AbstractTextClassifier import AbstractTextClassifier
 
+def loadWord2Vec(word2vecAddress):
+	word2vec = {}
+	with open(word2vecAddress, 'r') as f:
+		head = f.readline()
+		for line in f:
+			wv = line.strip().split(' ')
+			word2vec[wv[0]] = [float(x) for x in wv[1:]]
+	return word2vec
+
 class CNNClassifier(AbstractTextClassifier):
-	def __init__(self, embedding_dim=128,filter_sizes="2,3,4,5",num_filters=128,dropout_keep_prob=0.5,l2_reg_lambda=0.0,batch_size=64,num_epochs=20,evaluate_every=100,checkpoint_every=100,allow_soft_placement=True,log_device_placement=False):
+	def __init__(self, embedding_dim=128,filter_sizes="2,3,4,5",num_filters=128,dropout_keep_prob=0.5,l2_reg_lambda=0.0,batch_size=64,num_epochs=20,evaluate_every=100,checkpoint_every=100,allow_soft_placement=True,log_device_placement=False, word2vecAddress=None):
 		self.sess = None
 		vocab_processor = None
 		self.cnn = None
@@ -33,6 +49,9 @@ class CNNClassifier(AbstractTextClassifier):
 		tf.flags.DEFINE_boolean("allow_soft_placement", allow_soft_placement, "Allow device soft device placement")
 		tf.flags.DEFINE_boolean("log_device_placement", log_device_placement, "Log placement of ops on devices")
 		self.class_names = []
+		self.w2v = None
+		if word2vecAddress != None:
+			self.w2v = loadWord2Vec(word2vecAddress)		
 
 	def train(self, data):
 		FLAGS = tf.flags.FLAGS
@@ -44,7 +63,11 @@ class CNNClassifier(AbstractTextClassifier):
 		for i in data:
 			labels.add(i.class_value)
 		self.class_names = list(labels)
-		x_text, y = data_helpers.load_data_and_labels_from_instances(data, self.class_names)
+		if self.w2v == None:
+			x_text, y = data_helpers.load_data_and_labels_from_instances(data, self.class_names)
+		else:
+			x_text, y = data_helpers.load_data_and_labels_from_instances_withWord2vec(data, self.class_names, self.w2v)
+			
 
 		# Build vocabulary
 		max_document_length = max([len(x.split(" ")) for x in x_text])
@@ -75,7 +98,10 @@ class CNNClassifier(AbstractTextClassifier):
 					embedding_size=FLAGS.embedding_dim,
 					filter_sizes=list(map(int, FLAGS.filter_sizes.split(","))),
 					num_filters=FLAGS.num_filters,
-					l2_reg_lambda=FLAGS.l2_reg_lambda)
+					l2_reg_lambda=FLAGS.l2_reg_lambda,
+					word2vec=self.w2v,
+					relu1=False,
+					relu2=False)
 
 			# Define Training procedure
 			global_step = tf.Variable(0, name="global_step", trainable=False)
