@@ -1,6 +1,5 @@
 import collections
 import csv
-import sys
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from httplib2 import Http, ProxyInfo, socks
@@ -8,10 +7,8 @@ from nltk.corpus import stopwords
 from nltk.data import load
 from nltk.tokenize import RegexpTokenizer
 from numpy import dot
-from random import shuffle
-from RandomForestTextClassifier import RandomForestTextClassifier
 from RegexClassifier import RegexClassifier
-from TextDatasetFileParser import Instance, TextDatasetFileParser
+from TextDatasetFileParser import Instance
 
 
 class GoogleDatasetBalancer(object):
@@ -20,22 +17,22 @@ class GoogleDatasetBalancer(object):
                  quotes=False, site=None, keys=None, proxies=None,
                  engine_id=None, pages_per_query=1, outfile=None,
                  use_phrase_file=False, verbose=False):
-        self.query_type = query_type
-        self.snippet_parsing = snippet_parsing
-        self.similarity = similarity
-        self.doc2vec = doc2vec
-        self.threshold = threshold
-        self.quotes = quotes
-        self.site = site
-        self.keys = keys
+        self.__query_type = query_type
+        self.__snippet_parsing = snippet_parsing
+        self.__similarity = similarity
+        self.__doc2vec = doc2vec
+        self.__threshold = threshold
+        self.__quotes = quotes
+        self.__site = site
+        self.__keys = keys
         self.proxies = proxies
-        self.key_index = 0 if keys and len(keys) > 0 else -1
-        self.engine_id = engine_id
-        self.pages_per_query = pages_per_query
-        self.outfile = outfile
-        self.verbose = verbose
-        self.sentence_tokenizer = None
-        self.stopwords = None
+        self.__key_index = 0 if keys and len(keys) > 0 else -1
+        self.__engine_id = engine_id
+        self.__pages_per_query = pages_per_query
+        self.__outfile = outfile
+        self.__verbose = verbose
+        self.__sentence_tokenizer = None
+        self.__stopwords = None
 
     def balance(self, data):
         classes = []
@@ -50,11 +47,11 @@ class GoogleDatasetBalancer(object):
         most_common = counter.most_common(1)[0][0]
         search = True
 
-        if self.query_type == "sentence":
+        if self.__query_type == "sentence":
             queries = data
-        elif self.query_type == "regex":
+        elif self.__query_type == "regex":
             queries = self.__regex_queries(data, counter, most_common)
-        elif self.query_type == "phrase":
+        elif self.__query_type == "phrase":
             queries = data
             most_common = "__ignore__"
             counter[most_common] = float("inf")
@@ -68,7 +65,7 @@ class GoogleDatasetBalancer(object):
 
             for query in queries:
                 if query.class_value == class_value:
-                    for i in range(0, self.pages_per_query):
+                    for i in range(0, self.__pages_per_query):
                         sentences = self.__search_for_sentences(query.text, i)
 
                         if sentences is None:
@@ -92,13 +89,11 @@ class GoogleDatasetBalancer(object):
             if not search:
                 break
 
-        data += new_instances
-
-        if self.outfile and len(new_instances) > 0:
-            self.__write_dataset_file(data)
+        if self.__outfile and len(new_instances) > 0:
+            self.__write_dataset_file(data + new_instances)
 
         self.__print("Added " + str(len(new_instances)) + " new instances.")
-        return new_instances if self.query_type == "phrase" else data
+        return new_instances
 
     def __append(self, similar_sentences, sentence):
         self.__print("    " + sentence)
@@ -107,26 +102,28 @@ class GoogleDatasetBalancer(object):
     def __google_search(self, sentence, **kwargs):
         http = None
 
-        if self.key_index < 0:
+        if self.__key_index < 0:
             return None
-        elif self.key_index > 0:
-            proxy = self.proxies[self.key_index - 1]
+        elif self.__key_index > 0:
+            proxy = self.proxies[self.__key_index - 1]
             http = Http(proxy_info=ProxyInfo(socks.PROXY_TYPE_HTTP,
                                              proxy_host=proxy[0],
                                              proxy_port=proxy[1]))
 
         g = build(serviceName="customsearch", version="v1", http=http,
-                  developerKey=self.keys[self.key_index])
-        q = ('"' + sentence + '"' if self.quotes else sentence)
-        q += (" site:" + self.site if self.site and len(self.site) > 0 else "")
+                  developerKey=self.__keys[self.__key_index])
+        q = ('"' + sentence + '"' if self.__quotes else sentence)
+        q += (" site:" + self.__site if self.__site and len(self.__site) > 0
+              else "")
 
         try:
-            response = g.cse().list(q=q, cx=self.engine_id, **kwargs).execute()
+            response = g.cse().list(q=q, cx=self.__engine_id,
+                                    **kwargs).execute()
         except HttpError:
-            self.key_index += 1
+            self.__key_index += 1
 
-            if self.key_index >= len(keys):
-                self.key_index = -1
+            if self.__key_index >= len(self.__keys):
+                self.__key_index = -1
 
             response = self.__google_search(sentence, **kwargs)
 
@@ -135,11 +132,11 @@ class GoogleDatasetBalancer(object):
     def __parse_snippet(self, sentence, snippet, similar_sentences):
         snippet = snippet.replace("\n", "")
 
-        if self.snippet_parsing == "sentence":
+        if self.__snippet_parsing == "sentence":
             self.__parse_sentences(sentence, snippet, similar_sentences)
-        elif self.snippet_parsing == "ellipsis":
+        elif self.__snippet_parsing == "ellipsis":
             self.__parse_ellipses(sentence, snippet, similar_sentences)
-        elif self.snippet_parsing == "snippet" and \
+        elif self.__snippet_parsing == "snippet" and \
                 self.__similar(sentence, self.__tokenize(snippet)):
             self.__append(similar_sentences, snippet)
 
@@ -151,17 +148,17 @@ class GoogleDatasetBalancer(object):
                 self.__append(similar_sentences, result_sentence)
 
     def __parse_sentences(self, sentence, snippet, similar_sentences):
-        if not self.sentence_tokenizer:
-            self.sentence_tokenizer = load('tokenizers/punkt/english.pickle')
+        if not self.__sentence_tokenizer:
+            self.__sentence_tokenizer = load('tokenizers/punkt/english.pickle')
 
-        for result_sentence in self.sentence_tokenizer.tokenize(snippet):
+        for result_sentence in self.__sentence_tokenizer.tokenize(snippet):
             result_sentence = self.__remove_ellipses(result_sentence)
 
             if self.__similar(sentence, self.__tokenize(result_sentence)):
                 self.__append(similar_sentences, result_sentence)
 
     def __print(self, s):
-        if self.verbose:
+        if self.__verbose:
             print(s)
 
     def __regex_queries(self, data, counter, most_common):
@@ -205,8 +202,8 @@ class GoogleDatasetBalancer(object):
         return sentence.strip()
 
     def __search_for_sentences(self, sentence, page=0):
-        if self.key_index < 0 or not self.engine_id or len(sentence) == 0 \
-                or (self.similarity == "cosine" and not self.doc2vec):
+        if self.__key_index < 0 or not self.__engine_id or len(sentence) == 0 \
+                or (self.__similarity == "cosine" and not self.__doc2vec):
             self.__print("No valid keys.")
             return None
 
@@ -225,8 +222,8 @@ class GoogleDatasetBalancer(object):
 
         sentence = self.__tokenize(sentence)
 
-        if self.similarity == "cosine" and self.doc2vec:
-            sentence = self.doc2vec.infer_vector(sentence)
+        if self.__similarity == "cosine" and self.__doc2vec:
+            sentence = self.__doc2vec.infer_vector(sentence)
 
         for search_result in response["items"]:
             self.__parse_snippet(sentence, search_result["snippet"],
@@ -236,19 +233,19 @@ class GoogleDatasetBalancer(object):
         return similar_sentences
 
     def __similar(self, a, b):
-        if self.similarity == "jaccard":
-            if not self.stopwords:
-                self.stopwords = set(stopwords.words("english"))
+        if self.__similarity == "jaccard":
+            if not self.__stopwords:
+                self.__stopwords = set(stopwords.words("english"))
 
-            a = set(a) - self.stopwords
-            b = set(b) - self.stopwords
+            a = set(a) - self.__stopwords
+            b = set(b) - self.__stopwords
             intersection_count = float(len(a.intersection(b)))
             union_count = float(len(a.union(b)))
 
-            return intersection_count / union_count >= self.threshold if \
+            return intersection_count / union_count >= self.__threshold if \
                 union_count > 0.0 else 0.0
-        elif self.similarity == "cosine":
-            return dot(a, self.doc2vec.infer_vector(b)) >= self.threshold
+        elif self.__similarity == "cosine":
+            return dot(a, self.__doc2vec.infer_vector(b)) >= self.__threshold
 
         return False
 
@@ -256,48 +253,8 @@ class GoogleDatasetBalancer(object):
         return RegexpTokenizer(r"\w+").tokenize(sentence.lower())
 
     def __write_dataset_file(self, data):
-        with open(self.outfile, 'w', newline="", errors="ignore") as file:
+        with open(self.__outfile, 'w', newline="", errors="ignore") as file:
             writer = csv.writer(file)
 
             for instance in data:
                 writer.writerow([instance.text, instance.class_value])
-
-
-if len(sys.argv) < 2:
-    print("Missing argument for path to dataset file.")
-    sys.exit()
-
-data = TextDatasetFileParser().parse(sys.argv[1])
-# keys = ["AIzaSyC0MlmDjTS_XLBJWAdIyGniDR3iMhkIT3k"]
-keys = []
-proxies = []
-
-with open("keys.txt", "r") as file:
-    for line in file.readlines():
-        split_line = line.replace("\n", "").split(",")
-
-        keys.append(split_line[0])
-        proxies.append((split_line[1], 3306))
-
-engine_id = "010254973031167365908:s-lpifpdmgs"
-balancer = GoogleDatasetBalancer(keys=keys, proxies=proxies, verbose=True,
-                                 engine_id=engine_id)
-
-shuffle(data)
-
-training_set_end = int(len(data) * 0.9)
-training_set = balancer.balance(data[0:training_set_end])
-text_classifier = RandomForestTextClassifier(num_jobs=-1, ngram_range=(1, 1))
-classes = []
-
-for instance in training_set:
-    classes.append(instance.class_value)
-
-counter = collections.Counter(classes)
-most_common = counter.most_common(1)[0][0]
-
-for instance in training_set:
-    instance.weight = counter[most_common] / counter[instance.class_value]
-
-text_classifier.train(training_set)
-text_classifier.evaluate(data[training_set_end:], True)

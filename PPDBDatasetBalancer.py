@@ -1,10 +1,7 @@
 import collections
-import sys
 from mysql import connector
 from nltk import word_tokenize
-from random import shuffle
-from RandomForestTextClassifier import RandomForestTextClassifier
-from TextDatasetFileParser import Instance, TextDatasetFileParser
+from TextDatasetFileParser import Instance
 
 
 class PPDBDatasetBalancer(object):
@@ -83,7 +80,7 @@ class PPDBDatasetBalancer(object):
 
         if self.__verbose:
             print("Added " + str(len(new_instances)) + " new instances.")
-        return data + new_instances
+        return new_instances
 
     def close_connection(self):
         self.__connection.close()
