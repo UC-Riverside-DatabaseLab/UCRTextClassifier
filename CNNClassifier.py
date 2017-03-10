@@ -188,7 +188,10 @@ class CNNClassifier(AbstractTextClassifier):
         """
         Evaluates model on a dev set
         """
-        x_text, y = data_helpers.load_data_and_labels_from_instances([instance], self.class_names)
+        if self.w2v is None:
+            x_text, y = data_helpers.load_data_and_labels_from_instances([instance], self.class_names)
+        else:
+            x_text, y = data_helpers.load_data_and_labels_from_instances_withWord2vec([instance], self.class_names, self.w2v)
         x = np.array(list(self.vocab_processor.fit_transform(x_text)))
         # Build vocabulary
         feed_dict = {
