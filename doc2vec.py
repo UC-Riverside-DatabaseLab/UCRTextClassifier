@@ -82,7 +82,10 @@ class DocVecClassifier(AbstractTextClassifier):
         labels = []
         weights = []
         for labeled_doc in self.labeled_docs:
-            labeled_vecs.append(self.model.docvecs[labeled_doc.tags[0]])
+            if labeled_doc.tags[0] in self.model.docvecs:
+                labeled_vecs.append(self.model.docvecs[labeled_doc.tags[0]])
+            else:
+                labeled_vecs.append(self.model.infer_vector(labeled_doc.words))
             labels.append(labeled_doc.label)
             weights.append(labeled_doc.weight)
         logger.debug("# labeled_vecs={}, # labels={}, # weights={}"
