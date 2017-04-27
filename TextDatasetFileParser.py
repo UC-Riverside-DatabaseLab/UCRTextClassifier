@@ -80,7 +80,8 @@ class TextDatasetFileParser(object):
                 length = len(line)
                 weight = 1
 
-                if not parsing_data and length > 0 and line[0] == "@DATA":
+                if not parsing_data and length > 0 and \
+                        line[0].upper() == "@DATA":
                     parsing_data = True
                 elif parsing_data and length > 0:
                     if self.verbose:
