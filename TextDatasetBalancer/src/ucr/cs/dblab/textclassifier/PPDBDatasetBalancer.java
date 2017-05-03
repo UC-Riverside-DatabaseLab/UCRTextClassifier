@@ -21,17 +21,17 @@ public class PPDBDatasetBalancer extends TextDatasetBalancer
 	private int port, minRange, maxRange;
 	private double threshold;
 	
-	public PPDBDatasetBalancer(Map<Parameter, Object> parameters)
+	public PPDBDatasetBalancer(Map<Object, Object> parameters)
 	{
 		this.host = (String) parameters.get(Parameter.HOST);
 		this.port = (Integer) parameters.get(Parameter.PORT);
 		this.database = (String) parameters.get(Parameter.DATABASE);
 		this.user = (String) parameters.get(Parameter.USER);
 		this.password = (String) parameters.get(Parameter.PASSWORD);
-		this.scoringFeature = (String) parameters.get(Parameter.SCORING_FEATURE);
-		this.threshold = (Double) parameters.get(Parameter.THRESHOLD);
-		this.minRange = Math.max(1, (Integer) parameters.get(Parameter.MIN_RANGE));
-		this.maxRange = Math.max(1, (Integer) parameters.get(Parameter.MAX_RANGE));
+		this.scoringFeature = parameters.containsKey(Parameter.SCORING_FEATURE) ? (String) parameters.get(Parameter.SCORING_FEATURE) : "PPDB2SCore";
+		this.threshold = parameters.containsKey(Parameter.THRESHOLD) ? (Double) parameters.get(Parameter.THRESHOLD) : 0.0;
+		this.minRange = parameters.containsKey(Parameter.MIN_RANGE) ? Math.max(1, (Integer) parameters.get(Parameter.MIN_RANGE)) : 1;
+		this.maxRange = parameters.containsKey(Parameter.MAX_RANGE) ? Math.max(1, (Integer) parameters.get(Parameter.MAX_RANGE)) : 1;
 		
 		if(minRange > maxRange)
 		{
@@ -44,15 +44,7 @@ public class PPDBDatasetBalancer extends TextDatasetBalancer
 	
 	public Instances balance(Instances data) throws SQLException
 	{
-		int mostCommon = -1, classValue, minCutoff, maxCutoff, length, index;
-		int[] classCounts = new int[data.numClasses()];
-		
-		for(Instance instance : data)
-		{
-			classValue = (int) instance.classValue();
-			classCounts[classValue]++;
-			mostCommon = mostCommon < 0 || classCounts[classValue] > classCounts[mostCommon] ? classCounts[classValue] : mostCommon;
-		}
+		countClasses(data);
 		
 		Map<String, List<String>> paraphrases = new HashMap<String, List<String>>();
 		Instances newInstances = new Instances(data, 0);
@@ -60,6 +52,7 @@ public class PPDBDatasetBalancer extends TextDatasetBalancer
 		String phrase, text;
 		Instance newInstance;
 		Connection connection = DriverManager.getConnection("jdbc:mysql://" + host + ":" + port + "/" + database, user, password);
+		int classValue, minCutoff, maxCutoff, length, index;
 		
 		for(Instance instance : data)
 		{

@@ -3,29 +3,30 @@ package ucr.cs.dblab.textclassifier;
 import java.sql.SQLException;
 import java.util.Map;
 
-import ucr.cs.dblab.textclassifier.PPDBDatasetBalancer.Parameter;
 import weka.core.Instances;
 
 public class EnsembleTextDatasetBalancer extends TextDatasetBalancer
 {
+	public static enum Parameter{PPDB, GOOGLE, DUPLICATE};
 	private TextDatasetBalancer ppdbDatasetBalancer = null, googleDatasetBalancer = null, duplicateDatasetBalancer = null;
 	
-	public EnsembleTextDatasetBalancer(Map<Parameter, Object> parameters)
+	public EnsembleTextDatasetBalancer(Map<Parameter, Map<Object, Object>> parameters)
 	{
-		boolean ppdb = true;
-		
-		for(Parameter parameter : PPDBDatasetBalancer.Parameter.values())
+		for(Parameter parameter : Parameter.values())
 		{
-			if(!parameters.containsKey(parameter))
+			switch(parameter)
 			{
-				ppdb = false;
-				break;
+				case PPDB:
+					ppdbDatasetBalancer = new PPDBDatasetBalancer((Map<Object, Object>) parameters.get(Parameter.PPDB));
+					break;
+				case GOOGLE:
+					break;
+				case DUPLICATE:
+					duplicateDatasetBalancer = new DuplicateDatasetBalancer();
+					break;
+				default:
+					break;
 			}
-		}
-		
-		if(ppdb)
-		{
-			ppdbDatasetBalancer = new PPDBDatasetBalancer(parameters);
 		}
 	}
 	
