@@ -43,10 +43,6 @@ class TextDatasetBalancer(object):
 
         return new_instances
 
-if len(sys.argv) < 2:
-    print("Missing argument for path to dataset file.")
-    sys.exit()
-
     def balance(self, data):
         new_instances = []
 
