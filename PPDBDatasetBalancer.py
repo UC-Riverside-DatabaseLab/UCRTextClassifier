@@ -149,7 +149,7 @@ class PPDBDatasetBalancer(object):
             text.append(instance.text)
             labels.append([instance.class_value])
 
-        vectors = vectorizer.fit_transform(text)
+        vectors = vectorizer.fit_transform(text).toarray()
         words = vectorizer.get_feature_names()
         entropy = self.__entropy(labels, 0)
 
@@ -169,7 +169,8 @@ class PPDBDatasetBalancer(object):
             for value, frequency in value_frequencies.items():
                 value_probability = frequency / sum(value_frequencies.values())
                 sub = [vector for vector in vectors if vector[index] == value]
-                subset_entropy += value_probability * entropy(sub, index)
+                subset_entropy += value_probability * \
+                    self.__entropy(sub, index)
 
             if entropy - subset_entropy > self.__ig_threshold:
                 top_words.append(words[index])
