@@ -141,23 +141,33 @@ class PPDBDatasetBalancer(object):
     def __top_information_gain_words(self, data):
         vectorizer = CountVectorizer(stop_words="english")
         text = []
-        labels = []
         top_words = []
         word_frequencies = {}
 
         for instance in data:
             text.append(instance.text)
-            labels.append([instance.class_value])
 
-        vectors = vectorizer.fit_transform(text).toarray()
+        vector_array = vectorizer.fit_transform(text).toarray()
+        vectors = []
         words = vectorizer.get_feature_names()
-        entropy = self.__entropy(labels, 0)
+        class_index = len(words)
+
+        for i in range(0, len(data)):
+            vector = []
+
+            for value in vector_array[i]:
+                vector.append(value)
+
+            vector.append(data[i].class_value)
+            vectors.append(vector)
+
+        entropy = self.__entropy(vectors, class_index)
 
         for i in range(0, len(words)):
             word_frequencies[i] = {}
 
         for vector in vectors:
-            for i in range(0, len(vector)):
+            for i in range(0, len(vector) - 1):
                 if vector[i] not in word_frequencies[i]:
                     word_frequencies[i][vector[i]] = 0
 
@@ -170,7 +180,7 @@ class PPDBDatasetBalancer(object):
                 value_probability = frequency / sum(value_frequencies.values())
                 sub = [vector for vector in vectors if vector[index] == value]
                 subset_entropy += value_probability * \
-                    self.__entropy(sub, index)
+                    self.__entropy(sub, class_index)
 
             if entropy - subset_entropy > self.__ig_threshold:
                 top_words.append(words[index])
