@@ -46,8 +46,8 @@ class TextDatasetFileParser(object):
 
         return []
 
-    def parse_unlabeled(self, filename, delimit=",", quote_char='"'):
-        """Read a CSV file containing unlabeled text data. The CSV file should
+    def parse_unlabeled(self, filename):
+        """Read a text file containing unlabeled text data. The file should
         have one text data string per line.
 
         Arguments:
@@ -59,13 +59,8 @@ class TextDatasetFileParser(object):
         dataset = []
 
         with open(filename, newline="", errors="ignore") as file:
-            reader = csv.reader(file, delimiter=delimit, quotechar=quote_char)
-
-            for line in reader:
-                if self.verbose:
-                    print(line[0])
-
-                dataset.append(line[0])
+            for line in file:
+                dataset.append(line.lower())
 
         return dataset
 
