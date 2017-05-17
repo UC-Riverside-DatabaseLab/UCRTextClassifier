@@ -17,10 +17,15 @@ class Word2VecSimilarity(AbstractTextClassifier):
         self.tokenizer = nltk.data.load('tokenizers/punkt/english.pickle')
         self.training_weights = {}
         self.training_data = {}
-        path = "/models/w2v.model"
-        model_file = Path(path)
-        self.word2vec = Word2Vec.load(path) if model_file.is_file() else \
-            Word2Vec(LineSentence(unlabeled_data))
+        path = "./models/w2v_" + unlabeled_data[unlabeled_data.rfind("/") +
+                                                1] + ".model"
+
+        if Path(path).is_file():
+            self.word2vec = Word2Vec.load(path)
+        else:
+            self.word2vec = Word2Vec(LineSentence(unlabeled_data))
+
+            self.word2vec.save(path)
 
     def train(self, data):
         self.training_data.clear()

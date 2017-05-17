@@ -1,16 +1,14 @@
-import data_helpers as dh
-import numpy as np
 import os
 import sys
+sys.path.insert(0, os.path.abspath("./cnn"))
+import data_helpers as dh
+import numpy as np
 import tensorflow as tf
 from AbstractTextClassifier import AbstractTextClassifier
 from gensim.models.word2vec import Word2Vec, LineSentence
 from pathlib import Path
 from text_cnn import TextCNN
-from tensorflow.contrib.learn.preprocessing import VocabularyProcessor
-
-
-sys.path.insert(0, os.path.abspath("./cnn"))
+from tensorflow.contrib.learn import preprocessing
 
 
 class CNNClassifier(AbstractTextClassifier):
@@ -61,10 +59,16 @@ class CNNClassifier(AbstractTextClassifier):
         if unlabeled_data is None:
             self.w2v = None
         else:
-            path = "/models/w2v.model"
-            model_file = Path(path)
-            word2vec = Word2Vec.load(path) if model_file.is_file() else \
-                Word2Vec(LineSentence(unlabeled_data))
+            path = "./models/w2v_" + unlabeled_data[unlabeled_data.rfind("/") +
+                                                    1] + ".model"
+
+            if Path(path).is_file():
+                word2vec = Word2Vec.load(path)
+            else:
+                word2vec = Word2Vec(LineSentence(unlabeled_data))
+
+                word2vec.save(path)
+
             self.w2v = {}
 
             for word in word2vec.vocab:
@@ -88,8 +92,8 @@ class CNNClassifier(AbstractTextClassifier):
                                                          self.w2v)
 
         # Build vocabulary
-        max_document_length = max([len(x.split(" ")) for x in x_t])
-        self.vocab_processor = VocabularyProcessor(max_document_length)
+        max_doc_len = max([len(x.split(" ")) for x in x_t])
+        self.vocab_processor = preprocessing.VocabularyProcessor(max_doc_len)
         x = np.array(list(self.vocab_processor.fit_transform(x_t)))
 
         # Randomly shuffle data

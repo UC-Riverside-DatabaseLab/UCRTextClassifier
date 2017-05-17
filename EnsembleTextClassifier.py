@@ -45,7 +45,7 @@ class EnsembleTextClassifier(AbstractTextClassifier):
     """
     def __init__(self, voting_method=VotingMethod.majority, weight_penalty=4,
                  doc2vec_dir=None, unlabeled_data=None):
-        self.classifiers = [CNNClassifier(word2vecAddress=unlabeled_data),
+        self.classifiers = [CNNClassifier(unlabeled_data=unlabeled_data),
                             RandomForestTextClassifier(num_jobs=-1),
                             RegexClassifier(root_words=2)]
         self.classifier_weights = []
