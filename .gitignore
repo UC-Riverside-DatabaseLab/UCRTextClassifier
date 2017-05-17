@@ -3,3 +3,5 @@
 *.csv
 models/
 *.arff
+models/dm_concat
+Datasets/review_text.txt
