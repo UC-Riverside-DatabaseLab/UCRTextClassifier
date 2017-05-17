@@ -1,48 +1,16 @@
-#######################################################
-#######################################################
-############## Moloud Shahbazi
-############## Convolutional Neural Network implemented
-############## by ... extended to include word2vec
-############## representations as initial embedding
-############## values.
-#######################################################
-#######################################################
-
-import tensorflow as tf
+import data_helpers as dh
 import numpy as np
 import os
 import sys
-sys.path.insert(0, os.path.abspath("./cnn"))
-import data_helpers as data_helpers
-from text_cnn import TextCNN
-from tensorflow.contrib import learn
+import tensorflow as tf
 from AbstractTextClassifier import AbstractTextClassifier
-from TextDatasetFileParser import TextDatasetFileParser
-from gensim.models.word2vec import Word2Vec
+from gensim.models.word2vec import Word2Vec, LineSentence
+from pathlib import Path
+from text_cnn import TextCNN
+from tensorflow.contrib.learn.preprocessing import VocabularyProcessor
 
 
-def trainWord2Vec(unlabeled_data):
-    unlabeled = TextDatasetFileParser().parse_unlabeled(unlabeled_data)
-    word2vec = Word2Vec()
-    dictionary = {}
-
-    word2vec.build_vocab(unlabeled)
-    word2vec.train(unlabeled)
-
-    for word in word2vec.vocab:
-        dictionary[word] = word2vec[word]
-
-    return dictionary
-
-
-def loadWord2Vec(word2vecAddress):
-    word2vec = {}
-    with open(word2vecAddress, 'r') as f:
-        f.readline()
-        for line in f:
-            wv = line.strip().split(' ')
-            word2vec[wv[0]] = [float(x) for x in wv[1:]]
-    return word2vec
+sys.path.insert(0, os.path.abspath("./cnn"))
 
 
 class CNNClassifier(AbstractTextClassifier):
@@ -50,7 +18,7 @@ class CNNClassifier(AbstractTextClassifier):
                  num_filters=128, dropout_keep_prob=0.5, l2_reg_lambda=0.0,
                  batch_size=64, num_epochs=20, evaluate_every=100,
                  checkpoint_every=100, allow_soft_placement=True,
-                 log_device_placement=False, word2vecAddress=None):
+                 log_device_placement=False, unlabeled_data=None):
         self.sess = None
         self.cnn = None
         # Parameters
@@ -89,9 +57,18 @@ class CNNClassifier(AbstractTextClassifier):
         tf.flags.DEFINE_boolean("log_device_placement", log_device_placement,
                                 "Log placement of ops on devices")
         self.class_names = []
-        self.w2v = None if word2vecAddress is None else \
-            trainWord2Vec(word2vecAddress)
-            # loadWord2Vec(word2vecAddress)
+
+        if unlabeled_data is None:
+            self.w2v = None
+        else:
+            path = "/models/w2v.model"
+            model_file = Path(path)
+            word2vec = Word2Vec.load(path) if model_file.is_file() else \
+                Word2Vec(LineSentence(unlabeled_data))
+            self.w2v = {}
+
+            for word in word2vec.vocab:
+                self.w2v[word] = word2vec[word]
 
     def train(self, data):
         FLAGS = tf.flags.FLAGS
@@ -104,14 +81,16 @@ class CNNClassifier(AbstractTextClassifier):
             labels.add(i.class_value)
         self.class_names = list(labels)
         if self.w2v is None:
-            x_text, y = data_helpers.load_data_and_labels_from_instances(data, self.class_names)
+            x_t, y = dh.load_from_instances(data, self.class_names)
         else:
-            x_text, y = data_helpers.load_data_and_labels_from_instances_withWord2vec(data, self.class_names, self.w2v)
+            x_t, y = dh.load_from_instances_withWord2vec(data,
+                                                         self.class_names,
+                                                         self.w2v)
 
         # Build vocabulary
-        max_document_length = max([len(x.split(" ")) for x in x_text])
-        self.vocab_processor = learn.preprocessing.VocabularyProcessor(max_document_length)
-        x = np.array(list(self.vocab_processor.fit_transform(x_text)))
+        max_document_length = max([len(x.split(" ")) for x in x_t])
+        self.vocab_processor = VocabularyProcessor(max_document_length)
+        x = np.array(list(self.vocab_processor.fit_transform(x_t)))
 
         # Randomly shuffle data
         np.random.seed(10)
@@ -153,8 +132,11 @@ class CNNClassifier(AbstractTextClassifier):
             grad_summaries = []
             for g, v in grads_and_vars:
                 if g is not None:
-                    grad_hist_summary = tf.summary.histogram("{}/grad/hist".format(v.name.replace(":", "_")), g)
-                    sparsity_summary = tf.summary.scalar("{}/grad/sparsity".format(v.name.replace(":", "_")), tf.nn.zero_fraction(g))
+                    h = "{}/grad/hist".format(v.name.replace(":", "_"))
+                    s1 = "{}/grad/sparsity".format(v.name.replace(":", "_"))
+                    s2 = tf.nn.zero_fraction(g)
+                    grad_hist_summary = tf.summary.histogram(h, g)
+                    sparsity_summary = tf.summary.scalar(s1, s2)
                     grad_summaries.append(grad_hist_summary)
                     grad_summaries.append(sparsity_summary)
             tf.summary.merge(grad_summaries)
@@ -175,9 +157,9 @@ class CNNClassifier(AbstractTextClassifier):
                     [train_op, global_step, self.cnn.loss, self.cnn.accuracy],
                     feed_dict)
             # Generate batches
-            batches = data_helpers.batch_iter(list(zip(x_train, y_train)),
-                                              FLAGS.batch_size,
-                                              FLAGS.num_epochs)
+            batches = dh.batch_iter(list(zip(x_train, y_train)),
+                                    FLAGS.batch_size,
+                                    FLAGS.num_epochs)
             # Training loop. For each batch...
             for batch in batches:
                 x_batch, y_batch = zip(*batch)
@@ -189,10 +171,12 @@ class CNNClassifier(AbstractTextClassifier):
         Evaluates model on a dev set
         """
         if self.w2v is None:
-            x_text, y = data_helpers.load_data_and_labels_from_instances([instance], self.class_names)
+            x_t, y = dh.load_from_instances([instance], self.class_names)
         else:
-            x_text, y = data_helpers.load_data_and_labels_from_instances_withWord2vec([instance], self.class_names, self.w2v)
-        x = np.array(list(self.vocab_processor.fit_transform(x_text)))
+            x_t, y = dh.load_from_instances_withWord2vec([instance],
+                                                         self.class_names,
+                                                         self.w2v)
+        x = np.array(list(self.vocab_processor.fit_transform(x_t)))
         # Build vocabulary
         feed_dict = {
           self.cnn.input_x: x,

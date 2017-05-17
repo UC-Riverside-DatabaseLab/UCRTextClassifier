@@ -1,15 +1,10 @@
-##########################################################
-##########################################################
-########## Author: Moloud Shahbazi
-##########################################################
-##########################################################
-
 import numpy as np
 import re
 import pandas as pd
-
 import os
 import sys
+
+
 sys.path.insert(0, os.path.abspath(".."))
 
 
@@ -42,7 +37,7 @@ def extra_clean_str(string, dictionary):
     return " ".join(outstring)
 
 
-def load_data_and_labels_from_file(data_address):
+def load_from_file(data_address):
     # Loads data from csv,format is two text columns followed by location and
     # class
     d = pd.read_csv(data_address, sep='\t')
@@ -58,7 +53,7 @@ def load_data_and_labels_from_file(data_address):
     return [x, y]
 
 
-def load_data_and_labels_from_instances(instances, classes):
+def load_from_instances(instances, classes):
     x = []
     labels = []
     for i in instances:
@@ -82,8 +77,7 @@ def load_data_and_labels_from_instances(instances, classes):
     return [x, y]
 
 
-def load_data_and_labels_from_instances_withWord2vec(instances, classes,
-                                                     word2vec):
+def load_from_instances_withWord2vec(instances, classes, word2vec):
     x = []
     labels = []
     dictionary = word2vec.keys()

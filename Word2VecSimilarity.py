@@ -1,10 +1,10 @@
 import nltk.data
-from numpy import array, dot
-from nltk import word_tokenize
-from gensim.matutils import unitvec
-from gensim.models.word2vec import Word2Vec
 from AbstractTextClassifier import AbstractTextClassifier
-from TextDatasetFileParser import TextDatasetFileParser
+from gensim.matutils import unitvec
+from gensim.models.word2vec import Word2Vec, LineSentence
+from pathlib import Path
+from nltk import word_tokenize
+from numpy import array, dot
 
 
 class Word2VecSimilarity(AbstractTextClassifier):
@@ -15,17 +15,14 @@ class Word2VecSimilarity(AbstractTextClassifier):
     """
     def __init__(self, unlabeled_data):
         self.tokenizer = nltk.data.load('tokenizers/punkt/english.pickle')
-        self.unlabeled_data = unlabeled_data
-        self.word2vec = Word2Vec()
         self.training_weights = {}
         self.training_data = {}
+        path = "/models/w2v.model"
+        model_file = Path(path)
+        self.word2vec = Word2Vec.load(path) if model_file.is_file() else \
+            Word2Vec(LineSentence(unlabeled_data))
 
     def train(self, data):
-        textDatasetFileParser = TextDatasetFileParser()
-        unlabeled = textDatasetFileParser.parse_unlabeled(self.unlabeled_data)
-
-        self.word2vec.build_vocab(unlabeled)
-        self.word2vec.train(unlabeled)
         self.training_data.clear()
 
         for instance in data:
