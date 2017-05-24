@@ -11,12 +11,23 @@ from TextDatasetFileParser import Instance
 
 class SemgrexClassifier(AbstractTextClassifier):
     def __init__(self, ig_threshold=0, imbalance_threshold=0.75):
+        java_directory = "SemgrexClassifierHelper/"
         helper_filename = "SemgrexClassifierHelper"
 
-        if not isfile(helper_filename + ".class"):
-            subprocess.run(["javac", "SemgrexClassifierHelper.java"])
+        if not isfile(java_directory + "bin/" + helper_filename + ".class"):
+            classpath = "./" + java_directory
+            libraries = ["json-simple-1.1.1.jar",
+                         "stanford-corelnlp-3.7.0.jar",
+                         "stanford-corelnlp-3.7.0-models.jar"]
 
-        self.__helper = subprocess.Popen(["java", "SemgrexClassifierHelper"],
+            for library in libraries:
+                classpath += ";./" + java_directory + "/" + library
+
+            subprocess.run(["javac", "-cp", classpath,
+                            "src/" + helper_filename + ".java"])
+
+        self.__helper = subprocess.Popen(["java", java_directory + "bin/" +
+                                          helper_filename],
                                          stdin=subprocess.PIPE,
                                          stdout=subprocess.PIPE,
                                          stderr=subprocess.PIPE,
@@ -46,17 +57,21 @@ class SemgrexClassifier(AbstractTextClassifier):
         return entropy
 
     def train(self, data):
+        pattern_extractor = PatternExtractor()
         classes = []
         trees = []
 
+        self.__helper.communicate(input=json.dumps({"mode": "init"}))
+
         for instance in data:
             payload = {"mode": "parse", "text": instance.text}
-            (tree, _) = self.__helper.communicate(input=json.dumps(payload))
+            (l, _) = self.__helper.communicate(input=json.dumps(payload))
 
-            trees.append(tree)
+            for tree in json.loads(l):
+                trees.append(tree)
+
             classes.append(instance.class_value)
 
-        pattern_extractor = PatternExtractor()
         counter = Counter(classes)
         most_common = counter.most_common(1)[0][0]
         classes = set(classes)
