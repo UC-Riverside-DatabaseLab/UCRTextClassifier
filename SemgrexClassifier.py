@@ -40,7 +40,7 @@ class SemgrexClassifier(AbstractTextClassifier):
         self.__imbalance_threshold = imbalance_threshold
 
     def classify(self, instance):
-        self.__helper.send(json.dumps({"mode": "classify",
+        self.__helper.send(json.dumps({"command": "classify",
                                        "text": instance.text}))
         distribution = json.loads(self.__helper.receive())
         return distribution if len(distribution) > 0 else \
@@ -66,7 +66,7 @@ class SemgrexClassifier(AbstractTextClassifier):
         pattern_extractor = PatternExtractor()
         classes = []
 
-        self.__helper.send(json.dumps({"mode": "init"}))
+        self.__helper.send(json.dumps({"command": "init"}))
         self.__backup_classifier.train(data)
 
         for instance in data:
@@ -75,41 +75,58 @@ class SemgrexClassifier(AbstractTextClassifier):
         counter = Counter(classes)
         most_common = counter.most_common(1)[0][0]
         classes = set(classes)
+        num_classes = len(classes)
 
         if(counter[most_common] / len(data) > self.__imbalance_threshold):
             classes.remove(most_common)
 
-        for class_value in classes:
-            binary_data = []
+        if num_classes > 2:
+            for class_value in classes:
+                binary_data = []
+                ig_words = []
+                trees = []
+
+                for instance in data:
+                    if instance.class_value == class_value:
+                        self.__helper.send(json.dumps({"command": "parse",
+                                                       "text": instance.text}))
+
+                        for tree in json.loads(self.__helper.receive()):
+                            trees += [tree]
+
+                    binary_class = ("" if instance.class_value == class_value
+                                    else "Not") + str(class_value)
+
+                    binary_data.append(Instance(instance.text, binary_class))
+
+                for word in self.__top_information_gain_words(binary_data):
+                    ig_words += [word]
+
+                for pattern in pattern_extractor.extract_patterns(ig_words,
+                                                                  trees):
+                    self.__helper.send(json.dumps({"command": "add_pattern",
+                                                   "pattern": pattern,
+                                                   "class": str(class_value)}))
+        else:
             ig_words = []
-            trees = []
-
-            for instance in data:
-                if instance.class_value == class_value:
-                    self.__helper.send(json.dumps({"mode": "parse",
-                                                   "text": instance.text}))
-
-                    for tree in json.loads(self.__helper.receive()):
-                        trees += [tree]
-
-                binary_class = ("" if instance.class_value == class_value else
-                                "Not") + str(class_value)
-
-                binary_data.append(Instance(instance.text, binary_class))
 
             for word in self.__top_information_gain_words(binary_data):
                 ig_words += [word]
 
-#            with open(class_value + "_trees.txt", "w") as file:
-#                for tree in trees:
-#                    file.write(tree + "\n---------\n")
+            for class_value in classes:
+                for instance in data:
+                    if instance.class_value == class_value:
+                        self.__helper.send(json.dumps({"command": "parse",
+                                                       "text": instance.text}))
 
-            patterns = pattern_extractor.extract_patterns(ig_words, trees)
-            print("Pattern extraction complete.")
-            for pattern in patterns:
-                self.__helper.send(json.dumps({"mode": "add_pattern",
-                                               "pattern": pattern,
-                                               "class": str(class_value)}))
+                        for tree in json.loads(self.__helper.receive()):
+                            trees += [tree]
+
+                for pattern in pattern_extractor.extract_patterns(ig_words,
+                                                                  trees):
+                    self.__helper.send(json.dumps({"command": "add_pattern",
+                                                   "pattern": pattern,
+                                                   "class": str(class_value)}))
 
     def __top_information_gain_words(self, data):
         vectorizer = CountVectorizer(stop_words="english")
@@ -157,7 +174,6 @@ class SemgrexClassifier(AbstractTextClassifier):
 
             if entropy - subset_entropy > self.__ig_threshold:
                 top_words.append(words[index])
-                print(words[index] + "\t" + str(entropy - subset_entropy))
 
         return top_words
 

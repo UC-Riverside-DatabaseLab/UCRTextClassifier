@@ -457,15 +457,16 @@ class PatternExtractor(object):
 
         return sorted(l, reverse=True)
 
-    def add_suffix_to_all_non_star_nodes(self, node, i):
-        i += 1
+    def add_suffix_to_all_non_star_nodes(self, node, i_list):
+        i = i_list[0]
+        i_list[0] = i + 1
         word, pos = node.node_val
 
         if word != "*":
             node.node_val = ("%s__%s" % (word, i), pos)
 
         for rel, child in node.children:
-            self.add_suffix_to_all_non_star_nodes(child, i)
+            self.add_suffix_to_all_non_star_nodes(child, i_list)
 
     def remove_suffixes(self, node):
         word, pos = node.node_val
@@ -492,8 +493,8 @@ class PatternExtractor(object):
 
         return return_list
 
-    def create_sub_patterns(self, pattern_tree):
-        patterns = []
+    def create_sub_patterns(self, pattern_tree, patterns_so_far):
+        # patterns = []
         important_word_nodes = {}
 
         # this will fill word_nodes with data
@@ -504,16 +505,14 @@ class PatternExtractor(object):
         if len(important) <= 2:
             # if patternTree has only 2 important words,
             # then we don't create subpatterns for it
-            return []
+            return
 
         combos = self.create_word_combinations_by_removing_one_word(important)
 
         for word_comb in combos:
             important = word_comb
-            patterns += self.create_all_patterns_and_sub_patterns(pattern_tree,
-                                                                  important)
-
-        return patterns
+            self.create_all_patterns_and_sub_patterns(pattern_tree, important,
+                                                      patterns_so_far)
 
     def get_unique_patterns(self, patterns):
         # we create str representation of pattern subtrees
@@ -528,8 +527,11 @@ class PatternExtractor(object):
 
         return pattern_str_patterns.values()
 
-    def create_all_patterns_and_sub_patterns(self, node1, important_words):
-        patterns = []
+    def create_all_patterns_and_sub_patterns(self, node1, important_words,
+                                             patterns_so_far):
+        if len(node1.children) == 0:
+            return
+
         node = node1.clone()
         # prunes the tree to keep only branches that contain an important word.
         # non-important words along the way are replaced by "*". For negation,
@@ -538,22 +540,22 @@ class PatternExtractor(object):
         sub_tree = self.get_sub_tree(node, important_words)
 
         if sub_tree:
+            if str(sub_tree) in patterns_so_far:
+                return
+
             sub_tree2 = self.prune_empty_roots(sub_tree)
 
             self.make_indir_relations(sub_tree2)
 
             if len(sub_tree2.children) == 0:
-                return patterns
+                return
 
-            patterns += [sub_tree2]
+            if str(sub_tree2) in patterns_so_far:
+                return
 
-            for sub_pattern in self.create_sub_patterns(sub_tree2):
-                if len(sub_pattern.children) == 0:
-                    continue
+            patterns_so_far[str(sub_tree2)] = sub_tree2
 
-                patterns += [sub_pattern]
-
-        return self.get_unique_patterns(patterns)
+            self.create_sub_patterns(sub_tree2, patterns_so_far)
 
     def extract_patterns(self, important_words, trees):
         pattern_str_count = {}
@@ -573,26 +575,33 @@ class PatternExtractor(object):
             # now pattern_tree's words are replaced by word_suffix and hence
             # repeated words become unique. suffx is __i where i is a number
             # counting up from 1
-            self.add_suffix_to_all_non_star_nodes(sub_tree, 0)
+            self.add_suffix_to_all_non_star_nodes(sub_tree, [0])
 
             important_word_nodes = {}
+
             # this will fill word_nodes with data. We want to extract all
             # important words (plus suffixes) that occur in this tree.
             sub_tree.get_all_important_word_nodes(important_word_nodes)
+
             # words_suffixes are important words plus suffixes.
             words_suffixes = important_word_nodes.keys()
+            pattern_str_pattern = {}
 
-            nodes = self.create_all_patterns_and_sub_patterns(sub_tree,
-                                                              words_suffixes)
+            # this will fill allPatterns
+            self.create_all_patterns_and_sub_patterns(sub_tree, words_suffixes,
+                                                      pattern_str_pattern)
 
-            for pattern_node in nodes:
+            for pattern_str in pattern_str_pattern:
+                pattern_node = pattern_str_pattern[pattern_str]
+
                 self.remove_suffixes(pattern_node)
-                pattern_str = str(pattern_node)
 
-                if pattern_str not in pattern_str_count:
-                    pattern_str_count[pattern_str] = 0
+                new_pattern_str = str(pattern_node)
 
-                pattern_str_count[pattern_str] += 1
+                if new_pattern_str not in pattern_str_count:
+                    pattern_str_count[new_pattern_str] = 0
+
+                pattern_str_count[new_pattern_str] += 1
 
         # sort patterns by count and return
         for count, pattern in self.sort_dict(pattern_str_count):
@@ -608,17 +617,19 @@ class PatternExtractor(object):
 
 # --set main parameters and input files here-------------
 
-info_gain_threshold = 0.0025
-word_infogain_file = "LongWaitTime_words.txt"  # "shortWait_word_infoGain.txt"
-tree_file = "LongWaitTime_trees.txt"
-pattern_extractor = PatternExtractor()
-important_words = pattern_extractor.read_info_gain(word_infogain_file,
-                                                   info_gain_threshold)
-trees = pattern_extractor.load_trees_from_file(tree_file)
-
-# ---- for each parse tree, extract a pattern and all sub-patterns and add them
-# to patternStr_count. Each extracted pattern is a node (with its children),
-# but we store its string representation in patternStr_count.
-
-for pattern in pattern_extractor.extract_patterns(important_words, trees):
-    print(pattern)
+#info_gain_threshold = 0.0025
+#word_infogain_file = "/Users/lesani/Dropbox/work/Opinion-Mining/Data/word_infoGain/LongWaitTime_words.txt"  # "shortWait_word_infoGain.txt"
+#tree_file = "/Users/lesani/Dropbox/work/Opinion-Mining/Data/sentences/LongWaitTime_trees.txt"
+#pattern_extractor = PatternExtractor()
+#important_words = pattern_extractor.read_info_gain(word_infogain_file,
+#                                                   info_gain_threshold)
+#
+#trees = pattern_extractor.load_trees_from_file(tree_file)
+#
+#
+## ---- for each parse tree, extract a pattern and all sub-patterns and add them
+## to patternStr_count. Each extracted pattern is a node (with its children),
+## but we store its string representation in patternStr_count.
+#
+#for pattern in pattern_extractor.extract_patterns(important_words, trees):
+#    print(pattern)
