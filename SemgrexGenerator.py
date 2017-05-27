@@ -1,44 +1,50 @@
 import json
 import math
+import socket
 import subprocess
 from AbstractTextClassifier import AbstractTextClassifier
 from collections import Counter
 from extractPatterns import PatternExtractor
-from os.path import isfile
+from RandomForestTextClassifier import RandomForestTextClassifier
 from sklearn.feature_extraction.text import CountVectorizer
-from TextDatasetFileParser import Instance
+from TextDatasetFileParser import Instance, TextDatasetFileParser
+
+
+class HelperCommunicator(object):
+    def __init__(self, host="localhost", port=9000):
+        # path = "./SemgrexClassifierHelper/bin/SemgrexClassifierHelper"
+        # self.__helper = subprocess.Popen(["java", path])
+        self.__sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+        self.__sock.connect((host, port))
+
+    def send(self, json):
+        self.__sock.send((json + "\n").encode())
+
+    def receive(self):
+        json = ""
+
+        while len(json) == 0 or not json[len(json) - 1] == "\n":
+            json += self.__sock.recv(1).decode("latin-1")
+
+        return json[0:len(json) - 1].replace("__NEWLINE__", "\n")
 
 
 class SemgrexClassifier(AbstractTextClassifier):
-    def __init__(self, ig_threshold=0, imbalance_threshold=0.75):
-        java_directory = "SemgrexClassifierHelper/"
-        helper_filename = "SemgrexClassifierHelper"
-
-        if not isfile(java_directory + "bin/" + helper_filename + ".class"):
-            classpath = "./" + java_directory
-            libraries = ["json-simple-1.1.1.jar",
-                         "stanford-corelnlp-3.7.0.jar",
-                         "stanford-corelnlp-3.7.0-models.jar"]
-
-            for library in libraries:
-                classpath += ";./" + java_directory + "/" + library
-
-            subprocess.run(["javac", "-cp", classpath,
-                            "src/" + helper_filename + ".java"])
-
-        self.__helper = subprocess.Popen(["java", java_directory + "bin/" +
-                                          helper_filename],
-                                         stdin=subprocess.PIPE,
-                                         stdout=subprocess.PIPE,
-                                         stderr=subprocess.PIPE,
-                                         universal_newlines=True)
+    def __init__(self, backup_classifier=None, ig_threshold=0,
+                 imbalance_threshold=0.75):
+        self.__backup_classifier = RandomForestTextClassifier(num_jobs=-1) if \
+            backup_classifier is None else backup_classifier
+        self.__helper = HelperCommunicator()
         self.__ig_threshold = ig_threshold
         self.__imbalance_threshold = imbalance_threshold
 
     def classify(self, instance):
-        payload = {"mode": "classify", "text": instance.text}
-        (distribution, _) = self.__helper.communicate(input=payload)
-        return json.loads(distribution)
+        self.__helper.send(json.dumps({"mode": "classify",
+                                       "text": instance.text}))
+        distribution = json.loads(self.__helper.receive())
+        return distribution if len(distribution) > 0 else \
+            self.__backup_classifier.classify(instance)
 
     def __entropy(self, vectors, index):
         value_frequencies = {}
@@ -59,17 +65,11 @@ class SemgrexClassifier(AbstractTextClassifier):
     def train(self, data):
         pattern_extractor = PatternExtractor()
         classes = []
-        trees = []
 
-        self.__helper.communicate(input=json.dumps({"mode": "init"}))
+        self.__helper.send(json.dumps({"mode": "init"}))
+        self.__backup_classifier.train(data)
 
         for instance in data:
-            payload = {"mode": "parse", "text": instance.text}
-            (l, _) = self.__helper.communicate(input=json.dumps(payload))
-
-            for tree in json.loads(l):
-                trees.append(tree)
-
             classes.append(instance.class_value)
 
         counter = Counter(classes)
@@ -81,21 +81,35 @@ class SemgrexClassifier(AbstractTextClassifier):
 
         for class_value in classes:
             binary_data = []
+            ig_words = []
+            trees = []
 
             for instance in data:
+                if instance.class_value == class_value:
+                    self.__helper.send(json.dumps({"mode": "parse",
+                                                   "text": instance.text}))
+
+                    for tree in json.loads(self.__helper.receive()):
+                        trees += [tree]
+
                 binary_class = ("" if instance.class_value == class_value else
                                 "Not") + str(class_value)
 
                 binary_data.append(Instance(instance.text, binary_class))
 
-                ig_words = self.__top_information_gain_words(binary_data)
+            for word in self.__top_information_gain_words(binary_data):
+                ig_words += [word]
 
-                for pattern in pattern_extractor.extract_patterns(ig_words,
-                                                                  trees):
-                    payload = {"mode": "add_pattern", "pattern": pattern,
-                               "class": str(class_value)}
+#            with open(class_value + "_trees.txt", "w") as file:
+#                for tree in trees:
+#                    file.write(tree + "\n---------\n")
 
-                    self.__helper.communicate(input=payload)
+            patterns = pattern_extractor.extract_patterns(ig_words, trees)
+            print("Pattern extraction complete.")
+            for pattern in patterns:
+                self.__helper.send(json.dumps({"mode": "add_pattern",
+                                               "pattern": pattern,
+                                               "class": str(class_value)}))
 
     def __top_information_gain_words(self, data):
         vectorizer = CountVectorizer(stop_words="english")
@@ -143,5 +157,15 @@ class SemgrexClassifier(AbstractTextClassifier):
 
             if entropy - subset_entropy > self.__ig_threshold:
                 top_words.append(words[index])
+                print(words[index] + "\t" + str(entropy - subset_entropy))
 
         return top_words
+
+
+textDatasetFileParser = TextDatasetFileParser()
+training_set = textDatasetFileParser.parse("./Datasets/ShortWaitTime and LongWaitTime Training.arff")
+test_set = textDatasetFileParser.parse("./Datasets/ShortWaitTime and LongWaitTime Test.arff")
+classifier = SemgrexClassifier(ig_threshold=0.0025)
+
+classifier.train(training_set)
+classifier.evaluate(test_set, verbose=True)

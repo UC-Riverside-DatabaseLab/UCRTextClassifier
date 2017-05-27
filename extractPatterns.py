@@ -1,4 +1,4 @@
-class Node:
+class Node(object):
     def __init__(self, node_val):
         self.node_val = node_val
         self.children = []
@@ -144,7 +144,7 @@ class Node:
         return indices
 
 
-class Tree:
+class Tree(object):
     def __init__(self, root):
         self.root = root
 
@@ -155,7 +155,10 @@ class Tree:
         return self.root.find_lemma(lemma)
 
 
-class PatternExtractor:
+class PatternExtractor(object):
+    def __init__(self):
+        pass
+
     def prune_node(self, node, tree, important_words):
         found_important_word = False
 
@@ -177,6 +180,7 @@ class PatternExtractor:
                 return True
 
         word, po = node.node_val
+
         for lemma in important_words:
             if lemma == word[:len(lemma)]:
                 node.node_val = (lemma, po)  # replace word for lemma in node
@@ -604,17 +608,17 @@ class PatternExtractor:
 
 # --set main parameters and input files here-------------
 
-#info_gain_threshold = 0.0025
-#word_infogain_file = "LongWaitTimeWords.txt"  # "shortWait_word_infoGain.txt"
-#tree_file = "long_wait_trees.txt"
-#pattern_extractor = PatternExtractor()
-#important_words = pattern_extractor.read_info_gain(word_infogain_file,
-#                                                   info_gain_threshold)
-#trees = pattern_extractor.load_trees_from_file(tree_file)
+info_gain_threshold = 0.0025
+word_infogain_file = "LongWaitTime_words.txt"  # "shortWait_word_infoGain.txt"
+tree_file = "LongWaitTime_trees.txt"
+pattern_extractor = PatternExtractor()
+important_words = pattern_extractor.read_info_gain(word_infogain_file,
+                                                   info_gain_threshold)
+trees = pattern_extractor.load_trees_from_file(tree_file)
 
 # ---- for each parse tree, extract a pattern and all sub-patterns and add them
 # to patternStr_count. Each extracted pattern is a node (with its children),
 # but we store its string representation in patternStr_count.
 
-#for pattern in pattern_extractor.extract_patterns(important_words, trees):
-#    print(pattern)
+for pattern in pattern_extractor.extract_patterns(important_words, trees):
+    print(pattern)

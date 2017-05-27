@@ -1,10 +1,15 @@
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.io.StringReader;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Scanner;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -36,11 +41,11 @@ public class SemgrexClassifierHelper
 		
 		SemanticGraph semanticGraph = new SemanticGraph(parser.predict(tagger.tagSentence(sentence)).typedDependencies());
 		
-		semanticGraphs.put(sentence, semanticGraph);
+		//semanticGraphs.put(sentence, semanticGraph);
 		return semanticGraph;
 	}
 	
-	private void classifyText(String text)
+	private String classifyText(String text)
 	{
 		SemanticGraph semanticGraph;
 		
@@ -64,22 +69,30 @@ public class SemgrexClassifierHelper
 			}
 		}
 		
-		System.out.println(((JSONObject) distribution).toJSONString());
+		return ((JSONObject) distribution).toJSONString();
 	}
 	
-	private void parseText(String text)
+	private String parseText(String text)
 	{
-		ArrayList<String> jsonArray = new ArrayList<String>();
+		List<String> sentences = new ArrayList<String>();
+		String formatted;
 		
 		for(List<HasWord> sentence : new DocumentPreprocessor(new StringReader(text)))
 		{
-			jsonArray.add(buildSemanticGraph(sentence).toFormattedString());
+			formatted = buildSemanticGraph(sentence).toFormattedString().replace("\n", " ");
+			
+			while(formatted.contains("  "))
+			{
+				formatted = formatted.replace("  ", " ");
+			}
+			
+			sentences.add(formatted);
 		}
 		
-		System.out.println(((JSONArray) jsonArray).toJSONString());
+		return JSONArray.toJSONString(sentences);
 	}
 	
-	public void receiveCommand(String json) throws ParseException
+	public String receiveCommand(String json) throws IOException, ParseException
 	{
 		JSONObject jsonObject = (JSONObject) jsonParser.parse(json);
 		
@@ -93,7 +106,7 @@ public class SemgrexClassifierHelper
 			}
 			else if(mode.equals("parse"))
 			{
-				parseText((String) jsonObject.get("text"));
+				return parseText((String) jsonObject.get("text"));
 			}
 			else if(mode.equals("add_pattern"))
 			{
@@ -101,28 +114,32 @@ public class SemgrexClassifierHelper
 			}
 			else if(mode.equals("classify"))
 			{
-				classifyText((String) jsonObject.get("text"));
+				return classifyText((String) jsonObject.get("text"));
 			}
 		}
+		
+		return null;
 	}
 	
-	public static void main(String[] args)
+	public static void main(String[] args) throws IOException, ParseException
 	{
 		SemgrexClassifierHelper semgrexClassifierHelper = new SemgrexClassifierHelper();
-		Scanner scanner = new Scanner(System.in);
-		
-		try
-		{
-			while(true)
-			{
-				semgrexClassifierHelper.receiveCommand(scanner.nextLine());
-			}
-		}
-		catch(Exception e)
-		{
-			e.printStackTrace();
-		}
-		
-		scanner.close();
+		ServerSocket serverSocket = new ServerSocket(9000);
+		Socket clientSocket = serverSocket.accept();
+	    PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
+	    BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+	    String inputLine, outputLine;
+	    
+	    while((inputLine = in.readLine()) != null)
+	    {
+	    	outputLine = semgrexClassifierHelper.receiveCommand(inputLine);
+	    	
+	    	if(outputLine != null)
+	    	{
+	    		out.println(outputLine.replace("\n", "__NEWLINE__"));
+	    	}
+	    }
+	    
+	    serverSocket.close();
 	}
 }
