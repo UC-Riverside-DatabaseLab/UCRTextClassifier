@@ -32,12 +32,13 @@ class HelperCommunicator(object):
 
 class SemgrexClassifier(AbstractTextClassifier):
     def __init__(self, backup_classifier=None, ig_threshold=0,
-                 imbalance_threshold=0.75):
+                 imbalance_threshold=0.75, split_sentences=False):
         self.__backup_classifier = RandomForestTextClassifier(num_jobs=-1) if \
             backup_classifier is None else backup_classifier
         self.__helper = HelperCommunicator()
         self.__ig_threshold = ig_threshold
         self.__imbalance_threshold = imbalance_threshold
+        self.__split_sentences = split_sentences
 
     def classify(self, instance):
         self.__helper.send(json.dumps({"command": "classify",
@@ -67,6 +68,9 @@ class SemgrexClassifier(AbstractTextClassifier):
         classes = []
 
         self.__helper.send(json.dumps({"command": "init"}))
+        self.__helper.send(json.dumps({"command": "split_sentences",
+                                       "value": "true" if
+                                       self.__split_sentences else "false"}))
         self.__backup_classifier.train(data)
 
         for instance in data:
@@ -181,7 +185,7 @@ class SemgrexClassifier(AbstractTextClassifier):
 textDatasetFileParser = TextDatasetFileParser()
 training_set = textDatasetFileParser.parse("./Datasets/ShortWaitTime and LongWaitTime Training.arff")
 test_set = textDatasetFileParser.parse("./Datasets/ShortWaitTime and LongWaitTime Test.arff")
-classifier = SemgrexClassifier(ig_threshold=0.0025)
+classifier = SemgrexClassifier(ig_threshold=0.0025, split_sentences=True)
 
 classifier.train(training_set)
 classifier.evaluate(test_set, verbose=True)

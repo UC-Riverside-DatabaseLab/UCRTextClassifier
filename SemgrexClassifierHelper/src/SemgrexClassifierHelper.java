@@ -7,9 +7,12 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Queue;
+import java.util.function.Predicate;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -17,33 +20,38 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import edu.stanford.nlp.ling.HasWord;
+import edu.stanford.nlp.ling.Word;
+import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
 import edu.stanford.nlp.parser.nndep.DependencyParser;
 import edu.stanford.nlp.process.DocumentPreprocessor;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexPattern;
 import edu.stanford.nlp.tagger.maxent.MaxentTagger;
+import edu.stanford.nlp.trees.Tree;
 
 public class SemgrexClassifierHelper
 {
 	private static final String shutdownCommand = "__SHUTDOWN__";
+	private static final String sbar = "SBAR";
+	private static final Predicate<Tree> predicate = new Predicate<Tree>()
+	{
+		@Override
+		public boolean test(Tree tree)
+		{
+			return !tree.value().equals(sbar);
+		}
+	};
 	private final MaxentTagger tagger = new MaxentTagger("edu/stanford/nlp/models/pos-tagger/english-left3words/english-left3words-distsim.tagger");
 	private final DependencyParser parser = DependencyParser.loadFromModelFile(DependencyParser.DEFAULT_MODEL);
+	private final LexicalizedParser constituencyParser = LexicalizedParser.loadModel();
 	private final JSONParser jsonParser = new JSONParser();
-	private Map<List<HasWord>, SemanticGraph> semanticGraphs = new HashMap<List<HasWord>, SemanticGraph>();
 	private Map<String, Double> distribution = new HashMap<String, Double>();
 	private Map<SemgrexPattern, String> semgrexPatterns;
+	private boolean splitSentences = false;
 	
 	public SemanticGraph buildSemanticGraph(List<HasWord> sentence)
 	{
-		if(semanticGraphs.containsKey(sentence))
-		{
-			return semanticGraphs.get(sentence);
-		}
-		
-		SemanticGraph semanticGraph = new SemanticGraph(parser.predict(tagger.tagSentence(sentence)).typedDependencies());
-		
-		//semanticGraphs.put(sentence, semanticGraph);
-		return semanticGraph;
+		return new SemanticGraph(parser.predict(tagger.tagSentence(sentence)).typedDependencies());
 	}
 	
 	private String classifyText(String text)
@@ -52,7 +60,7 @@ public class SemgrexClassifierHelper
 		
 		distribution.clear();
 		
-		for(List<HasWord> sentence : new DocumentPreprocessor(new StringReader(text)))
+		for(List<HasWord> sentence : splitSentences ? parseSentences(text) : new DocumentPreprocessor(new StringReader(text)))
 		{
 			semanticGraph = buildSemanticGraph(sentence);
 			
@@ -73,12 +81,82 @@ public class SemgrexClassifierHelper
 		return JSONObject.toJSONString(distribution);
 	}
 	
+	private List<Tree> parseClauses(Tree root)
+	{
+		Queue<Tree> queue = new LinkedList<Tree>();
+		List<Tree> trees = new ArrayList<Tree>();
+		String rootValue = root.value();
+		Tree tree;
+		
+		root.setValue("ROOT");
+		queue.add(root);
+		
+		while(!queue.isEmpty())
+		{
+			tree = queue.remove();
+			
+			for(Tree child : tree.children())
+			{
+				if(child.value().equals(sbar))
+				{
+					trees.addAll(parseClauses(child));
+				}
+				else
+				{
+					queue.add(child);
+				}
+			}
+		}
+		
+		tree = root.prune(predicate);
+		
+		if(tree != null && tree.size() > 3)
+		{
+			trees.add(tree.deepCopy());
+		}
+		
+		root.setValue(rootValue);
+		return trees;
+	}
+	
+	private List<List<HasWord>> parseSentences(String text)
+	{
+		List<List<HasWord>> sentences = new ArrayList<List<HasWord>>();
+		StringBuilder stringBuilder = new StringBuilder(text.length());
+		
+		//System.out.println("Original text: " + text);
+		
+		for(List<HasWord> sentence : new DocumentPreprocessor(new StringReader(text)))
+		{
+			for(Tree tree : parseClauses(constituencyParser.apply(sentence)))
+			{
+				stringBuilder.delete(0, stringBuilder.length());
+				
+				for(Word word : tree.yieldWords())
+				{
+					stringBuilder.append(stringBuilder.length() > 0 ? " " : "");
+					stringBuilder.append(word.word());
+				}
+				
+				//System.out.println(stringBuilder.toString());
+				
+				for(List<HasWord> clause : new DocumentPreprocessor(new StringReader(stringBuilder.toString())))
+				{
+					sentences.add(clause);
+				}
+			}
+		}
+		
+		//System.out.println();
+		return sentences;
+	}
+	
 	private String parseText(String text)
 	{
 		List<String> sentences = new ArrayList<String>();
 		String formatted;
 		
-		for(List<HasWord> sentence : new DocumentPreprocessor(new StringReader(text)))
+		for(List<HasWord> sentence : splitSentences ? parseSentences(text) : new DocumentPreprocessor(new StringReader(text)))
 		{
 			formatted = buildSemanticGraph(sentence).toFormattedString().replace("\n", " ");
 			
@@ -106,6 +184,10 @@ public class SemgrexClassifierHelper
 			{
 				semgrexPatterns = new HashMap<SemgrexPattern, String>();
 			}
+			else if(command.equals("split_sentences"))
+			{
+				setSplitSentences(Boolean.parseBoolean((String) jsonObject.get("value")));
+			}
 			else if(command.equals("parse"))
 			{
 				return parseText((String) jsonObject.get("text"));
@@ -127,10 +209,18 @@ public class SemgrexClassifierHelper
 		return null;
 	}
 	
+	public void setSplitSentences(boolean splitSentences)
+	{
+		this.splitSentences = splitSentences;
+	}
+	
 	public static void main(String[] args) throws IOException, ParseException
 	{
+		int port = 9000;
 		SemgrexClassifierHelper semgrexClassifierHelper = new SemgrexClassifierHelper();
-		ServerSocket serverSocket = new ServerSocket(9000);
+		ServerSocket serverSocket = new ServerSocket(port);
+		
+		System.out.println("Listening on port " + port + ".");
 		
 		while(true)
 		{
