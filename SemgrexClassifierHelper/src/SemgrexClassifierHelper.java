@@ -88,7 +88,19 @@ public class SemgrexClassifierHelper
 		String rootValue = root.value();
 		Tree tree;
 		
-		root.setValue("ROOT");
+		for(Tree child : root.children())
+		{
+			if(!child.value().equals(sbar) && !child.value().equals("S"))
+			{
+				queue.add(child);
+			}
+		}
+		
+		while(!queue.isEmpty())
+		{
+			root.removeChild(root.objectIndexOf(queue.remove()));
+		}
+		
 		queue.add(root);
 		
 		while(!queue.isEmpty())
@@ -108,9 +120,11 @@ public class SemgrexClassifierHelper
 			}
 		}
 		
+		root.setValue("ROOT");
+		
 		tree = root.prune(predicate);
 		
-		if(tree != null && tree.size() > 3)
+		if(tree != null)
 		{
 			trees.add(tree.deepCopy());
 		}
@@ -124,11 +138,9 @@ public class SemgrexClassifierHelper
 		List<List<HasWord>> sentences = new ArrayList<List<HasWord>>();
 		StringBuilder stringBuilder = new StringBuilder(text.length());
 		
-		//System.out.println("Original text: " + text);
-		
 		for(List<HasWord> sentence : new DocumentPreprocessor(new StringReader(text)))
 		{
-			for(Tree tree : parseClauses(constituencyParser.apply(sentence)))
+			for(Tree tree : parseClauses(constituencyParser.parse(sentence)))
 			{
 				stringBuilder.delete(0, stringBuilder.length());
 				
@@ -138,8 +150,6 @@ public class SemgrexClassifierHelper
 					stringBuilder.append(word.word());
 				}
 				
-				//System.out.println(stringBuilder.toString());
-				
 				for(List<HasWord> clause : new DocumentPreprocessor(new StringReader(stringBuilder.toString())))
 				{
 					sentences.add(clause);
@@ -147,7 +157,23 @@ public class SemgrexClassifierHelper
 			}
 		}
 		
-		//System.out.println();
+/*		if(sentences.size() > 1)
+		{
+			System.out.println("Original text: " + text);
+			
+			for(List<HasWord> sentence : sentences)
+			{
+				for(HasWord hasWord : sentence)
+				{
+					System.out.print(hasWord.word() + " ");
+				}
+				
+				System.out.println();
+			}
+			
+			System.out.println();
+		}
+		*/
 		return sentences;
 	}
 	
