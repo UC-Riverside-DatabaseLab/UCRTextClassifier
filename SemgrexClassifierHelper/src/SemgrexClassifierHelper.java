@@ -284,6 +284,8 @@ public class SemgrexClassifierHelper
 			case EVALUATE:
 				break;
 			case CLASSIFY:
+				semgrexPatterns = new ArrayList<SemgrexPatternWrapper>(new HashSet<SemgrexPatternWrapper>(semgrexPatterns));
+				
 				Collections.sort(semgrexPatterns);
 				break;
 			default:
@@ -383,7 +385,7 @@ public class SemgrexClassifierHelper
 		}
 	};
 	
-	private class SemgrexPatternWrapper implements Comparable<SemgrexPatternWrapper>
+	public class SemgrexPatternWrapper implements Comparable<SemgrexPatternWrapper>
 	{
 		private SemgrexPattern semgrexPattern;
 		private String classLabel;
@@ -393,6 +395,11 @@ public class SemgrexClassifierHelper
 		{
 			this.semgrexPattern = semgrexPattern;
 			this.classLabel = classLabel;
+		}
+		
+		public boolean equals(SemgrexPatternWrapper semgrexPatternWrapper)
+		{
+			return semgrexPattern.pattern().equals(semgrexPatternWrapper.semgrexPattern.pattern()) && classLabel.equals(semgrexPatternWrapper.getClassLabel());
 		}
 		
 		public boolean find(SemanticGraph semanticGraph)
@@ -446,7 +453,8 @@ public class SemgrexClassifierHelper
 		@Override
 		public int compareTo(SemgrexPatternWrapper semgrexPatternWrapper)
 		{
-			return getAccuracy() < semgrexPatternWrapper.getAccuracy() ? 1 : 0;
+			double accuracyA = getAccuracy(), accuracyB = semgrexPatternWrapper.getAccuracy();
+			return accuracyA < accuracyB ? 1 : accuracyA > accuracyB ? -1 : 0;
 		}
 	}
 }
