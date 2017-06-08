@@ -5,6 +5,9 @@ import subprocess
 from AbstractTextClassifier import AbstractTextClassifier
 from collections import Counter
 from extractPatterns import PatternExtractor
+from nltk import word_tokenize
+from nltk.stem.snowball import EnglishStemmer
+from PPDBDatasetBalancer import PPDBDatasetBalancer
 from RandomForestTextClassifier import RandomForestTextClassifier
 from sklearn.feature_extraction.text import CountVectorizer
 from TextDatasetFileParser import Instance, TextDatasetFileParser
@@ -31,19 +34,52 @@ class HelperCommunicator(object):
 
 
 class SemgrexClassifier(AbstractTextClassifier):
-    def __init__(self, backup_classifier=None, ig_threshold=0,
-                 imbalance_threshold=0.75, split_sentences=False):
+    def __init__(self, backup_classifier=None, generate_patterns=True,
+                 paraphrase_arguments=None, imbalance_threshold=0.75,
+                 ig_threshold=0, split_sentences=False, use_stemming=False):
         self.__backup_classifier = RandomForestTextClassifier(num_jobs=-1) if \
             backup_classifier is None else backup_classifier
-        self.__helper = HelperCommunicator()
-        self.__ig_threshold = ig_threshold
+        self.__generate_patterns = generate_patterns
+        self.__helper = HelperCommunicator() if generate_patterns else None
         self.__imbalance_threshold = imbalance_threshold
+        self.__ig_threshold = ig_threshold
         self.__split_sentences = split_sentences
+        self.__stemmer = EnglishStemmer() if use_stemming else None
+
+        if paraphrase_arguments is not None and \
+                "host" in paraphrase_arguments and \
+                "database" in paraphrase_arguments and \
+                "user" in paraphrase_arguments and \
+                "password" in paraphrase_arguments:
+            host = paraphrase_arguments["host"]
+            database = paraphrase_arguments["database"]
+            user = paraphrase_arguments["user"]
+            password = paraphrase_arguments["password"]
+            threshold = paraphrase_arguments["threshold"] \
+                if "threshold" in paraphrase_arguments else 4
+            input_range = paraphrase_arguments["input_range"] \
+                if "input_range" in paraphrase_arguments else (2, 3)
+            ig = paraphrase_arguments["ig_threshold"] \
+                if "ig_threshold" in paraphrase_arguments else 0.01
+            self.__ppdb = PPDBDatasetBalancer(host, database, user, password,
+                                              threshold=threshold,
+                                              input_range=input_range,
+                                              ig_threshold=ig)
+        else:
+            self.__ppdb = None
 
     def classify(self, instance):
-        self.__helper.send(json.dumps({"command": "classify",
-                                       "text": instance.text}))
-        distribution = json.loads(self.__helper.receive())
+        distribution = {}
+
+        if self.__generate_patterns:
+            payload = {"command": "classify",
+                       "text": self.__stem_text(instance.text)}
+
+            self.__helper.send(json.dumps(payload))
+
+            distribution = json.loads(self.__helper.receive())
+            distribution = self._normalize_distribution(distribution)
+
         return distribution if len(distribution) > 0 else \
             self.__backup_classifier.classify(instance)
 
@@ -63,15 +99,36 @@ class SemgrexClassifier(AbstractTextClassifier):
 
         return entropy
 
+    def __stem_text(self, text):
+        if self.__stemmer is None:
+            return text
+
+        stemmed_text = ""
+
+        for word in word_tokenize(text):
+            stemmed_text += (" " if len(stemmed_text) > 0 else
+                             "") + self.__stemmer.stem(word)
+
+        return stemmed_text
+
     def train(self, data):
+        if self.__ppdb is not None:
+            data = data + self.__ppdb.balance(data)
+
+        # self.__backup_classifier.train(TextDatasetFileParser().parse("./Datasets/ShortWaitTime and LongWaitTime Training.arff"))
+        self.__backup_classifier.train(data)
+
+        if not self.__generate_patterns:
+            return
+
         pattern_extractor = PatternExtractor()
         classes = []
 
-        self.__helper.send(json.dumps({"command": "init"}))
+        self.__helper.send(json.dumps({"command": "set_mode",
+                                       "mode": "train"}))
         self.__helper.send(json.dumps({"command": "split_sentences",
                                        "value": "true" if
                                        self.__split_sentences else "false"}))
-        self.__backup_classifier.train(data)
 
         for instance in data:
             classes.append(instance.class_value)
@@ -113,8 +170,9 @@ class SemgrexClassifier(AbstractTextClassifier):
                                                    "class": str(class_value)}))
         else:
             ig_words = []
+            trees = []
 
-            for word in self.__top_information_gain_words(binary_data):
+            for word in self.__top_information_gain_words(data):
                 ig_words += [word]
 
             for class_value in classes:
@@ -131,6 +189,17 @@ class SemgrexClassifier(AbstractTextClassifier):
                     self.__helper.send(json.dumps({"command": "add_pattern",
                                                    "pattern": pattern,
                                                    "class": str(class_value)}))
+
+        self.__helper.send(json.dumps({"command": "set_mode",
+                                       "mode": "evaluate"}))
+
+        for instance in data:
+            self.__helper.send(json.dumps({"command": "test",
+                                           "text": instance.text,
+                                           "class": str(class_value)}))
+
+        self.__helper.send(json.dumps({"command": "set_mode",
+                                       "mode": "classify"}))
 
     def __top_information_gain_words(self, data):
         vectorizer = CountVectorizer(stop_words="english")
@@ -182,10 +251,28 @@ class SemgrexClassifier(AbstractTextClassifier):
         return top_words
 
 
+training_file = "./Datasets/ShortWaitTime and LongWaitTime Training.arff"
+phrases = "./Datasets/ShortWaitTime and LongWaitTime Phrases.csv"
+test_file = "./Datasets/ShortWaitTime and LongWaitTime Test.arff"
 textDatasetFileParser = TextDatasetFileParser()
-training_set = textDatasetFileParser.parse("./Datasets/ShortWaitTime and LongWaitTime Training.arff")
-test_set = textDatasetFileParser.parse("./Datasets/ShortWaitTime and LongWaitTime Test.arff")
-classifier = SemgrexClassifier(ig_threshold=0.0025, split_sentences=True)
+training_set = textDatasetFileParser.parse(training_file)
+phrases = textDatasetFileParser.parse(phrases)
+test_set = textDatasetFileParser.parse(test_file)
+paraphrase_arguments = {"host": "localhost", "database": "PPDB",
+                        "user": "rriva002", "password": "passwd"}
+classifier = SemgrexClassifier(generate_patterns=True, ig_threshold=0.0025,
+                               paraphrase_arguments=None,
+                               split_sentences=False, use_stemming=False,
+                               imbalance_threshold=0.75)
 
+phrase_training_set = []
+
+for instance in phrases:
+    for training_instance in training_set:
+        if training_instance.text.find(instance.text) >= 0:
+            phrase_training_set.append(instance)
+            break
+
+# classifier.train(phrase_training_set)
 classifier.train(training_set)
 classifier.evaluate(test_set, verbose=True)

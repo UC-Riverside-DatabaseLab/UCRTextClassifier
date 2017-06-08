@@ -5,13 +5,17 @@ import java.io.PrintWriter;
 import java.io.StringReader;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Queue;
+import java.util.Set;
 import java.util.function.Predicate;
 
 import org.json.simple.JSONArray;
@@ -31,23 +35,47 @@ import edu.stanford.nlp.trees.Tree;
 
 public class SemgrexClassifierHelper
 {
-	private static final String shutdownCommand = "__SHUTDOWN__";
+	public static enum Mode{INIT, TRAIN, EVALUATE, CLASSIFY};
+	public static final String addPatternCommand = "add_pattern";
+	public static final String classifyCommand = "classify";
+	public static final String endCommand = "end";
+	public static final String parseCommand = "parse";
+	public static final String setModeCommand = "set_mode";
+	public static final String splitSentencesCommand = "split_sentences";
+	public static final String testCommand = "test";
+	private static final String shutdownToken = "__SHUTDOWN__";
 	private static final String sbar = "SBAR";
-	private static final Predicate<Tree> predicate = new Predicate<Tree>()
-	{
-		@Override
-		public boolean test(Tree tree)
-		{
-			return !tree.value().equals(sbar);
-		}
-	};
 	private final MaxentTagger tagger = new MaxentTagger("edu/stanford/nlp/models/pos-tagger/english-left3words/english-left3words-distsim.tagger");
 	private final DependencyParser parser = DependencyParser.loadFromModelFile(DependencyParser.DEFAULT_MODEL);
 	private final LexicalizedParser constituencyParser = LexicalizedParser.loadModel();
 	private final JSONParser jsonParser = new JSONParser();
+	private final Map<Mode, Set<String>> validCommands = new HashMap<Mode, Set<String>>(Mode.values().length);
 	private Map<String, Double> distribution = new HashMap<String, Double>();
-	private Map<SemgrexPattern, String> semgrexPatterns;
+	private List<SemgrexPatternWrapper> semgrexPatterns;
+	private Mode mode = Mode.INIT;
 	private boolean splitSentences = false;
+	
+	public SemgrexClassifierHelper()
+	{
+		validCommands.put(Mode.INIT, new HashSet<String>());
+		validCommands.put(Mode.TRAIN, new HashSet<String>());
+		validCommands.put(Mode.EVALUATE, new HashSet<String>());
+		validCommands.put(Mode.CLASSIFY, new HashSet<String>());
+		validCommands.get(Mode.INIT).add(endCommand);
+		validCommands.get(Mode.INIT).add(setModeCommand);
+		validCommands.get(Mode.INIT).add(splitSentencesCommand);
+		validCommands.get(Mode.TRAIN).add(addPatternCommand);
+		validCommands.get(Mode.TRAIN).add(endCommand);
+		validCommands.get(Mode.TRAIN).add(parseCommand);
+		validCommands.get(Mode.TRAIN).add(setModeCommand);
+		validCommands.get(Mode.TRAIN).add(splitSentencesCommand);
+		validCommands.get(Mode.EVALUATE).add(endCommand);
+		validCommands.get(Mode.EVALUATE).add(setModeCommand);
+		validCommands.get(Mode.EVALUATE).add(testCommand);
+		validCommands.get(Mode.CLASSIFY).add(classifyCommand);
+		validCommands.get(Mode.CLASSIFY).add(endCommand);
+		validCommands.get(Mode.CLASSIFY).add(setModeCommand);
+	}
 	
 	public SemanticGraph buildSemanticGraph(List<HasWord> sentence)
 	{
@@ -64,16 +92,28 @@ public class SemgrexClassifierHelper
 		{
 			semanticGraph = buildSemanticGraph(sentence);
 			
-			for(Entry<SemgrexPattern, String> entry : semgrexPatterns.entrySet())
+			for(SemgrexPatternWrapper semgrexPatternWrapper : semgrexPatterns)
 			{
-				if(entry.getKey().matcher(semanticGraph).find())
+				if(semgrexPatternWrapper.find(semanticGraph))
 				{
-					if(!distribution.containsKey(entry.getValue()))
+					/*if(!distribution.containsKey(semgrexPatternWrapper.getClassLabel()))
 					{
-						distribution.put(entry.getValue(), 0.0);
+						distribution.put(semgrexPatternWrapper.getClassLabel(), 0.0);
 					}
 					
-					distribution.put(entry.getValue(), distribution.get(entry.getValue()) + 1.0);
+					distribution.put(semgrexPatternWrapper.getClassLabel(), distribution.get(semgrexPatternWrapper.getClassLabel()) + 1.0);*/
+					
+					for(Entry<String, Double> entry : semgrexPatternWrapper.distribution.entrySet())
+					{
+						if(!distribution.containsKey(entry.getKey()))
+						{
+							distribution.put(entry.getKey(), 0.0);
+						}
+						
+						distribution.put(entry.getKey(), distribution.get(entry.getKey()) + entry.getValue());
+					}
+					
+					break;
 				}
 			}
 		}
@@ -206,38 +246,97 @@ public class SemgrexClassifierHelper
 		{
 			String command = (String) jsonObject.get(commandString);
 			
-			if(command.equals("init"))
+			if(validCommands.get(mode).contains(command))
 			{
-				semgrexPatterns = new HashMap<SemgrexPattern, String>();
-			}
-			else if(command.equals("split_sentences"))
-			{
-				setSplitSentences(Boolean.parseBoolean((String) jsonObject.get("value")));
-			}
-			else if(command.equals("parse"))
-			{
-				return parseText((String) jsonObject.get("text"));
-			}
-			else if(command.equals("add_pattern"))
-			{
-				semgrexPatterns.put(SemgrexPattern.compile((String) jsonObject.get("pattern")), (String) jsonObject.get("class"));
-			}
-			else if(command.equals("classify"))
-			{
-				return classifyText((String) jsonObject.get("text"));
-			}
-			else if(command.equals("end"))
-			{
-				return shutdownCommand;
+				if(command.equals(addPatternCommand))
+				{
+					semgrexPatterns.add(new SemgrexPatternWrapper(SemgrexPattern.compile((String) jsonObject.get("pattern")), (String) jsonObject.get("class")));
+				}
+				else if(command.equals(classifyCommand))
+				{
+					return classifyText((String) jsonObject.get("text"));
+				}
+				else if(command.equals(endCommand))
+				{
+					return shutdownToken;
+				}
+				else if(command.equals(parseCommand))
+				{
+					return parseText((String) jsonObject.get("text"));
+				}
+				else if(command.equals(setModeCommand))
+				{
+					setMode((String) jsonObject.get("mode"));
+				}
+				else if(command.equals(splitSentencesCommand))
+				{
+					setSplitSentences(Boolean.parseBoolean((String) jsonObject.get("value")));
+				}
+				else if(command.equals(testCommand))
+				{
+					testSemgrexPatterns((String) jsonObject.get("text"), (String) jsonObject.get("class"));
+				}
 			}
 		}
 		
 		return null;
 	}
 	
+	public void setMode(Mode mode)
+	{
+		this.mode = mode;
+		
+		switch(mode)
+		{
+			case INIT:
+				break;
+			case TRAIN:
+				semgrexPatterns = new ArrayList<SemgrexPatternWrapper>();
+				break;
+			case EVALUATE:
+				break;
+			case CLASSIFY:
+				Collections.sort(semgrexPatterns);
+				break;
+			default:
+				break;
+		}
+	}
+	
+	public void setMode(String modeValue)
+	{
+		if(modeValue.equals("train"))
+		{
+			setMode(Mode.TRAIN);
+		}
+		else if(modeValue.equals("evaluate"))
+		{
+			setMode(Mode.EVALUATE);
+		}
+		else if(modeValue.equals("classify"))
+		{
+			setMode(Mode.CLASSIFY);
+		}
+	}
+	
 	public void setSplitSentences(boolean splitSentences)
 	{
 		this.splitSentences = splitSentences;
+	}
+	
+	private void testSemgrexPatterns(String text, String classLabel)
+	{
+		SemanticGraph semanticGraph;
+		
+		for(List<HasWord> sentence : splitSentences ? parseSentences(text) : new DocumentPreprocessor(new StringReader(text)))
+		{
+			semanticGraph = buildSemanticGraph(sentence);
+			
+			for(SemgrexPatternWrapper semgrexPatternWrapper : semgrexPatterns)
+			{
+				semgrexPatternWrapper.test(semanticGraph, classLabel);
+			}
+		}
 	}
 	
 	public static void main(String[] args) throws IOException, ParseException
@@ -255,24 +354,107 @@ public class SemgrexClassifierHelper
 		    BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 		    String inputLine, outputLine;
 		    
-		    while((inputLine = in.readLine()) != null)
+		    try
 		    {
-		    	outputLine = semgrexClassifierHelper.receiveCommand(inputLine);
+			    while((inputLine = in.readLine()) != null)
+			    {
+			    	outputLine = semgrexClassifierHelper.receiveCommand(inputLine);
+			    	
+			    	if(outputLine != null)
+			    	{
+			    		if(outputLine.equals(shutdownToken))
+			    		{
+			    			clientSocket.close();
+			    			serverSocket.close();
+			    			return;
+			    		}
+			    		
+			    		out.println(outputLine.replace("\n", "__NEWLINE__"));
+			    	}
+			    }
+		    }
+		    catch(SocketException socketException)
+		    {
 		    	
-		    	if(outputLine != null)
-		    	{
-		    		if(outputLine.equals(shutdownCommand))
-		    		{
-		    			clientSocket.close();
-		    			serverSocket.close();
-		    			return;
-		    		}
-		    		
-		    		out.println(outputLine.replace("\n", "__NEWLINE__"));
-		    	}
 		    }
 		    
 		    clientSocket.close();
+		}
+	}
+	
+	private static final Predicate<Tree> predicate = new Predicate<Tree>()
+	{
+		@Override
+		public boolean test(Tree tree)
+		{
+			return !tree.value().equals(sbar);
+		}
+	};
+	
+	private class SemgrexPatternWrapper implements Comparable<SemgrexPatternWrapper>
+	{
+		private SemgrexPattern semgrexPattern;
+		private String classLabel;
+		private Map<String, Double> distribution = new HashMap<String, Double>();
+		
+		public SemgrexPatternWrapper(SemgrexPattern semgrexPattern, String classLabel)
+		{
+			this.semgrexPattern = semgrexPattern;
+			this.classLabel = classLabel;
+		}
+		
+		public boolean find(SemanticGraph semanticGraph)
+		{
+			return semgrexPattern.matcher(semanticGraph).find();
+		}
+		
+		public double getAccuracy()
+		{
+			if(distribution.size() > 0)
+			{
+				double sum = 0.0;
+				
+				for(Double d : distribution.values())
+				{
+					sum += d;
+				}
+				
+				if(sum > 0.0)
+				{
+					for(String label : distribution.keySet())
+					{
+						distribution.put(label, distribution.get(label) / sum);
+					}
+				}
+				
+				return distribution.containsKey(classLabel) ? distribution.get(classLabel) / sum : 0.0;
+			}
+			
+			return 0.0;
+		}
+		
+		public String getClassLabel()
+		{
+			return classLabel;
+		}
+		
+		public void test(SemanticGraph semanticGraph, String classLabel)
+		{
+			if(find(semanticGraph))
+			{
+				if(!distribution.containsKey(classLabel))
+				{
+					distribution.put(classLabel, 0.0);
+				}
+				
+				distribution.put(classLabel, distribution.get(classLabel) + 1.0);
+			}
+		}
+
+		@Override
+		public int compareTo(SemgrexPatternWrapper semgrexPatternWrapper)
+		{
+			return getAccuracy() < semgrexPatternWrapper.getAccuracy() ? 1 : 0;
 		}
 	}
 }
