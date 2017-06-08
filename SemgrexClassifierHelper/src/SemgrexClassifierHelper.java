@@ -13,7 +13,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -288,8 +287,10 @@ public class SemgrexClassifierHelper
 				Collections.sort(semgrexPatterns);
 				break;
 			default:
-				break;
+				return;
 		}
+		
+		System.out.println("Mode set to " + mode.toString() + ".");
 	}
 	
 	public void setMode(String modeValue)
@@ -343,6 +344,8 @@ public class SemgrexClassifierHelper
 		    BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 		    String inputLine, outputLine;
 		    
+		    System.out.println("Connected to " + clientSocket.getInetAddress().getHostAddress() + ".");
+		    
 		    try
 		    {
 			    while((inputLine = in.readLine()) != null)
@@ -364,7 +367,7 @@ public class SemgrexClassifierHelper
 		    }
 		    catch(SocketException socketException)
 		    {
-		    	
+		    	System.out.println("Disconnected from client.");
 		    }
 		    
 		    clientSocket.close();
