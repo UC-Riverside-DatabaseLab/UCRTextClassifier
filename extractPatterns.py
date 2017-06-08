@@ -569,7 +569,7 @@ class PatternExtractor(object):
         sub_tree = self.get_sub_tree(root_clone, important_words)
         if sub_tree is None or len(sub_tree.children) == 0:
             # no important word found, or there is only one node in subtree
-            return
+            return patterns
 
         # now pattern_tree's words are replaced by word_suffix and hence
         # repeated words become unique. suffx is __i where i is a number
