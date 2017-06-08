@@ -96,23 +96,12 @@ public class SemgrexClassifierHelper
 			{
 				if(semgrexPatternWrapper.find(semanticGraph))
 				{
-					/*if(!distribution.containsKey(semgrexPatternWrapper.getClassLabel()))
+					if(!distribution.containsKey(semgrexPatternWrapper.getClassLabel()))
 					{
 						distribution.put(semgrexPatternWrapper.getClassLabel(), 0.0);
 					}
 					
-					distribution.put(semgrexPatternWrapper.getClassLabel(), distribution.get(semgrexPatternWrapper.getClassLabel()) + 1.0);*/
-					
-					for(Entry<String, Double> entry : semgrexPatternWrapper.distribution.entrySet())
-					{
-						if(!distribution.containsKey(entry.getKey()))
-						{
-							distribution.put(entry.getKey(), 0.0);
-						}
-						
-						distribution.put(entry.getKey(), distribution.get(entry.getKey()) + entry.getValue());
-					}
-					
+					distribution.put(semgrexPatternWrapper.getClassLabel(), distribution.get(semgrexPatternWrapper.getClassLabel()) + 1.0);
 					break;
 				}
 			}
