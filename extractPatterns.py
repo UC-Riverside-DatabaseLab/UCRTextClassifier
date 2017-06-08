@@ -557,51 +557,50 @@ class PatternExtractor(object):
 
             self.create_sub_patterns(sub_tree2, patterns_so_far)
 
-    def extract_patterns(self, important_words, trees):
+    def extract_patterns(self, important_words, tree):
         pattern_str_count = {}
         patterns = []
 
-        for tree in trees:
-            # we clone the original tree, because we are going to change the
-            # clone in place
-            root_clone = self.read_tree(tree).root.clone()
-            # initial prune of the parse tree to obtain only nodes that are
-            # members of important_words
-            sub_tree = self.get_sub_tree(root_clone, important_words)
-            if not sub_tree or len(sub_tree.children) == 0:
-                # no important word found, or there is only one node in subtree
-                continue
+        # we clone the original tree, because we are going to change the
+        # clone in place
+        root_clone = self.read_tree(tree).root.clone()
+        # initial prune of the parse tree to obtain only nodes that are
+        # members of important_words
+        sub_tree = self.get_sub_tree(root_clone, important_words)
+        if sub_tree is None or len(sub_tree.children) == 0:
+            # no important word found, or there is only one node in subtree
+            return
 
-            # now pattern_tree's words are replaced by word_suffix and hence
-            # repeated words become unique. suffx is __i where i is a number
-            # counting up from 1
-            self.add_suffix_to_all_non_star_nodes(sub_tree, [0])
+        # now pattern_tree's words are replaced by word_suffix and hence
+        # repeated words become unique. suffx is __i where i is a number
+        # counting up from 1
+        self.add_suffix_to_all_non_star_nodes(sub_tree, [0])
 
-            important_word_nodes = {}
+        important_word_nodes = {}
 
-            # this will fill word_nodes with data. We want to extract all
-            # important words (plus suffixes) that occur in this tree.
-            sub_tree.get_all_important_word_nodes(important_word_nodes)
+        # this will fill word_nodes with data. We want to extract all
+        # important words (plus suffixes) that occur in this tree.
+        sub_tree.get_all_important_word_nodes(important_word_nodes)
 
-            # words_suffixes are important words plus suffixes.
-            words_suffixes = important_word_nodes.keys()
-            pattern_str_pattern = {}
+        # words_suffixes are important words plus suffixes.
+        words_suffixes = important_word_nodes.keys()
+        pattern_str_pattern = {}
 
-            # this will fill allPatterns
-            self.create_all_patterns_and_sub_patterns(sub_tree, words_suffixes,
-                                                      pattern_str_pattern)
+        # this will fill allPatterns
+        self.create_all_patterns_and_sub_patterns(sub_tree, words_suffixes,
+                                                  pattern_str_pattern)
 
-            for pattern_str in pattern_str_pattern:
-                pattern_node = pattern_str_pattern[pattern_str]
+        for pattern_str in pattern_str_pattern:
+            pattern_node = pattern_str_pattern[pattern_str]
 
-                self.remove_suffixes(pattern_node)
+            self.remove_suffixes(pattern_node)
 
-                new_pattern_str = str(pattern_node)
+            new_pattern_str = str(pattern_node)
 
-                if new_pattern_str not in pattern_str_count:
-                    pattern_str_count[new_pattern_str] = 0
+            if new_pattern_str not in pattern_str_count:
+                pattern_str_count[new_pattern_str] = 0
 
-                pattern_str_count[new_pattern_str] += 1
+            pattern_str_count[new_pattern_str] += 1
 
         # sort patterns by count and return
         for count, pattern in self.sort_dict(pattern_str_count):
@@ -609,6 +608,14 @@ class PatternExtractor(object):
                 patterns.append(pattern[1:-1].replace("  ", " "))
             else:
                 patterns.append(pattern.replace("  ", " "))
+
+        return patterns
+
+    def extract_patterns_from_trees(self, important_words, trees):
+        patterns = []
+
+        for tree in trees:
+            patterns.append(self.extract_patterns(important_words, tree))
 
         return patterns
 

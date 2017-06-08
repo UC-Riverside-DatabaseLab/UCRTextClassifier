@@ -163,19 +163,23 @@ class SemgrexClassifier(AbstractTextClassifier):
                 for word in self.__top_information_gain_words(binary_data):
                     ig_words += [word]
 
-                for pattern in pattern_extractor.extract_patterns(ig_words,
-                                                                  trees):
-                    self.__helper.send(json.dumps({"command": "add_pattern",
-                                                   "pattern": pattern,
-                                                   "class": str(class_value)}))
+                for tree in trees:
+                    for pattern in pattern_extractor.extract_patterns(ig_words,
+                                                                      tree):
+                        payload = {"command": "add_pattern",
+                                   "pattern": pattern,
+                                   "class": str(class_value)}
+
+                        self.__helper.send(json.dumps(payload))
         else:
             ig_words = []
-            trees = []
 
             for word in self.__top_information_gain_words(data):
                 ig_words += [word]
 
             for class_value in classes:
+                trees = []
+
                 for instance in data:
                     if instance.class_value == class_value:
                         self.__helper.send(json.dumps({"command": "parse",
@@ -184,11 +188,14 @@ class SemgrexClassifier(AbstractTextClassifier):
                         for tree in json.loads(self.__helper.receive()):
                             trees += [tree]
 
-                for pattern in pattern_extractor.extract_patterns(ig_words,
-                                                                  trees):
-                    self.__helper.send(json.dumps({"command": "add_pattern",
-                                                   "pattern": pattern,
-                                                   "class": str(class_value)}))
+                for tree in trees:
+                    for pattern in pattern_extractor.extract_patterns(ig_words,
+                                                                      tree):
+                        payload = {"command": "add_pattern",
+                                   "pattern": pattern,
+                                   "class": str(class_value)}
+
+                        self.__helper.send(json.dumps(payload))
 
         self.__helper.send(json.dumps({"command": "set_mode",
                                        "mode": "evaluate"}))
