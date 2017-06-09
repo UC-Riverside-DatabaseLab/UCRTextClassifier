@@ -615,7 +615,7 @@ class PatternExtractor(object):
         patterns = []
 
         for tree in trees:
-            patterns.append(self.extract_patterns(important_words, tree))
+            patterns += self.extract_patterns(important_words, tree)
 
         return patterns
 
