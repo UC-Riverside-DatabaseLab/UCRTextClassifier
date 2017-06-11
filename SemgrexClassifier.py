@@ -14,17 +14,12 @@ from TextDatasetFileParser import Instance, TextDatasetFileParser
 
 
 class NlpService(object):
-    def __init__(self, host="192.168.1.73", port=9000):
+    def __init__(self, host="localhost", port=9000):
         self.__sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         # path = "./SemgrexClassifierHelper/bin/SemgrexClassifierHelper"
 
         # subprocess.Popen(["java", path])
         self.__sock.connect((host, port))
-
-    def __send(self, command, data):
-        data["command"] = command
-
-        self.__sock.send((json.dumps(data) + "\n").encode())
 
     def __receive(self):
         data = ""
@@ -34,11 +29,20 @@ class NlpService(object):
 
         return json.loads(data[0:len(data) - 1].replace("__NEWLINE__", "\n"))
 
+    def __send(self, command, data):
+        data["command"] = command
+
+        self.__sock.send((json.dumps(data) + "\n").encode())
+
     def add_pattern(self, pattern, class_value):
         self.__send("add_pattern", {"pattern": pattern, "class": class_value})
 
     def classify(self, text):
         self.__send("classify", {"text": text})
+        return self.__receive()
+
+    def has_pattern(self, pattern, class_value):
+        self.__send("has_pattern", {"pattern": pattern, "class": class_value})
         return self.__receive()
 
     def parse(self, text):
@@ -49,7 +53,7 @@ class NlpService(object):
         self.__send("set_mode", {"mode": mode})
 
     def set_split_sentences(self, split):
-        self.__send("split_sentences", {"value": "true" if split else "false"})
+        self.__send("split_sentences", {"value": split})
 
     def test(self, text, class_value):
         self.__send("test", {"text": text, "class": class_value})
@@ -59,7 +63,7 @@ class SemgrexClassifier(AbstractTextClassifier):
     def __init__(self, backup_classifier=None, generate_patterns=True,
                  paraphrase_arguments=None, imbalance_threshold=0.75,
                  ig_threshold=0, split_sentences=False, use_stemming=False):
-        self.__backup_classifier = RandomForestTextClassifier(num_jobs=-1) if \
+        self.__backup_classifier = RandomForestTextClassifier() if \
             backup_classifier is None else backup_classifier
         self.__generate_patterns = generate_patterns
         self.__nlp = NlpService() if generate_patterns else None
@@ -224,9 +228,8 @@ class SemgrexClassifier(AbstractTextClassifier):
                 ig_words = self.__top_information_gain_words(binary_data)
 
                 for tree in trees:
-                    for pattern in pattern_extractor.extract_patterns(ig_words,
-                                                                      tree):
-                        self.__nlp.add_pattern(pattern, class_value)
+                    pattern_extractor.extract_patterns(ig_words, tree,
+                                                       class_value, self.__nlp)
         else:
             ig_words = self.__top_information_gain_words(data)
 
@@ -238,9 +241,8 @@ class SemgrexClassifier(AbstractTextClassifier):
                         trees += self.__nlp.parse(instance.text)
 
                 for tree in trees:
-                    for pattern in pattern_extractor.extract_patterns(ig_words,
-                                                                      tree):
-                        self.__nlp.add_pattern(pattern, class_value)
+                    pattern_extractor.extract_patterns(ig_words, tree,
+                                                       class_value, self.__nlp)
 
         self.__nlp.set_mode("evaluate")
 
@@ -266,10 +268,11 @@ phrases = textDatasetFileParser.parse(phrases)
 test_set = textDatasetFileParser.parse(test_file)
 paraphrase_arguments = {"host": "localhost", "database": "PPDB",
                         "user": "rriva002", "password": "passwd"}
-classifier = SemgrexClassifier(generate_patterns=True, ig_threshold=0.0025,
+rf = RandomForestTextClassifier(num_jobs=-1, random_state=10000)
+classifier = SemgrexClassifier(backup_classifier=rf, generate_patterns=True,
+                               imbalance_threshold=0.75, ig_threshold=0.0025,
                                paraphrase_arguments=None,
-                               split_sentences=False, use_stemming=False,
-                               imbalance_threshold=0.75)
+                               split_sentences=False, use_stemming=False)
 
 phrase_training_set = []
 
@@ -279,6 +282,6 @@ for instance in phrases:
             phrase_training_set.append(instance)
             break
 
-# classifier.train_with_phrases(training_set, phrase_training_set)
-classifier.train(training_set)
+classifier.train_with_phrases(training_set, phrase_training_set)
+# classifier.train(training_set)
 classifier.evaluate(test_set, verbose=True)

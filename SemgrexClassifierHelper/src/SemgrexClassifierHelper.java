@@ -19,6 +19,7 @@ import java.util.function.Predicate;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
@@ -38,6 +39,7 @@ public class SemgrexClassifierHelper
 	public static final String addPatternCommand = "add_pattern";
 	public static final String classifyCommand = "classify";
 	public static final String endCommand = "end";
+	public static final String hasPatternCommand = "has_pattern";
 	public static final String parseCommand = "parse";
 	public static final String setModeCommand = "set_mode";
 	public static final String splitSentencesCommand = "split_sentences";
@@ -50,6 +52,7 @@ public class SemgrexClassifierHelper
 	private final JSONParser jsonParser = new JSONParser();
 	private final Map<Mode, Set<String>> validCommands = new HashMap<Mode, Set<String>>(Mode.values().length);
 	private Map<String, Double> distribution = new HashMap<String, Double>();
+	private Map<String, Set<String>> semgrexPatternMap;
 	private List<SemgrexPatternWrapper> semgrexPatterns;
 	private Mode mode = Mode.INIT;
 	private boolean splitSentences = false;
@@ -65,6 +68,7 @@ public class SemgrexClassifierHelper
 		validCommands.get(Mode.INIT).add(splitSentencesCommand);
 		validCommands.get(Mode.TRAIN).add(addPatternCommand);
 		validCommands.get(Mode.TRAIN).add(endCommand);
+		validCommands.get(Mode.TRAIN).add(hasPatternCommand);
 		validCommands.get(Mode.TRAIN).add(parseCommand);
 		validCommands.get(Mode.TRAIN).add(setModeCommand);
 		validCommands.get(Mode.TRAIN).add(splitSentencesCommand);
@@ -238,7 +242,15 @@ public class SemgrexClassifierHelper
 			{
 				if(command.equals(addPatternCommand))
 				{
-					semgrexPatterns.add(new SemgrexPatternWrapper(SemgrexPattern.compile((String) jsonObject.get("pattern")), (String) jsonObject.get("class")));
+					String classValue = (String) jsonObject.get("class");
+					
+					if(!semgrexPatternMap.containsKey(classValue))
+					{
+						semgrexPatternMap.put(classValue, new HashSet<String>());
+					}
+					
+					semgrexPatternMap.get(classValue).add((String) jsonObject.get("pattern"));
+					//semgrexPatterns.add(new SemgrexPatternWrapper(SemgrexPattern.compile((String) jsonObject.get("pattern")), (String) jsonObject.get("class")));
 				}
 				else if(command.equals(classifyCommand))
 				{
@@ -247,6 +259,11 @@ public class SemgrexClassifierHelper
 				else if(command.equals(endCommand))
 				{
 					return shutdownToken;
+				}
+				else if(command.equals(hasPatternCommand))
+				{
+					String classValue = (String) jsonObject.get("class");
+					return JSONValue.toJSONString(semgrexPatternMap.containsKey(classValue) && semgrexPatternMap.get(classValue).contains((String) jsonObject.get("pattern")));
 				}
 				else if(command.equals(parseCommand))
 				{
@@ -258,7 +275,7 @@ public class SemgrexClassifierHelper
 				}
 				else if(command.equals(splitSentencesCommand))
 				{
-					setSplitSentences(Boolean.parseBoolean((String) jsonObject.get("value")));
+					setSplitSentences((Boolean) jsonObject.get("value"));
 				}
 				else if(command.equals(testCommand))
 				{
@@ -279,13 +296,30 @@ public class SemgrexClassifierHelper
 			case INIT:
 				break;
 			case TRAIN:
-				semgrexPatterns = new ArrayList<SemgrexPatternWrapper>();
+				semgrexPatterns = null;
+				semgrexPatternMap = new HashMap<String, Set<String>>();
 				break;
 			case EVALUATE:
+				int count = 0;
+				
+				for(Set<String> set : semgrexPatternMap.values())
+				{
+					count += set.size();
+				}
+				
+				semgrexPatterns = new ArrayList<SemgrexPatternWrapper>(count);
+				
+				for(String classValue : semgrexPatternMap.keySet())
+				{
+					for(String pattern : semgrexPatternMap.get(classValue))
+					{
+						semgrexPatterns.add(new SemgrexPatternWrapper(SemgrexPattern.compile(pattern), classValue));
+					}
+				}
+				
+				semgrexPatternMap = null;
 				break;
 			case CLASSIFY:
-				semgrexPatterns = new ArrayList<SemgrexPatternWrapper>(new HashSet<SemgrexPatternWrapper>(semgrexPatterns));
-				
 				Collections.sort(semgrexPatterns);
 				break;
 			default:
