@@ -250,7 +250,6 @@ public class SemgrexClassifierHelper
 					}
 					
 					semgrexPatternMap.get(classValue).add((String) jsonObject.get("pattern"));
-					//semgrexPatterns.add(new SemgrexPatternWrapper(SemgrexPattern.compile((String) jsonObject.get("pattern")), (String) jsonObject.get("class")));
 				}
 				else if(command.equals(classifyCommand))
 				{

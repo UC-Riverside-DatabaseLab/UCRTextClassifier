@@ -61,15 +61,17 @@ class NlpService(object):
 
 class SemgrexClassifier(AbstractTextClassifier):
     def __init__(self, backup_classifier=None, generate_patterns=True,
-                 paraphrase_arguments=None, imbalance_threshold=0.75,
-                 ig_threshold=0, split_sentences=False, use_stemming=False):
+                 nlp_host="localhost", paraphrase_arguments=None,
+                 imbalance_threshold=0.75, ig_threshold=0,
+                 split_sentences=False, max_iterations=1, use_stemming=False):
         self.__backup_classifier = RandomForestTextClassifier() if \
             backup_classifier is None else backup_classifier
         self.__generate_patterns = generate_patterns
-        self.__nlp = NlpService() if generate_patterns else None
+        self.__nlp = NlpService(host=nlp_host) if generate_patterns else None
         self.__imbalance_threshold = imbalance_threshold
         self.__ig_threshold = ig_threshold
         self.__split_sentences = split_sentences
+        self.__max_iterations = max(1, max_iterations)
         self.__stemmer = EnglishStemmer() if use_stemming else None
 
         if paraphrase_arguments is not None and \
@@ -122,7 +124,7 @@ class SemgrexClassifier(AbstractTextClassifier):
 
         return stemmed_text
 
-    def __top_information_gain_words(self, data):
+    def __top_information_gain_words(self, data, threshold):
         vectorizer = CountVectorizer(stop_words="english")
         text = []
         top_words = []
@@ -166,7 +168,7 @@ class SemgrexClassifier(AbstractTextClassifier):
                 subset_entropy += value_probability * \
                     self.__entropy(sub, class_index)
 
-            if entropy - subset_entropy > self.__ig_threshold:
+            if entropy - subset_entropy > threshold:
                 top_words.append(words[index])
 
         return top_words
@@ -186,19 +188,7 @@ class SemgrexClassifier(AbstractTextClassifier):
         self.__generate_patterns = enable
 
     def train(self, data):
-        if self.__ppdb is not None:
-            data = data + self.__ppdb.balance(data)
-
-        self.__backup_classifier.train(data)
-
-        if not self.__generate_patterns:
-            return
-
-        pattern_extractor = PatternExtractor()
         classes = []
-
-        self.__nlp.set_mode("train")
-        self.__nlp.set_split_sentences(self.__split_sentences)
 
         for instance in data:
             classes.append(instance.class_value)
@@ -207,6 +197,19 @@ class SemgrexClassifier(AbstractTextClassifier):
         most_common = counter.most_common(1)[0][0]
         classes = set(classes)
         num_classes = len(classes)
+
+        if self.__ppdb is not None:
+            data = data + self.__ppdb.balance(data)
+
+        self.__backup_classifier.train(data)
+
+        if not self.__generate_patterns:
+            return
+
+        pattern_extractor = PatternExtractor(self.__nlp, self.__max_iterations)
+
+        self.__nlp.set_mode("train")
+        self.__nlp.set_split_sentences(self.__split_sentences)
 
         if(counter[most_common] / len(data) > self.__imbalance_threshold):
             classes.remove(most_common)
@@ -225,13 +228,19 @@ class SemgrexClassifier(AbstractTextClassifier):
 
                     binary_data.append(Instance(instance.text, binary_class))
 
-                ig_words = self.__top_information_gain_words(binary_data)
+                threshold = self.__ig_threshold[class_value] if \
+                    isinstance(self.__ig_threshold, dict) and class_value in \
+                    self.__ig_threshold else self.__ig_threshold
+                ig_words = self.__top_information_gain_words(binary_data,
+                                                             threshold)
 
                 for tree in trees:
                     pattern_extractor.extract_patterns(ig_words, tree,
-                                                       class_value, self.__nlp)
+                                                       class_value)
         else:
-            ig_words = self.__top_information_gain_words(data)
+            threshold = self.__ig_threshold[self.__ig_threshold.keys()[0]] if \
+                isinstance(self.__ig_threshold, dict) else self.__ig_threshold
+            ig_words = self.__top_information_gain_words(data, threshold)
 
             for class_value in classes:
                 trees = []
@@ -242,7 +251,7 @@ class SemgrexClassifier(AbstractTextClassifier):
 
                 for tree in trees:
                     pattern_extractor.extract_patterns(ig_words, tree,
-                                                       class_value, self.__nlp)
+                                                       class_value)
 
         self.__nlp.set_mode("evaluate")
 
@@ -273,7 +282,6 @@ classifier = SemgrexClassifier(backup_classifier=rf, generate_patterns=True,
                                imbalance_threshold=0.75, ig_threshold=0.0025,
                                paraphrase_arguments=None,
                                split_sentences=False, use_stemming=False)
-
 phrase_training_set = []
 
 for instance in phrases:
@@ -282,6 +290,6 @@ for instance in phrases:
             phrase_training_set.append(instance)
             break
 
-classifier.train_with_phrases(training_set, phrase_training_set)
-# classifier.train(training_set)
+# classifier.train_with_phrases(training_set, phrase_training_set)
+classifier.train(training_set)
 classifier.evaluate(test_set, verbose=True)

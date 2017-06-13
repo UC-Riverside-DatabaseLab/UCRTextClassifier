@@ -76,8 +76,9 @@ class Tree(object):
 
 
 class PatternExtractor(object):
-    def __init__(self):
-        pass
+    def __init__(self, nlp, max_iterations=1):
+        self.__nlp = nlp
+        self.__max_iterations = max_iterations
 
     def __add_suffix_to_all_non_star_nodes(self, node, i_list):
         i = i_list[0]
@@ -115,7 +116,7 @@ class PatternExtractor(object):
         return (s[start:end].strip(), end)
 
     def __create_all_patterns_and_sub_patterns(self, node1, important_words,
-                                               class_value, nlp_service):
+                                               class_value, iterations):
         if len(node1.children) == 0:
             return
 
@@ -126,9 +127,9 @@ class PatternExtractor(object):
         # "neg", so wee keep branches containing a "neg" relation too.
         sub_tree = self.__get_sub_tree(node, important_words)
 
-        if sub_tree:
-            if nlp_service.has_pattern(self.__pattern_to_str(sub_tree),
-                                       class_value):
+        if sub_tree is not None:
+            if self.__nlp.has_pattern(self.__pattern_to_str(sub_tree),
+                                      class_value):
                 return
 
             sub_tree2 = self.__prune_empty_roots(sub_tree)
@@ -140,14 +141,16 @@ class PatternExtractor(object):
 
             pattern = self.__pattern_to_str(sub_tree2)
 
-            if nlp_service.has_pattern(pattern, class_value):
+            if self.__nlp.has_pattern(pattern, class_value):
                 return
 
-            nlp_service.add_pattern(pattern, class_value)
+            self.__nlp.add_pattern(pattern, class_value)
+            self.__create_sub_patterns(sub_tree2, class_value, iterations - 1)
 
-            self.__create_sub_patterns(sub_tree2, class_value, nlp_service)
+    def __create_sub_patterns(self, pattern_tree, class_value, iterations):
+        if iterations <= 0:
+            return
 
-    def __create_sub_patterns(self, pattern_tree, class_value, nlp_service):
         important_word_nodes = {}
 
         # this will fill word_nodes with data
@@ -167,7 +170,7 @@ class PatternExtractor(object):
 
             self.__create_all_patterns_and_sub_patterns(pattern_tree,
                                                         important, class_value,
-                                                        nlp_service)
+                                                        iterations)
 
     def __create_word_combinations(self, words):
         return_list = []
@@ -191,7 +194,7 @@ class PatternExtractor(object):
             for rel, child in node.children:
                 good_child = self.__get_sub_tree(child, important_words)
 
-                if good_child:
+                if good_child is not None:
                     good_children += [(rel, child)]
 
             node.children = good_children
@@ -255,6 +258,8 @@ class PatternExtractor(object):
             self.__make_indir_relations(child)
 
     def __pattern_to_str(self, pattern):
+        pattern = pattern.clone()
+
         self.__remove_suffixes(pattern)
 
         pattern = str(pattern)
@@ -300,7 +305,7 @@ class PatternExtractor(object):
         next_token = self.__peek_next_token(s, position)
 
         if next_token == "[":  # the node we are going to read has children
-            (token, position) = self.__consume_next_token(s, position)
+            token, position = self.__consume_next_token(s, position)
             has_children = True
 
         node_val, position = self.__read_node_val(s, position)
@@ -360,8 +365,7 @@ class PatternExtractor(object):
         for rel, child in node.children:
             self.__remove_suffixes(child)
 
-    def extract_patterns(self, important_words, tree, class_value,
-                         nlp_service):
+    def extract_patterns(self, important_words, tree, class_value):
         # we clone the original tree, because we are going to change the
         # clone in place
         root_clone = self.__read_tree(tree).get_root().clone()
@@ -389,10 +393,10 @@ class PatternExtractor(object):
 
         # this will fill allPatterns
         self.__create_all_patterns_and_sub_patterns(sub_tree, words_suffixes,
-                                                    class_value, nlp_service)
+                                                    class_value,
+                                                    self.__max_iterations)
 
     def extract_patterns_from_trees(self, important_words, trees, class_value,
-                                    nlp_service):
+                                    max_iterations=1):
         for tree in trees:
-            self.extract_patterns(important_words, tree, class_value,
-                                  nlp_service)
+            self.extract_patterns(important_words, tree, class_value)
