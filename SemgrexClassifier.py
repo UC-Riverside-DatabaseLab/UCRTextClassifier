@@ -88,7 +88,7 @@ class SemgrexClassifier(AbstractTextClassifier):
             input_range = paraphrase_arguments["input_range"] \
                 if "input_range" in paraphrase_arguments else (2, 3)
             ig = paraphrase_arguments["ig_threshold"] \
-                if "ig_threshold" in paraphrase_arguments else 0.01
+                if "ig_threshold" in paraphrase_arguments else 0
             self.__ppdb = PPDBDatasetBalancer(host, database, user, password,
                                               threshold=threshold,
                                               input_range=input_range,
@@ -177,8 +177,7 @@ class SemgrexClassifier(AbstractTextClassifier):
         distribution = {}
 
         if self.__generate_patterns:
-            text = self.__stem_text(instance.text)
-            distribution = self.__nlp.classify(text)
+            distribution = self.__nlp.classify(self.__stem_text(instance.text))
             distribution = self._normalize_distribution(distribution)
 
         return distribution if len(distribution) > 0 else \
@@ -220,13 +219,14 @@ class SemgrexClassifier(AbstractTextClassifier):
                 trees = []
 
                 for instance in data:
+                    text = self.__stem_text(instance.text)
+
                     if instance.class_value == class_value:
-                        trees += self.__nlp.parse(instance.text)
+                        trees += self.__nlp.parse(text)
 
-                    binary_class = ("" if instance.class_value == class_value
-                                    else "Not") + str(class_value)
-
-                    binary_data.append(Instance(instance.text, binary_class))
+                        binary_data.append(Instance(text, class_value))
+                    else:
+                        binary_data.append(Instance(text, "Not" + class_value))
 
                 threshold = self.__ig_threshold[class_value] if \
                     isinstance(self.__ig_threshold, dict) and class_value in \
@@ -238,7 +238,8 @@ class SemgrexClassifier(AbstractTextClassifier):
                     pattern_extractor.extract_patterns(ig_words, tree,
                                                        class_value)
         else:
-            threshold = self.__ig_threshold[self.__ig_threshold.keys()[0]] if \
+            least_common = counter.most_common(num_classes)[num_classes - 1][0]
+            threshold = self.__ig_threshold[least_common] if \
                 isinstance(self.__ig_threshold, dict) else self.__ig_threshold
             ig_words = self.__top_information_gain_words(data, threshold)
 
@@ -246,8 +247,10 @@ class SemgrexClassifier(AbstractTextClassifier):
                 trees = []
 
                 for instance in data:
+                    text = self.__stem_text(instance.text)
+
                     if instance.class_value == class_value:
-                        trees += self.__nlp.parse(instance.text)
+                        trees += self.__nlp.parse(text)
 
                 for tree in trees:
                     pattern_extractor.extract_patterns(ig_words, tree,
@@ -276,12 +279,15 @@ training_set = textDatasetFileParser.parse(training_file)
 phrases = textDatasetFileParser.parse(phrases)
 test_set = textDatasetFileParser.parse(test_file)
 paraphrase_arguments = {"host": "localhost", "database": "PPDB",
-                        "user": "rriva002", "password": "passwd"}
+                        "user": "rriva002", "password": "passwd",
+                        "ig_threshold": 0.02}
 rf = RandomForestTextClassifier(num_jobs=-1, random_state=10000)
+ig = {"ShortWaitTime": 0.0025, "LongWaitTime": 0.0035}
 classifier = SemgrexClassifier(backup_classifier=rf, generate_patterns=True,
-                               imbalance_threshold=0.75, ig_threshold=0.0025,
+                               imbalance_threshold=0.75, ig_threshold=ig,
                                paraphrase_arguments=None,
-                               split_sentences=False, use_stemming=False)
+                               split_sentences=False, use_stemming=False,
+                               max_iterations=1)
 phrase_training_set = []
 
 for instance in phrases:
