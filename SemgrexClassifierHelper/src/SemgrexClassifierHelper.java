@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -189,23 +190,6 @@ public class SemgrexClassifierHelper
 			}
 		}
 		
-/*		if(sentences.size() > 1)
-		{
-			System.out.println("Original text: " + text);
-			
-			for(List<HasWord> sentence : sentences)
-			{
-				for(HasWord hasWord : sentence)
-				{
-					System.out.print(hasWord.word() + " ");
-				}
-				
-				System.out.println();
-			}
-			
-			System.out.println();
-		}
-		*/
 		return sentences;
 	}
 	
@@ -300,10 +284,13 @@ public class SemgrexClassifierHelper
 				break;
 			case EVALUATE:
 				int count = 0;
+				Map<String, Integer> classCounts = new HashMap<String, Integer>();
 				
-				for(Set<String> set : semgrexPatternMap.values())
+				for(Entry<String, Set<String>> entry : semgrexPatternMap.entrySet())
 				{
-					count += set.size();
+					classCounts.put(entry.getKey(), entry.getValue().size());
+					
+					count += entry.getValue().size();
 				}
 				
 				semgrexPatterns = new ArrayList<SemgrexPatternWrapper>(count);
@@ -422,7 +409,8 @@ public class SemgrexClassifierHelper
 	{
 		private SemgrexPattern semgrexPattern;
 		private String classLabel;
-		private Map<String, Double> distribution = new HashMap<String, Double>();
+		private Map<String, Double> correct = new HashMap<String, Double>();
+		private Map<String, Double> incorrect = new HashMap<String, Double>();
 		
 		public SemgrexPatternWrapper(SemgrexPattern semgrexPattern, String classLabel)
 		{
@@ -442,27 +430,19 @@ public class SemgrexClassifierHelper
 		
 		public double getAccuracy()
 		{
-			if(distribution.size() > 0)
+			double accuracy = 0.0, correctClass, incorrectClass;
+			Set<String> classes = new HashSet<String>(correct.keySet());
+			
+			classes.addAll(incorrect.keySet());
+			
+			for(String classLabel : classes)
 			{
-				double sum = 0.0;
-				
-				for(Double d : distribution.values())
-				{
-					sum += d;
-				}
-				
-				if(sum > 0.0)
-				{
-					for(String label : distribution.keySet())
-					{
-						distribution.put(label, distribution.get(label) / sum);
-					}
-				}
-				
-				return distribution.containsKey(classLabel) ? distribution.get(classLabel) / sum : 0.0;
+				correctClass = correct.containsKey(classLabel) ? correct.get(classLabel) : 0.0;
+				incorrectClass = incorrect.containsKey(classLabel) ? incorrect.get(classLabel) : 0.0;
+				accuracy += correctClass / (correctClass + incorrectClass);
 			}
 			
-			return 0.0;
+			return accuracy / (double) classes.size();
 		}
 		
 		public String getClassLabel()
@@ -472,14 +452,25 @@ public class SemgrexClassifierHelper
 		
 		public void test(SemanticGraph semanticGraph, String classLabel)
 		{
-			if(find(semanticGraph))
+			boolean matched = find(semanticGraph), sameClass = classLabel.equals(this.classLabel);
+			
+			if((matched && sameClass) || (!matched && !sameClass))
 			{
-				if(!distribution.containsKey(classLabel))
+				if(!correct.containsKey(classLabel))
 				{
-					distribution.put(classLabel, 0.0);
+					correct.put(classLabel, 0.0);
 				}
 				
-				distribution.put(classLabel, distribution.get(classLabel) + 1.0);
+				correct.put(classLabel, correct.get(classLabel) + 1.0);
+			}
+			else
+			{
+				if(!incorrect.containsKey(classLabel))
+				{
+					incorrect.put(classLabel, 0.0);
+				}
+				
+				incorrect.put(classLabel, incorrect.get(classLabel) + 1.0);
 			}
 		}
 

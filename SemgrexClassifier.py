@@ -63,7 +63,7 @@ class SemgrexClassifier(AbstractTextClassifier):
     def __init__(self, backup_classifier=None, generate_patterns=True,
                  nlp_host="localhost", paraphrase_arguments=None,
                  imbalance_threshold=0.75, ig_threshold=0,
-                 split_sentences=False, max_iterations=1, use_stemming=False):
+                 split_sentences=False, max_words=4, use_stemming=False):
         self.__backup_classifier = RandomForestTextClassifier() if \
             backup_classifier is None else backup_classifier
         self.__generate_patterns = generate_patterns
@@ -71,7 +71,7 @@ class SemgrexClassifier(AbstractTextClassifier):
         self.__imbalance_threshold = imbalance_threshold
         self.__ig_threshold = ig_threshold
         self.__split_sentences = split_sentences
-        self.__max_iterations = max(1, max_iterations)
+        self.__max_words = max(1, max_words)
         self.__stemmer = EnglishStemmer() if use_stemming else None
 
         if paraphrase_arguments is not None and \
@@ -205,7 +205,7 @@ class SemgrexClassifier(AbstractTextClassifier):
         if not self.__generate_patterns:
             return
 
-        pattern_extractor = PatternExtractor(self.__nlp, self.__max_iterations)
+        pattern_extractor = PatternExtractor(self.__nlp, self.__max_words)
 
         self.__nlp.set_mode("train")
         self.__nlp.set_split_sentences(self.__split_sentences)
@@ -274,20 +274,22 @@ class SemgrexClassifier(AbstractTextClassifier):
 training_file = "./Datasets/ShortWaitTime and LongWaitTime Training.arff"
 phrases = "./Datasets/ShortWaitTime and LongWaitTime Phrases.csv"
 test_file = "./Datasets/ShortWaitTime and LongWaitTime Test.arff"
+new_short_wait_time = "./Datasets/NewShortWaitTime.arff"
 textDatasetFileParser = TextDatasetFileParser()
 training_set = textDatasetFileParser.parse(training_file)
 phrases = textDatasetFileParser.parse(phrases)
-test_set = textDatasetFileParser.parse(test_file)
+test_set = textDatasetFileParser.parse(test_file) + \
+    textDatasetFileParser.parse(new_short_wait_time)
 paraphrase_arguments = {"host": "localhost", "database": "PPDB",
                         "user": "rriva002", "password": "passwd",
                         "ig_threshold": 0.02}
 rf = RandomForestTextClassifier(num_jobs=-1, random_state=10000)
-ig = {"ShortWaitTime": 0.0025, "LongWaitTime": 0.0035}
+ig = {"ShortWaitTime": 0.003, "LongWaitTime": 0.005}
 classifier = SemgrexClassifier(backup_classifier=rf, generate_patterns=True,
                                imbalance_threshold=0.75, ig_threshold=ig,
                                paraphrase_arguments=None,
-                               split_sentences=False, use_stemming=False,
-                               max_iterations=1)
+                               split_sentences=False, max_words=4,
+                               use_stemming=False)
 phrase_training_set = []
 
 for instance in phrases:

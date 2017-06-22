@@ -1,3 +1,6 @@
+from itertools import combinations
+
+
 class Node(object):
     def __init__(self, node_val):
         self.node_val = node_val
@@ -76,9 +79,9 @@ class Tree(object):
 
 
 class PatternExtractor(object):
-    def __init__(self, nlp, max_iterations=1):
+    def __init__(self, nlp, max_words):
         self.__nlp = nlp
-        self.__max_iterations = max_iterations
+        self.__max_words = max_words
 
     def __add_suffix_to_all_non_star_nodes(self, node, i_list):
         i = i_list[0]
@@ -116,7 +119,7 @@ class PatternExtractor(object):
         return (s[start:end].strip(), end)
 
     def __create_all_patterns_and_sub_patterns(self, node1, important_words,
-                                               class_value, iterations):
+                                               class_value):
         if len(node1.children) == 0:
             return
 
@@ -145,12 +148,9 @@ class PatternExtractor(object):
                 return
 
             self.__nlp.add_pattern(pattern, class_value)
-            self.__create_sub_patterns(sub_tree2, class_value, iterations - 1)
+            self.__create_sub_patterns(sub_tree2, class_value)
 
-    def __create_sub_patterns(self, pattern_tree, class_value, iterations):
-        if iterations <= 0:
-            return
-
+    def __create_sub_patterns(self, pattern_tree, class_value):
         important_word_nodes = {}
 
         # this will fill word_nodes with data
@@ -169,8 +169,7 @@ class PatternExtractor(object):
             important = word_comb
 
             self.__create_all_patterns_and_sub_patterns(pattern_tree,
-                                                        important, class_value,
-                                                        iterations)
+                                                        important, class_value)
 
     def __create_word_combinations(self, words):
         return_list = []
@@ -392,11 +391,11 @@ class PatternExtractor(object):
         words_suffixes = important_word_nodes.keys()
 
         # this will fill allPatterns
-        self.__create_all_patterns_and_sub_patterns(sub_tree, words_suffixes,
-                                                    class_value,
-                                                    self.__max_iterations)
+        for subset in combinations(words_suffixes, min(len(words_suffixes),
+                                                       self.__max_words)):
+            self.__create_all_patterns_and_sub_patterns(sub_tree, subset,
+                                                        class_value)
 
-    def extract_patterns_from_trees(self, important_words, trees, class_value,
-                                    max_iterations=1):
+    def extract_patterns_from_trees(self, important_words, trees, class_value):
         for tree in trees:
             self.extract_patterns(important_words, tree, class_value)
