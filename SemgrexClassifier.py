@@ -37,9 +37,12 @@ class NlpService(object):
     def add_pattern(self, pattern, class_value):
         self.__send("add_pattern", {"pattern": pattern, "class": class_value})
 
-    def classify(self, text):
-        self.__send("classify", {"text": text})
+    def classify(self, text, class_value=None):
+        self.__send("classify", {"text": text, "class": class_value})
         return self.__receive()
+
+    def end(self):
+        self.__send("end", {})
 
     def has_pattern(self, pattern, class_value):
         self.__send("has_pattern", {"pattern": pattern, "class": class_value})
@@ -177,11 +180,16 @@ class SemgrexClassifier(AbstractTextClassifier):
         distribution = {}
 
         if self.__generate_patterns:
-            distribution = self.__nlp.classify(self.__stem_text(instance.text))
+            distribution = self.__nlp.classify(self.__stem_text(instance.text),
+                                               instance.class_value)
             distribution = self._normalize_distribution(distribution)
 
         return distribution if len(distribution) > 0 else \
             self.__backup_classifier.classify(instance)
+
+    def disconnect(self):
+        if self.__nlp is not None:
+            self.__nlp.end()
 
     def set_generate_patterns(self, enable):
         self.__generate_patterns = enable
@@ -196,6 +204,9 @@ class SemgrexClassifier(AbstractTextClassifier):
         most_common = counter.most_common(1)[0][0]
         classes = set(classes)
         num_classes = len(classes)
+
+        for class_value in classes:
+            print(class_value + ": " + str(counter[class_value]))
 
         if self.__ppdb is not None:
             data = data + self.__ppdb.balance(data)
@@ -272,32 +283,35 @@ class SemgrexClassifier(AbstractTextClassifier):
         self.set_generate_patterns(temp)
 
 training_file = "./Datasets/ShortWaitTime and LongWaitTime Training.arff"
-phrases = "./Datasets/ShortWaitTime and LongWaitTime Phrases.csv"
 test_file = "./Datasets/ShortWaitTime and LongWaitTime Test.arff"
-new_short_wait_time = "./Datasets/NewShortWaitTime.arff"
+# training_file = "./Datasets/SUPPORT_TRAIN.arff"
+# test_file = "./Datasets/SUPPORT_TEST.arff"
+# phrases = "./Datasets/ShortWaitTime and LongWaitTime Phrases.csv"
 textDatasetFileParser = TextDatasetFileParser()
 training_set = textDatasetFileParser.parse(training_file)
-phrases = textDatasetFileParser.parse(phrases)
-test_set = textDatasetFileParser.parse(test_file) + \
-    textDatasetFileParser.parse(new_short_wait_time)
+# phrases = textDatasetFileParser.parse(phrases)
+test_set = textDatasetFileParser.parse(test_file)
+test_set += textDatasetFileParser.parse("./Datasets/NewShortWaitTime.arff")
 paraphrase_arguments = {"host": "localhost", "database": "PPDB",
                         "user": "rriva002", "password": "passwd",
-                        "ig_threshold": 0.02}
+                        "ig_threshold": 0.05}
 rf = RandomForestTextClassifier(num_jobs=-1, random_state=10000)
 ig = {"ShortWaitTime": 0.003, "LongWaitTime": 0.005}
+# ig = {"positive": 0.003, "negative": 0.003}
 classifier = SemgrexClassifier(backup_classifier=rf, generate_patterns=True,
-                               imbalance_threshold=0.75, ig_threshold=ig,
+                               imbalance_threshold=0.4, ig_threshold=ig,
                                paraphrase_arguments=None,
                                split_sentences=False, max_words=4,
                                use_stemming=False)
-phrase_training_set = []
+# phrase_training_set = []
 
-for instance in phrases:
-    for training_instance in training_set:
-        if training_instance.text.find(instance.text) >= 0:
-            phrase_training_set.append(instance)
-            break
+#for instance in phrases:
+#    for training_instance in training_set:
+#        if training_instance.text.find(instance.text) >= 0:
+#            phrase_training_set.append(instance)
+#            break
 
 # classifier.train_with_phrases(training_set, phrase_training_set)
 classifier.train(training_set)
 classifier.evaluate(test_set, verbose=True)
+classifier.disconnect()

@@ -361,6 +361,7 @@ class PatternExtractor(object):
         if index > 0:
             word = word[:index]
             node.node_val = (word, pos)
+
         for rel, child in node.children:
             self.__remove_suffixes(child)
 
@@ -379,7 +380,7 @@ class PatternExtractor(object):
         # now pattern_tree's words are replaced by word_suffix and hence
         # repeated words become unique. suffx is __i where i is a number
         # counting up from 1
-        self.__add_suffix_to_all_non_star_nodes(sub_tree, [0])
+        # self.__add_suffix_to_all_non_star_nodes(sub_tree, [0])
 
         important_word_nodes = {}
 

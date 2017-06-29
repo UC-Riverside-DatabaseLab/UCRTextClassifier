@@ -1,4 +1,5 @@
 import java.io.BufferedReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -24,6 +25,7 @@ import org.json.simple.JSONValue;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import au.com.bytecode.opencsv.CSVWriter;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
@@ -45,6 +47,7 @@ public class SemgrexClassifierHelper
 	public static final String setModeCommand = "set_mode";
 	public static final String splitSentencesCommand = "split_sentences";
 	public static final String testCommand = "test";
+	private static final String disconnectToken = "__DISCONNECT__";
 	private static final String shutdownToken = "__SHUTDOWN__";
 	private static final String sbar = "SBAR";
 	private final MaxentTagger tagger = new MaxentTagger("edu/stanford/nlp/models/pos-tagger/english-left3words/english-left3words-distsim.tagger");
@@ -57,6 +60,15 @@ public class SemgrexClassifierHelper
 	private List<SemgrexPatternWrapper> semgrexPatterns;
 	private Mode mode = Mode.INIT;
 	private boolean splitSentences = false;
+	private static final Predicate<Tree> predicate = new Predicate<Tree>()
+	{
+		@Override
+		public boolean test(Tree tree)
+		{
+			return !tree.value().equals(sbar);
+		}
+	};
+	public CSVWriter miclassifiedWriter;
 	
 	public SemgrexClassifierHelper()
 	{
@@ -86,7 +98,7 @@ public class SemgrexClassifierHelper
 		return new SemanticGraph(parser.predict(tagger.tagSentence(sentence)).typedDependencies());
 	}
 	
-	private String classifyText(String text)
+	private String classifyText(String text, String classLabel)
 	{
 		SemanticGraph semanticGraph;
 		
@@ -98,7 +110,7 @@ public class SemgrexClassifierHelper
 			
 			for(SemgrexPatternWrapper semgrexPatternWrapper : semgrexPatterns)
 			{
-				if(semgrexPatternWrapper.find(semanticGraph))
+				if(semgrexPatternWrapper.find(semanticGraph) && verifyMatch(sentence, semgrexPatternWrapper))
 				{
 					if(!distribution.containsKey(semgrexPatternWrapper.getClassLabel()))
 					{
@@ -106,6 +118,13 @@ public class SemgrexClassifierHelper
 					}
 					
 					distribution.put(semgrexPatternWrapper.getClassLabel(), distribution.get(semgrexPatternWrapper.getClassLabel()) + 1.0);
+					
+					if(classLabel != null && !semgrexPatternWrapper.getClassLabel().equals(classLabel))
+					{
+						miclassifiedWriter.writeNext(new String[]{text, semanticGraph.toFormattedString().replace("\n", "").replaceAll("\\s{2,}", " "),
+							semgrexPatternWrapper.toString(), classLabel, semgrexPatternWrapper.getClassLabel()});
+					}
+					
 					break;
 				}
 			}
@@ -237,11 +256,11 @@ public class SemgrexClassifierHelper
 				}
 				else if(command.equals(classifyCommand))
 				{
-					return classifyText((String) jsonObject.get("text"));
+					return classifyText((String) jsonObject.get("text"), (String) jsonObject.get("class"));
 				}
 				else if(command.equals(endCommand))
 				{
-					return shutdownToken;
+					return disconnectToken;
 				}
 				else if(command.equals(hasPatternCommand))
 				{
@@ -307,6 +326,30 @@ public class SemgrexClassifierHelper
 				break;
 			case CLASSIFY:
 				Collections.sort(semgrexPatterns);
+				
+				try
+				{
+					CSVWriter writer = new CSVWriter(new FileWriter("ranked_patterns.csv"));
+					String[] line = new String[]{"Pattern", "Class", "Weighted Accuracy"};
+					
+					writer.writeNext(line);
+					
+					for(SemgrexPatternWrapper semgrexPatternWrapper : semgrexPatterns)
+					{
+						line[0] = semgrexPatternWrapper.toString();
+						line[1] = semgrexPatternWrapper.getClassLabel();
+						line[2] = Double.toString(semgrexPatternWrapper.getAccuracy());
+						
+						writer.writeNext(line);
+					}
+					
+					writer.close();
+				}
+				catch(IOException e)
+				{
+					
+				}
+				
 				break;
 			default:
 				return;
@@ -351,6 +394,31 @@ public class SemgrexClassifierHelper
 		}
 	}
 	
+	private boolean verifyMatch(List<HasWord> sentence, SemgrexPatternWrapper semgrexPatternWrapper)
+	{
+		StringBuilder stringBuilder = new StringBuilder(sentence.size() * 5);
+		String wordToken = "__WORD_TOKEN__";
+		
+		for(HasWord word : sentence)
+		{
+			stringBuilder.append(wordToken).append(word.word()).append(" ");
+		}
+		
+		String sentenceText = stringBuilder.toString();
+		
+		for(String word : semgrexPatternWrapper.getWords())
+		{
+			if(!sentenceText.contains(wordToken + word))
+			{
+				return false;
+			}
+			
+			sentenceText = sentenceText.replaceFirst(wordToken + word, "");
+		}
+		
+		return true;
+	}
+	
 	public static void main(String[] args) throws IOException, ParseException
 	{
 		int port = 9000;
@@ -368,6 +436,9 @@ public class SemgrexClassifierHelper
 		    
 		    System.out.println("Connected to " + clientSocket.getInetAddress().getHostAddress() + ".");
 		    
+		    semgrexClassifierHelper.miclassifiedWriter = new CSVWriter(new FileWriter("misclassified.csv"));
+		    semgrexClassifierHelper.miclassifiedWriter.writeNext(new String[]{"Sentence", "Parse Tree", "Matched Pattern", "Class", "Classified As"});
+		    
 		    try
 		    {
 			    while((inputLine = in.readLine()) != null)
@@ -376,7 +447,11 @@ public class SemgrexClassifierHelper
 			    	
 			    	if(outputLine != null)
 			    	{
-			    		if(outputLine.equals(shutdownToken))
+			    		if(outputLine.equals(disconnectToken))
+			    		{
+			    			break;
+			    		}
+			    		else if(outputLine.equals(shutdownToken))
 			    		{
 			    			clientSocket.close();
 			    			serverSocket.close();
@@ -392,93 +467,8 @@ public class SemgrexClassifierHelper
 		    	System.out.println("Disconnected from client.");
 		    }
 		    
+		    semgrexClassifierHelper.miclassifiedWriter.close();
 		    clientSocket.close();
-		}
-	}
-	
-	private static final Predicate<Tree> predicate = new Predicate<Tree>()
-	{
-		@Override
-		public boolean test(Tree tree)
-		{
-			return !tree.value().equals(sbar);
-		}
-	};
-	
-	public class SemgrexPatternWrapper implements Comparable<SemgrexPatternWrapper>
-	{
-		private SemgrexPattern semgrexPattern;
-		private String classLabel;
-		private Map<String, Double> correct = new HashMap<String, Double>();
-		private Map<String, Double> incorrect = new HashMap<String, Double>();
-		
-		public SemgrexPatternWrapper(SemgrexPattern semgrexPattern, String classLabel)
-		{
-			this.semgrexPattern = semgrexPattern;
-			this.classLabel = classLabel;
-		}
-		
-		public boolean equals(SemgrexPatternWrapper semgrexPatternWrapper)
-		{
-			return semgrexPattern.pattern().equals(semgrexPatternWrapper.semgrexPattern.pattern()) && classLabel.equals(semgrexPatternWrapper.getClassLabel());
-		}
-		
-		public boolean find(SemanticGraph semanticGraph)
-		{
-			return semgrexPattern.matcher(semanticGraph).find();
-		}
-		
-		public double getAccuracy()
-		{
-			double accuracy = 0.0, correctClass, incorrectClass;
-			Set<String> classes = new HashSet<String>(correct.keySet());
-			
-			classes.addAll(incorrect.keySet());
-			
-			for(String classLabel : classes)
-			{
-				correctClass = correct.containsKey(classLabel) ? correct.get(classLabel) : 0.0;
-				incorrectClass = incorrect.containsKey(classLabel) ? incorrect.get(classLabel) : 0.0;
-				accuracy += correctClass / (correctClass + incorrectClass);
-			}
-			
-			return accuracy / (double) classes.size();
-		}
-		
-		public String getClassLabel()
-		{
-			return classLabel;
-		}
-		
-		public void test(SemanticGraph semanticGraph, String classLabel)
-		{
-			boolean matched = find(semanticGraph), sameClass = classLabel.equals(this.classLabel);
-			
-			if((matched && sameClass) || (!matched && !sameClass))
-			{
-				if(!correct.containsKey(classLabel))
-				{
-					correct.put(classLabel, 0.0);
-				}
-				
-				correct.put(classLabel, correct.get(classLabel) + 1.0);
-			}
-			else
-			{
-				if(!incorrect.containsKey(classLabel))
-				{
-					incorrect.put(classLabel, 0.0);
-				}
-				
-				incorrect.put(classLabel, incorrect.get(classLabel) + 1.0);
-			}
-		}
-
-		@Override
-		public int compareTo(SemgrexPatternWrapper semgrexPatternWrapper)
-		{
-			double accuracyA = getAccuracy(), accuracyB = semgrexPatternWrapper.getAccuracy();
-			return accuracyA < accuracyB ? 1 : accuracyA > accuracyB ? -1 : 0;
 		}
 	}
 }
