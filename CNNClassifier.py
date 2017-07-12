@@ -22,6 +22,7 @@ class CNNClassifier(AbstractTextClassifier):
         # Parameters
         # ==================================================
         # Model Hyperparameters
+        tf.flags._global_parser = tf.flags._argparse.ArgumentParser()
         tf.flags.DEFINE_integer("embedding_dim", embedding_dim,
                                 "Dimensionality of character embedding "
                                 "(default: 128)")
@@ -101,7 +102,6 @@ class CNNClassifier(AbstractTextClassifier):
         shuffle_indices = np.random.permutation(np.arange(len(y)))
         x_shuffled = x[shuffle_indices]
         y_shuffled = y[shuffle_indices]
-
         x_train = x_shuffled
         y_train = y_shuffled
 
@@ -109,8 +109,8 @@ class CNNClassifier(AbstractTextClassifier):
         # ==================================================
         with tf.Graph().as_default():
             session_conf = tf.ConfigProto(
-              allow_soft_placement=FLAGS.allow_soft_placement,
-              log_device_placement=FLAGS.log_device_placement)
+                allow_soft_placement=FLAGS.allow_soft_placement,
+                log_device_placement=FLAGS.log_device_placement)
             self.sess = tf.Session(config=session_conf)
             with self.sess.as_default():
                 self.cnn = TextCNN(
@@ -121,9 +121,7 @@ class CNNClassifier(AbstractTextClassifier):
                     filter_sizes=list(map(int, FLAGS.filter_sizes.split(","))),
                     num_filters=FLAGS.num_filters,
                     l2_reg_lambda=FLAGS.l2_reg_lambda,
-                    word2vec=self.w2v,
-                    relu1=False,
-                    relu2=False)
+                    word2vec=self.w2v)
 
             # Define Training procedure
             global_step = tf.Variable(0, name="global_step", trainable=False)
