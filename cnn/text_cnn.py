@@ -33,21 +33,20 @@ class TextCNN(object):
                 values = []
                 for value in word2vec.values():
                     values.append(value)
-                W = tf.Variable(tf.pack(np.array([len(values[0]) * [0]] +
-                                                 values, dtype=np.float32)),
-                                name="W")
+                self.W = tf.Variable(tf.stack(np.array([len(values[0]) * [0]] +
+                                                       values,
+                                                       dtype=np.float32)),
+                                     name="W")
                 embedding_size = len(values[0])
                 vocab_size = len(word2vec.keys()) + 1
             else:
-                with tf.device('/cpu:0'), tf.name_scope("embedding"):
-                    self.W = tf.Variable(tf.random_uniform([vocab_size,
-                                                           embedding_size],
-                                                           -1.0, 1.0),
-                                         name="W")
-                    self.embedded_chars = tf.nn.embedding_lookup(self.W,
-                                                                 self.input_x)
-                    self.embedded_chars_expanded = \
-                        tf.expand_dims(self.embedded_chars, -1)
+                self.W = tf.Variable(tf.random_uniform([vocab_size,
+                                                       embedding_size],
+                                                       -1.0, 1.0),
+                                     name="W")
+            self.embedded_chars = tf.nn.embedding_lookup(self.W, self.input_x)
+            self.embedded_chars_expanded = tf.expand_dims(self.embedded_chars,
+                                                          -1)
 
         # Create a convolution + maxpool layer for each filter size
         pooled_outputs = []

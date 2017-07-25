@@ -60,8 +60,9 @@ class CNNClassifier(AbstractTextClassifier):
         if unlabeled_data is None:
             self.w2v = None
         else:
+            self.w2v = {}
             path = "./models/w2v_" + unlabeled_data[unlabeled_data.rfind("/") +
-                                                    1] + ".model"
+                                                    1:] + ".model"
 
             if Path(path).is_file():
                 word2vec = Word2Vec.load(path)
@@ -70,9 +71,7 @@ class CNNClassifier(AbstractTextClassifier):
 
                 word2vec.save(path)
 
-            self.w2v = {}
-
-            for word in word2vec.vocab:
+            for word in word2vec.wv.vocab:
                 self.w2v[word] = word2vec[word]
 
     def train(self, data):
