@@ -35,7 +35,6 @@ class NlpService(object):
         self.__sock.send((json.dumps(data) + "\n").encode())
 
     def add_pattern(self, pattern, class_value):
-        self.__parsed_text[self.__current_tree].add_pattern(pattern)
         self.__send("add_pattern", {"pattern": pattern, "class": class_value})
 
     def classify(self, text, class_value=None):
