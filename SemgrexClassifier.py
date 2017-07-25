@@ -267,7 +267,6 @@ class SemgrexClassifier(AbstractTextClassifier):
                                                              threshold)
 
                 for tree in trees:
-                    self.__nlp.set_current_tree(tree)
                     pattern_extractor.extract_patterns(ig_words, tree,
                                                        class_value)
         else:
@@ -286,7 +285,6 @@ class SemgrexClassifier(AbstractTextClassifier):
                         trees += self.__nlp.parse(text)
 
                 for tree in trees:
-                    self.__nlp.set_current_tree(tree)
                     pattern_extractor.extract_patterns(ig_words, tree,
                                                        class_value)
 
