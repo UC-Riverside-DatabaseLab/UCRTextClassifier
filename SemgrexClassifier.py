@@ -35,6 +35,7 @@ class NlpService(object):
         self.__sock.send((json.dumps(data) + "\n").encode())
 
     def add_pattern(self, pattern, class_value):
+        self.__parsed_text[self.__current_tree].add_pattern(pattern)
         self.__send("add_pattern", {"pattern": pattern, "class": class_value})
 
     def classify(self, text, class_value=None):
@@ -62,12 +63,32 @@ class NlpService(object):
         self.__send("test", {"text": text, "class": class_value})
 
 
+class DefaultRuleClassifier(AbstractTextClassifier):
+    def __init__(self):
+        self.__default_distribution = {}
+
+    def classify(self, data):
+        return self.__default_distribution
+
+    def train(self, data):
+        classes = []
+
+        for instance in data:
+            classes.append(instance.class_value)
+
+        most_common = Counter(classes).most_common(1)[0][0]
+
+        for class_label in set(classes):
+            self.__default_distribution[class_label] = 1 if \
+                class_label == most_common else 0
+
+
 class SemgrexClassifier(AbstractTextClassifier):
     def __init__(self, backup_classifier=None, generate_patterns=True,
                  nlp_host="localhost", paraphrase_arguments=None,
                  imbalance_threshold=0.75, ig_threshold=0,
                  split_sentences=False, max_words=4, use_stemming=False):
-        self.__backup_classifier = RandomForestTextClassifier() if \
+        self.__backup_classifier = DefaultRuleClassifier() if \
             backup_classifier is None else backup_classifier
         self.__generate_patterns = generate_patterns
         self.__nlp = NlpService(host=nlp_host) if generate_patterns else None
@@ -246,6 +267,7 @@ class SemgrexClassifier(AbstractTextClassifier):
                                                              threshold)
 
                 for tree in trees:
+                    self.__nlp.set_current_tree(tree)
                     pattern_extractor.extract_patterns(ig_words, tree,
                                                        class_value)
         else:
@@ -264,6 +286,7 @@ class SemgrexClassifier(AbstractTextClassifier):
                         trees += self.__nlp.parse(text)
 
                 for tree in trees:
+                    self.__nlp.set_current_tree(tree)
                     pattern_extractor.extract_patterns(ig_words, tree,
                                                        class_value)
 
@@ -274,44 +297,23 @@ class SemgrexClassifier(AbstractTextClassifier):
 
         self.__nlp.set_mode("classify")
 
-    def train_with_phrases(self, data, phrase_data):
-        temp = self.__generate_patterns
-
-        self.train(phrase_data)
-        self.set_generate_patterns(False)
-        self.train(data)
-        self.set_generate_patterns(temp)
-
 training_file = "./Datasets/ShortWaitTime and LongWaitTime Training.arff"
 test_file = "./Datasets/ShortWaitTime and LongWaitTime Test.arff"
-# training_file = "./Datasets/SUPPORT_TRAIN.arff"
-# test_file = "./Datasets/SUPPORT_TEST.arff"
-# phrases = "./Datasets/ShortWaitTime and LongWaitTime Phrases.csv"
 textDatasetFileParser = TextDatasetFileParser()
 training_set = textDatasetFileParser.parse(training_file)
-# phrases = textDatasetFileParser.parse(phrases)
 test_set = textDatasetFileParser.parse(test_file)
 test_set += textDatasetFileParser.parse("./Datasets/NewShortWaitTime.arff")
 paraphrase_arguments = {"host": "localhost", "database": "PPDB",
                         "user": "rriva002", "password": "passwd",
-                        "ig_threshold": 0.05}
+                        "ig_threshold": 0.08, "threshold": 3}
 rf = RandomForestTextClassifier(num_jobs=-1, random_state=10000)
 ig = {"ShortWaitTime": 0.003, "LongWaitTime": 0.005}
-# ig = {"positive": 0.003, "negative": 0.003}
 classifier = SemgrexClassifier(backup_classifier=rf, generate_patterns=True,
                                imbalance_threshold=0.4, ig_threshold=ig,
                                paraphrase_arguments=None,
                                split_sentences=False, max_words=4,
                                use_stemming=False)
-# phrase_training_set = []
 
-#for instance in phrases:
-#    for training_instance in training_set:
-#        if training_instance.text.find(instance.text) >= 0:
-#            phrase_training_set.append(instance)
-#            break
-
-# classifier.train_with_phrases(training_set, phrase_training_set)
 classifier.train(training_set)
 classifier.evaluate(test_set, verbose=True)
 classifier.disconnect()
