@@ -6,6 +6,7 @@ from RegexClassifier import RegexClassifier
 from Word2VecSimilarity import Word2VecSimilarity
 from AbstractTextClassifier import AbstractTextClassifier
 from RandomForestTextClassifier import RandomForestTextClassifier
+from TextDatasetFileParser import TextDatasetFileParser
 
 
 class VotingMethod(Enum):
@@ -52,11 +53,14 @@ class EnsembleTextClassifier(AbstractTextClassifier):
         self.voting_method = voting_method
         self.weight_penalty = weight_penalty
 
-        if unlabeled_data:
+        if unlabeled_data is not None:
             self.classifiers.append(Word2VecSimilarity(unlabeled_data))
 
             if not doc2vec_dir:
+                file_parser = TextDatasetFileParser()
+                unlabeled_data = file_parser.parse_unlabeled(unlabeled_data)
                 d2v = DocVecClassifier(unlabeled_data=unlabeled_data)
+
                 self.classifiers.append(d2v)
 
         if doc2vec_dir:

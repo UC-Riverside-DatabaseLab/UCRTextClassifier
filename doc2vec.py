@@ -142,7 +142,7 @@ class DocVecClassifier(AbstractTextClassifier):
             for epoch in range(num_epoch):
                 np.random.shuffle(line_documents)
 
-                model.train(line_documents)
+                model.train(line_documents, total_examples=len(line_documents))
                 current_epoch_time = default_timer()
                 logger.debug("Model {} finished epoch {} in {} s".format(name,
                              epoch, current_epoch_time - previous_epoch_time))
