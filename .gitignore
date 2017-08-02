@@ -6,3 +6,4 @@ models/
 models/dm_concat
 Datasets/review_text.txt
 *.class
+runs/
