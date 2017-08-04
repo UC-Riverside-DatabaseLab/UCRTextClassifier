@@ -4,6 +4,8 @@ import re
 import tensorflow as tf
 import time
 from AbstractTextClassifier import AbstractTextClassifier
+from gensim.models.word2vec import Word2Vec, LineSentence
+from pathlib import Path
 from tensorflow.contrib.learn import preprocessing
 
 
@@ -13,7 +15,7 @@ class CNNClassifier(AbstractTextClassifier):
                  l2_reg_lambda=0.0, batch_size=64, num_epochs=200,
                  evaluate_every=100, checkpoint_every=100, num_checkpoints=5,
                  allow_soft_placement=True, log_device_placement=False,
-                 random_state=10):
+                 random_state=10, unlabeled_data=None):
         self.__dev_sample_percentage = dev_sample_percentage
         self.__embedding_dim = embedding_dim
         self.__filter_sizes = filter_sizes
@@ -34,6 +36,23 @@ class CNNClassifier(AbstractTextClassifier):
         self.__checkpoint_dir = None
         self.__graph = None
         self.__sess = None
+
+        if unlabeled_data is None:
+            self.__w2v = None
+        else:
+            self.__w2v = {}
+            path = "./models/w2v_" + unlabeled_data[unlabeled_data.rfind("/") +
+                                                    1:] + ".model"
+
+            if Path(path).is_file():
+                word2vec = Word2Vec.load(path)
+            else:
+                word2vec = Word2Vec(LineSentence(unlabeled_data))
+
+                word2vec.save(path)
+
+            for word in word2vec.wv.vocab:
+                self.__w2v[word] = word2vec[word]
 
     def __batch_iter(self, data, batch_size, num_epochs, shuffle=True):
         data = np.array(data)
@@ -88,7 +107,18 @@ class CNNClassifier(AbstractTextClassifier):
         string = re.sub(r"\)", " \) ", string)
         string = re.sub(r"\?", " \? ", string)
         string = re.sub(r"\s{2,}", " ", string)
-        return string.strip().lower()
+        string = string.strip().lower()
+
+        if self.__w2v is not None:
+            outstring = []
+
+            for w in string.split(" "):
+                if w in self.__w2v.keys():
+                    outstring.append(w)
+
+            return " ".join(outstring)
+
+        return string
 
     def __complete_training(self):
         checkpoint_file = tf.train.latest_checkpoint(self.__checkpoint_dir)
@@ -192,7 +222,8 @@ class CNNClassifier(AbstractTextClassifier):
                               embedding_size=self.__flags.embedding_dim,
                               filter_sizes=list(map(int, filter_sizes)),
                               num_filters=self.__flags.num_filters,
-                              l2_reg_lambda=self.__flags.l2_reg_lambda)
+                              l2_reg_lambda=self.__flags.l2_reg_lambda,
+                              word2vec=self.__w2v)
                 global_step = tf.Variable(0, name="global_step",
                                           trainable=False)
                 optimizer = tf.train.AdamOptimizer(1e-3)
@@ -310,7 +341,8 @@ class CNNClassifier(AbstractTextClassifier):
 
 class TextCNN(object):
     def __init__(self, sequence_length, num_classes, vocab_size,
-                 embedding_size, filter_sizes, num_filters, l2_reg_lambda=0.0):
+                 embedding_size, filter_sizes, num_filters, l2_reg_lambda=0.0,
+                 word2vec=None):
         self.input_x = tf.placeholder(tf.int32, [None, sequence_length],
                                       name="input_x")
         self.input_y = tf.placeholder(tf.float32, [None, num_classes],
@@ -320,10 +352,22 @@ class TextCNN(object):
         l2_loss = tf.constant(0.0)
 
         with tf.device('/cpu:0'), tf.name_scope("embedding"):
-            self.W = tf.Variable(tf.random_uniform([vocab_size,
-                                                    embedding_size], -1.0,
-                                                   1.0),
-                                 name="W")
+            if word2vec is None:
+                shape = [vocab_size, embedding_size]
+                initial_value = tf.random_uniform(shape, -1.0, 1.0)
+                self.W = tf.Variable(initial_value, name="W")
+            else:
+                values = []
+
+                for value in word2vec.values():
+                    values.append(value)
+
+                embedding_size = len(values[0])
+                stack_values = np.array([embedding_size * [0]] + values,
+                                        dtype=np.float32)
+                initial_value = tf.stack(stack_values)
+                self.W = tf.Variable(initial_value, name="W")
+
             self.embedded_chars = tf.nn.embedding_lookup(self.W, self.input_x)
             self.embedded_chars_expanded = tf.expand_dims(self.embedded_chars,
                                                           -1)
