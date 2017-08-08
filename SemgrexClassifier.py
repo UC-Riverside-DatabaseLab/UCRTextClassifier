@@ -294,6 +294,7 @@ class SemgrexClassifier(AbstractTextClassifier):
 
         self.__nlp.set_mode("classify")
 
+
 training_file = "./Datasets/ShortWaitTime and LongWaitTime Training.arff"
 test_file = "./Datasets/ShortWaitTime and LongWaitTime Test.arff"
 textDatasetFileParser = TextDatasetFileParser()
@@ -304,7 +305,14 @@ paraphrase_arguments = {"host": "localhost", "database": "PPDB",
                         "user": "rriva002", "password": "passwd",
                         "ig_threshold": 0.08, "threshold": 3}
 rf = RandomForestTextClassifier(num_jobs=-1, random_state=10000)
-ig = {"ShortWaitTime": 0.003, "LongWaitTime": 0.005}
+ig = {"EasyToMakeAppointment":     0.0007, "HardToMakeAppointment": 0.001,
+      "GoodBedsideManner":         0.008,  "BadBedsideManner":      0.004,
+      "GoodMedicalSkills":         0.001,  "BadMedicalSkills":      0.002,
+      "GoodStaff":                 0.003,  "BadStaff":              0.004,
+      "LongVisitTime":             0.0003, "ShortVisitTime":        0.0002,
+      "LowCost":                   0.0004, "HighCost":              0.004,
+      "PromoteInformationSharing": 0.005,  "NoInformationSharing":  0.0005,
+      "ShortWaitTime":             0.003,  "LongWaitTime":          0.005}
 classifier = SemgrexClassifier(backup_classifier=rf, generate_patterns=True,
                                imbalance_threshold=0.4, ig_threshold=ig,
                                paraphrase_arguments=None,
