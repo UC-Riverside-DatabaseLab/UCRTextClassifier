@@ -135,19 +135,11 @@ class DocVecClassifier(AbstractTextClassifier):
                      .format(default_timer() - start_time))
 
         # Train doc2vec models
-        start_time = default_timer()
-        previous_epoch_time = default_timer()
         for name, model in self.name_to_models.items():
             logger.debug("Training doc2vec using model {} . . .".format(name))
-            for epoch in range(num_epoch):
-                np.random.shuffle(line_documents)
-
-                model.train(line_documents, total_examples=len(line_documents))
-                current_epoch_time = default_timer()
-                logger.debug("Model {} finished epoch {} in {} s".format(name,
-                             epoch, current_epoch_time - previous_epoch_time))
-                previous_epoch_time = current_epoch_time
-
+            np.random.shuffle(line_documents)
+            model.train(line_documents, total_examples=len(line_documents),
+                        epochs=num_epoch)
             logger.debug("most similar to \"great\": {}".format(
                     model.most_similar(positive=["great"])))
 
