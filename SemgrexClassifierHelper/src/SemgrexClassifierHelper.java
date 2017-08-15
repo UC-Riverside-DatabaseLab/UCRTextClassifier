@@ -1,5 +1,4 @@
 import java.io.BufferedReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -25,7 +24,6 @@ import org.json.simple.JSONValue;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import au.com.bytecode.opencsv.CSVWriter;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
@@ -68,7 +66,6 @@ public class SemgrexClassifierHelper
 			return !tree.value().equals(sbar);
 		}
 	};
-	public CSVWriter miclassifiedWriter;
 	
 	public SemgrexClassifierHelper()
 	{
@@ -118,13 +115,6 @@ public class SemgrexClassifierHelper
 					}
 					
 					distribution.put(semgrexPatternWrapper.getClassLabel(), distribution.get(semgrexPatternWrapper.getClassLabel()) + 1.0);
-					
-					if(classLabel != null && !semgrexPatternWrapper.getClassLabel().equals(classLabel))
-					{
-						miclassifiedWriter.writeNext(new String[]{text, semanticGraph.toFormattedString().replace("\n", "").replaceAll("\\s{2,}", " "),
-							semgrexPatternWrapper.toString(), classLabel, semgrexPatternWrapper.getClassLabel()});
-					}
-					
 					break;
 				}
 			}
@@ -326,30 +316,6 @@ public class SemgrexClassifierHelper
 				break;
 			case CLASSIFY:
 				Collections.sort(semgrexPatterns);
-				
-				try
-				{
-					CSVWriter writer = new CSVWriter(new FileWriter("ranked_patterns.csv"));
-					String[] line = new String[]{"Pattern", "Class", "Weighted Accuracy"};
-					
-					writer.writeNext(line);
-					
-					for(SemgrexPatternWrapper semgrexPatternWrapper : semgrexPatterns)
-					{
-						line[0] = semgrexPatternWrapper.toString();
-						line[1] = semgrexPatternWrapper.getClassLabel();
-						line[2] = Double.toString(semgrexPatternWrapper.getAccuracy());
-						
-						writer.writeNext(line);
-					}
-					
-					writer.close();
-				}
-				catch(IOException e)
-				{
-					
-				}
-				
 				break;
 			default:
 				return;
@@ -436,9 +402,6 @@ public class SemgrexClassifierHelper
 		    
 		    System.out.println("Connected to " + clientSocket.getInetAddress().getHostAddress() + ".");
 		    
-		    semgrexClassifierHelper.miclassifiedWriter = new CSVWriter(new FileWriter("misclassified.csv"));
-		    semgrexClassifierHelper.miclassifiedWriter.writeNext(new String[]{"Sentence", "Parse Tree", "Matched Pattern", "Class", "Classified As"});
-		    
 		    try
 		    {
 			    while((inputLine = in.readLine()) != null)
@@ -467,7 +430,6 @@ public class SemgrexClassifierHelper
 		    	System.out.println("Disconnected from client.");
 		    }
 		    
-		    semgrexClassifierHelper.miclassifiedWriter.close();
 		    clientSocket.close();
 		}
 	}
