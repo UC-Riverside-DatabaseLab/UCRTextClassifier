@@ -85,14 +85,14 @@ class DefaultRuleClassifier(AbstractTextClassifier):
 class SemgrexClassifier(AbstractTextClassifier):
     def __init__(self, backup_classifier=None, generate_patterns=True,
                  nlp_host="localhost", paraphrase_arguments=None,
-                 imbalance_threshold=0.75, ig_threshold=0,
+                 imbalance_threshold=0.75, num_words=10,
                  split_sentences=False, max_words=4, use_stemming=False):
         self.__backup_classifier = DefaultRuleClassifier() if \
             backup_classifier is None else backup_classifier
         self.__generate_patterns = generate_patterns
         self.__nlp = NlpService(host=nlp_host) if generate_patterns else None
         self.__imbalance_threshold = imbalance_threshold
-        self.__ig_threshold = ig_threshold
+        self.__num_words = num_words
         self.__split_sentences = split_sentences
         self.__max_words = max(1, max_words)
         self.__stemmer = EnglishStemmer() if use_stemming else None
@@ -147,9 +147,10 @@ class SemgrexClassifier(AbstractTextClassifier):
 
         return stemmed_text
 
-    def __top_information_gain_words(self, data, threshold):
+    def __top_information_gain_words(self, data, top_k):
         vectorizer = CountVectorizer(stop_words="english")
         text = []
+        ig_values = []
         top_words = []
         word_frequencies = {}
 
@@ -191,8 +192,14 @@ class SemgrexClassifier(AbstractTextClassifier):
                 subset_entropy += value_probability * \
                     self.__entropy(sub, class_index)
 
-            if entropy - subset_entropy > threshold:
-                top_words.append(words[index])
+            ig_values.append((words[index], entropy - subset_entropy))
+
+        ig_values.sort(key=lambda word: word[1], reverse=True)
+
+        limit = min(top_k, len(ig_values)) if top_k > 0 else len(ig_values)
+
+        for i in range(0, limit):
+            top_words.append(ig_values[i][0])
 
         return top_words
 
@@ -259,20 +266,20 @@ class SemgrexClassifier(AbstractTextClassifier):
                     else:
                         binary_data.append(Instance(text, "Not" + class_value))
 
-                threshold = self.__ig_threshold[class_value] if \
-                    isinstance(self.__ig_threshold, dict) and class_value in \
-                    self.__ig_threshold else self.__ig_threshold
+                num_words = self.__num_words[class_value] if \
+                    isinstance(self.__num_words, dict) and class_value in \
+                    self.__num_words else self.__num_words
                 ig_words = self.__top_information_gain_words(binary_data,
-                                                             threshold)
+                                                             num_words)
 
                 for tree in trees:
                     pattern_extractor.extract_patterns(ig_words, tree,
                                                        class_value)
         else:
             least_common = counter.most_common(num_classes)[num_classes - 1][0]
-            threshold = self.__ig_threshold[least_common] if \
-                isinstance(self.__ig_threshold, dict) else self.__ig_threshold
-            ig_words = self.__top_information_gain_words(data, threshold)
+            num_words = self.__num_words[least_common] if \
+                isinstance(self.__num_words, dict) else self.__num_words
+            ig_words = self.__top_information_gain_words(data, num_words)
 
             for class_value in classes:
                 trees = []
@@ -299,22 +306,24 @@ training_file = "./Datasets/ShortWaitTime and LongWaitTime Training.arff"
 test_file = "./Datasets/ShortWaitTime and LongWaitTime Test.arff"
 textDatasetFileParser = TextDatasetFileParser()
 training_set = textDatasetFileParser.parse(training_file)
+# test_set = training_set[int(len(training_set) * 0.8):]
+# training_set = training_set[0:int(len(training_set) * 0.8)]
 test_set = textDatasetFileParser.parse(test_file)
 test_set += textDatasetFileParser.parse("./Datasets/NewShortWaitTime.arff")
 paraphrase_arguments = {"host": "localhost", "database": "PPDB",
                         "user": "rriva002", "password": "passwd",
                         "ig_threshold": 0.08, "threshold": 3}
 rf = RandomForestTextClassifier(num_jobs=-1, random_state=10000)
-ig = {"EasyToMakeAppointment":     0.0007, "HardToMakeAppointment": 0.001,
-      "GoodBedsideManner":         0.008,  "BadBedsideManner":      0.004,
-      "GoodMedicalSkills":         0.001,  "BadMedicalSkills":      0.002,
-      "GoodStaff":                 0.003,  "BadStaff":              0.004,
-      "LongVisitTime":             0.0003, "ShortVisitTime":        0.0002,
-      "LowCost":                   0.0004, "HighCost":              0.004,
-      "PromoteInformationSharing": 0.005,  "NoInformationSharing":  0.0005,
-      "ShortWaitTime":             0.003,  "LongWaitTime":          0.005}
+num_words = {"EasyToMakeAppointment":     100, "HardToMakeAppointment":  50,
+             "GoodBedsideManner":          50, "BadBedsideManner":       50,
+             "GoodMedicalSkills":         200, "BadMedicalSkills":      250,
+             "GoodStaff":                 400, "BadStaff":               10,
+             "LongVisitTime":             150, "ShortVisitTime":        150,
+             "LowCost":                    50, "HighCost":              100,
+             "PromoteInformationSharing": 300, "NoInformationSharing":   20,
+             "ShortWaitTime":              20, "LongWaitTime":           50}
 classifier = SemgrexClassifier(backup_classifier=rf, generate_patterns=True,
-                               imbalance_threshold=0.4, ig_threshold=ig,
+                               imbalance_threshold=0.4, num_words=num_words,
                                paraphrase_arguments=None,
                                split_sentences=False, max_words=4,
                                use_stemming=False)
