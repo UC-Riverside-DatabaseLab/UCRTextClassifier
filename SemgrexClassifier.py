@@ -3,6 +3,7 @@ import math
 import socket
 # import subprocess
 from AbstractTextClassifier import AbstractTextClassifier
+from CNNClassifier import CNNClassifier
 from collections import Counter
 from extractPatterns import PatternExtractor
 from nltk import word_tokenize
@@ -313,7 +314,8 @@ test_set += textDatasetFileParser.parse("./Datasets/NewShortWaitTime.arff")
 paraphrase_arguments = {"host": "localhost", "database": "PPDB",
                         "user": "rriva002", "password": "passwd",
                         "ig_threshold": 0.08, "threshold": 3}
-rf = RandomForestTextClassifier(num_jobs=-1, random_state=10000)
+# rf = RandomForestTextClassifier(num_jobs=-1, random_state=10000)
+# cnn = CNNClassifier(unlabeled_data="./Datasets/review_text.txt")
 num_words = {"EasyToMakeAppointment":     100, "HardToMakeAppointment":  50,
              "GoodBedsideManner":          50, "BadBedsideManner":       50,
              "GoodMedicalSkills":         200, "BadMedicalSkills":      250,
@@ -322,7 +324,20 @@ num_words = {"EasyToMakeAppointment":     100, "HardToMakeAppointment":  50,
              "LowCost":                    50, "HighCost":              100,
              "PromoteInformationSharing": 300, "NoInformationSharing":   20,
              "ShortWaitTime":              20, "LongWaitTime":           50}
-classifier = SemgrexClassifier(backup_classifier=rf, generate_patterns=True,
+# num_words = {"positive": 2, "negative": 5}      # Battery
+# num_words = {"positive": 100, "negative": 100}  # Company
+# num_words = {"positive": 100, "negative": 150}  # Display
+# num_words = {"positive": 20, "negative": 200}   # Keyboard
+# num_words = {"positive": 200, "negative": 300}  # Laptop
+# num_words = {"positive": 50, "negative": 100}   # Mouse
+# num_words = {"positive": 200, "negative": 20}   # Software
+# num_words = {"positive": 100, "negative": 50}   # Support
+# num_words = {"positive": 2, "negative": 200}    # Ambience
+# num_words = {"positive": 50, "negative": 100}   # Drinks
+# num_words = {"positive": 500, "negative": 50}   # Food
+# num_words = {"positive": 100, "negative": 200}  # Restaurant
+# num_words = {"positive": 100, "negative": 200}  # Service
+classifier = SemgrexClassifier(backup_classifier=None, generate_patterns=True,
                                imbalance_threshold=0.4, num_words=num_words,
                                paraphrase_arguments=None,
                                split_sentences=False, max_words=4,
