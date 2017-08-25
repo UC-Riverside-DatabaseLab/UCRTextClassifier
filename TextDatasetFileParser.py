@@ -7,25 +7,23 @@ class Instance(object):
     Constructor arguments:
     text - Text data string
     class_value - The class of the text data
-    weight - The weight of the text data
+    weight (default 1) - The weight of the text data
+    values (default []) - A list of non-text values
     """
-    def __init__(self, text, class_value, weight=1):
+    def __init__(self, text, class_value, weight=1, values=[]):
         self.text = text
         self.class_value = class_value
         self.weight = weight
+        self.values = values
 
 
 class TextDatasetFileParser(object):
     """Reader for text dataset files.
 
     Constructor arguments:
-    merge_extra_columns (default False) - If True, columns between the first
-    and the class attribute column in .arff files are concatenated to the first
-    column, separated by a comma. Otherwise, they're ignored.
     verbose (default False) - If True, print each line of the file as it's read
     """
-    def __init__(self, merge_extra_columns=False, verbose=False):
-        self.merge_extra_columns = merge_extra_columns
+    def __init__(self, verbose=False):
         self.verbose = verbose
 
     def parse(self, filename, delimiter=",", quotechar='"'):
@@ -65,20 +63,33 @@ class TextDatasetFileParser(object):
         return dataset
 
     def __parse_arff_file(self, filename):
-        parsing_data = False
         dataset = []
 
         with open(filename, newline="", errors="ignore") as file:
             reader = csv.reader(file, quotechar="'")
+            parsing_data = False
+            attributes = []
 
             for line in reader:
                 length = len(line)
-                weight = 1
 
                 if not parsing_data and length > 0 and \
                         line[0].upper() == "@DATA":
                     parsing_data = True
+                elif not parsing_data and length > 0 and \
+                        line[0].upper().startswith("@ATTRIBUTE"):
+                    if length > 1 or line[0].find("{") > 0:
+                        data_type = "nominal"
+                    else:
+                        data_type = line[0][line[0].rfind(" ") + 1:].lower()
+
+                    attributes.append(data_type)
+
                 elif parsing_data and length > 0:
+                    text = ""
+                    weight = 1
+                    values = []
+
                     if self.verbose:
                         print(line)
 
@@ -87,16 +98,22 @@ class TextDatasetFileParser(object):
 
                         if line[length - 1].startswith("{") and \
                                 line[length - 1].endswith("}"):
-                            weight = float(line[2][1:len(line[2]) - 1])
+                            weight = line[length - 1]
+                            weight = float(weight[1:len(weight) - 1])
                             weighted = True
 
-                        if self.merge_extra_columns:
-                            for i in range(1, length - (2 if weighted else 1)):
-                                line[0] += "," + line[i]
+                        for i in range(0, length - (2 if weighted else 1)):
+                            attribute = attributes[i]
+                            value = line[i]
 
-                            line[1] = line[length - (2 if weighted else 1)]
+                            if attribute == "string" or attribute == "nominal":
+                                text += (" " if len(text) > 0 else "") + value
+                            else:
+                                values.append(float(value))
 
-                    dataset.append(Instance(line[0], line[1], weight))
+                        label = line[length - (2 if weighted else 1)]
+
+                    dataset.append(Instance(text, label, weight, values))
 
         return dataset
 
