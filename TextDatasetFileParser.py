@@ -79,9 +79,13 @@ class TextDatasetFileParser(object):
                 elif not parsing_data and length > 0 and \
                         line[0].upper().startswith("@ATTRIBUTE"):
                     if length > 1 or line[0].find("{") > 0:
-                        data_type = "nominal"
+                        data_type = "NOMINAL"
                     else:
-                        data_type = line[0][line[0].rfind(" ") + 1:].lower()
+                        line[0] = line[0].strip()
+                        data_type = line[0][line[0].rfind(" ") + 1:].upper()
+
+                    if self.verbose:
+                        print("Attribute: " + data_type)
 
                     attributes.append(data_type)
 
@@ -106,7 +110,7 @@ class TextDatasetFileParser(object):
                             attribute = attributes[i]
                             value = line[i]
 
-                            if attribute == "string" or attribute == "nominal":
+                            if attribute == "STRING" or attribute == "NOMINAL":
                                 text += (" " if len(text) > 0 else "") + value
                             else:
                                 values.append(float(value))

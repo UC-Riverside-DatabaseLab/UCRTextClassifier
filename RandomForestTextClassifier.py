@@ -32,29 +32,29 @@ class RandomForestTextClassifier(AbstractTextClassifier):
             return (stemmer.stem(word) for word in analyzer(text))
 
         if tf_idf:
-            self.vectorizer = TfidfVectorizer(ngram_range=ngram_range,
-                                              min_df=min_df,
-                                              max_features=max_word_features,
-                                              stop_words="english",
-                                              analyzer=stemmed_words)
+            self.__vectorizer = TfidfVectorizer(ngram_range=ngram_range,
+                                                min_df=min_df,
+                                                max_features=max_word_features,
+                                                stop_words="english",
+                                                analyzer=stemmed_words)
         else:
-            self.vectorizer = CountVectorizer(ngram_range=ngram_range,
-                                              min_df=min_df,
-                                              max_features=max_word_features,
-                                              stop_words="english",
-                                              analyzer=stemmed_words)
-        self.random_forest = RandomForestClassifier(num_trees, criterion,
-                                                    max_depth,
-                                                    min_samples_split,
-                                                    min_samples_leaf,
-                                                    min_weight_fraction_leaf,
-                                                    max_features,
-                                                    max_leaf_nodes,
-                                                    min_impurity_split,
-                                                    bootstrap, oob_score,
-                                                    num_jobs, random_state,
-                                                    verbose, warm_start,
-                                                    class_weight)
+            self.__vectorizer = CountVectorizer(ngram_range=ngram_range,
+                                                min_df=min_df,
+                                                max_features=max_word_features,
+                                                stop_words="english",
+                                                analyzer=stemmed_words)
+        self.__random_forest = RandomForestClassifier(num_trees, criterion,
+                                                      max_depth,
+                                                      min_samples_split,
+                                                      min_samples_leaf,
+                                                      min_weight_fraction_leaf,
+                                                      max_features,
+                                                      max_leaf_nodes,
+                                                      min_impurity_split,
+                                                      bootstrap, oob_score,
+                                                      num_jobs, random_state,
+                                                      verbose, warm_start,
+                                                      class_weight)
 
     def train(self, data):
         training_data = []
@@ -66,18 +66,27 @@ class RandomForestTextClassifier(AbstractTextClassifier):
             training_labels.append(instance.class_value)
             training_weights.append(instance.weight)
 
-        self.random_forest.fit(self.vectorizer.fit_transform(training_data),
-                               np.array(training_labels),
-                               np.array(training_weights))
+        training_data = self.__vectorizer.fit_transform(training_data)
+
+        for i in range(0, len(data)):
+            if len(data[i].values) > 0:
+                training_data[i] += np.array(data[i].values)
+
+        self.__random_forest.fit(training_data, np.array(training_labels),
+                                 np.array(training_weights))
 
     def classify(self, instance):
         distribution = {}
-        test_data = self.vectorizer.transform([instance.text])
-        ordered_distribution = self.random_forest.predict_proba(test_data)
+        test_data = self.__vectorizer.transform([instance.text])
+
+        if len(instance.values) > 0:
+            test_data += np.array(instance.values)
+
+        ordered_distribution = self.__random_forest.predict_proba(test_data)
 
         for i in range(0, len(ordered_distribution[0])):
             if ordered_distribution[0, i] > 0:
-                class_value = self.random_forest.classes_[i]
+                class_value = self.__random_forest.classes_[i]
                 distribution[class_value] = ordered_distribution[0, i]
 
         return distribution
