@@ -1,5 +1,6 @@
 import numpy as np
 from nltk.stem.snowball import EnglishStemmer
+from scipy.sparse import hstack
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from AbstractTextClassifier import AbstractTextClassifier
@@ -58,11 +59,13 @@ class RandomForestTextClassifier(AbstractTextClassifier):
 
     def train(self, data):
         training_data = []
+        training_values = []
         training_labels = []
         training_weights = []
 
         for instance in data:
             training_data.append(instance.text)
+            training_values.append(instance.values)
             training_labels.append(instance.class_value)
             training_weights.append(instance.weight)
 
@@ -84,9 +87,6 @@ class RandomForestTextClassifier(AbstractTextClassifier):
 
         ordered_distribution = self.__random_forest.predict_proba(test_data)
 
-        for i in range(0, len(ordered_distribution[0])):
-            if ordered_distribution[0, i] > 0:
                 class_value = self.__random_forest.classes_[i]
-                distribution[class_value] = ordered_distribution[0, i]
 
         return distribution
