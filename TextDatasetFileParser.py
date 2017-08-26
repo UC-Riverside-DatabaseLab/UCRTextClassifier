@@ -24,7 +24,7 @@ class TextDatasetFileParser(object):
     verbose (default False) - If True, print each line of the file as it's read
     """
     def __init__(self, verbose=False):
-        self.verbose = verbose
+        self.__verbose = verbose
 
     def parse(self, filename, delimiter=",", quotechar='"'):
         """Read an ARFF or CSV file containing a dataset. ARFF files should be
@@ -66,56 +66,69 @@ class TextDatasetFileParser(object):
         dataset = []
 
         with open(filename, newline="", errors="ignore") as file:
-            reader = csv.reader(file, quotechar="'")
             parsing_data = False
             attributes = []
 
-            for line in reader:
-                length = len(line)
+            for line in file:
+                line = line.strip()
 
-                if not parsing_data and length > 0 and \
-                        line[0].upper() == "@DATA":
-                    parsing_data = True
-                elif not parsing_data and length > 0 and \
-                        line[0].upper().startswith("@ATTRIBUTE"):
-                    if length > 1 or line[0].find("{") > 0:
+                if len(line) == 0:
+                    continue
+                elif not parsing_data and \
+                        line.upper().startswith("@ATTRIBUTE"):
+                    if line.find("{") >= 0:
                         data_type = "NOMINAL"
                     else:
-                        line[0] = line[0].strip()
-                        data_type = line[0][line[0].rfind(" ") + 1:].upper()
+                        data_type = line[line.rfind(" ") + 1:].upper()
 
-                    if self.verbose:
+                    if self.__verbose:
                         print("Attribute: " + data_type)
 
                     attributes.append(data_type)
-
-                elif parsing_data and length > 0:
+                elif not parsing_data and line.upper() == "@DATA":
+                    parsing_data = True
+                elif parsing_data:
+                    current_attribute = 0
                     text = ""
-                    weight = 1
+                    value = ""
                     values = []
+                    weight = 1
+                    in_quotes = False
 
-                    if self.verbose:
+                    if self.__verbose:
                         print(line)
 
-                    if length > 2:
-                        weighted = False
+                    if line.endswith("}"):
+                        index = line.rfind(",{")
 
-                        if line[length - 1].startswith("{") and \
-                                line[length - 1].endswith("}"):
-                            weight = line[length - 1]
-                            weight = float(weight[1:len(weight) - 1])
-                            weighted = True
+                        if index >= 0:
+                            weight = float(line[index + 2:len(line) - 1])
+                            line = line[:index]
 
-                        for i in range(0, length - (2 if weighted else 1)):
-                            attribute = attributes[i]
-                            value = line[i]
+                    index = line.rfind(",")
+                    label = line[index + 1:]
+                    line = line[:index]
 
-                            if attribute == "STRING" or attribute == "NOMINAL":
+                    for i in range(0, len(line)):
+                        if line[i] == "'" and (i == 0 or line[i - 1] != "\\"):
+                            in_quotes = not in_quotes
+                        elif not in_quotes and line[i] == ",":
+                            if attributes[current_attribute] == "STRING" or \
+                                    attributes[current_attribute] == "NOMINAL":
                                 text += (" " if len(text) > 0 else "") + value
                             else:
                                 values.append(float(value))
 
-                        label = line[length - (2 if weighted else 1)]
+                            value = ""
+                            current_attribute += 1
+                        elif line[i] != "\\":
+                            value += line[i]
+
+                    if attributes[current_attribute] == "STRING" or \
+                            attributes[current_attribute] == "NOMINAL":
+                        text += (" " if len(text) > 0 else "") + value
+                    else:
+                        values.append(float(value))
 
                     dataset.append(Instance(text, label, weight, values))
 
@@ -128,7 +141,7 @@ class TextDatasetFileParser(object):
             reader = csv.reader(file, delimiter=delimit, quotechar=quote_char)
 
             for line in reader:
-                if self.verbose:
+                if self.__verbose:
                     print(line)
 
                 if len(line) > 1:
