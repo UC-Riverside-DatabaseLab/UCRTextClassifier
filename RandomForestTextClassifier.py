@@ -71,9 +71,9 @@ class RandomForestTextClassifier(AbstractTextClassifier):
 
         training_data = self.__vectorizer.fit_transform(training_data)
 
-        for i in range(0, len(data)):
-            if len(data[i].values) > 0:
-                training_data[i] += np.array(data[i].values)
+        if len(data[0].values) > 0:
+            training_values = np.array(training_values)
+            training_data = hstack([training_data, training_values]).toarray()
 
         self.__random_forest.fit(training_data, np.array(training_labels),
                                  np.array(training_weights))
@@ -83,10 +83,14 @@ class RandomForestTextClassifier(AbstractTextClassifier):
         test_data = self.__vectorizer.transform([instance.text])
 
         if len(instance.values) > 0:
-            test_data += np.array(instance.values)
+            values = np.array(instance.values)
+            test_data = hstack([test_data, values]).toarray()
 
-        ordered_distribution = self.__random_forest.predict_proba(test_data)
+        ordered_dist = self.__random_forest.predict_proba(test_data)
 
+        for i in range(0, len(ordered_dist[0])):
+            if ordered_dist[0, i] > 0:
                 class_value = self.__random_forest.classes_[i]
+                distribution[class_value] = ordered_dist[0, i]
 
         return distribution

@@ -6,6 +6,7 @@ import time
 from AbstractTextClassifier import AbstractTextClassifier
 from gensim.models.word2vec import Word2Vec, LineSentence
 from pathlib import Path
+from scipy.sparse import hstack
 from tensorflow.contrib.learn import preprocessing
 
 
@@ -71,6 +72,10 @@ class CNNClassifier(AbstractTextClassifier):
         distribution = {}
         text = self.__clean_str(instance.text.strip())
         x_test = np.array(list(self.__vocab_proc.transform([text])))
+
+        if len(instance.values) > 0:
+            x_test = hstack([x_test, np.array(instance.values)]).toarray()
+
         input_x = self.__graph.get_operation_by_name("input_x").outputs[0]
         name = "dropout_keep_prob"
         dkp = self.__graph.get_operation_by_name(name).outputs[0]
@@ -194,6 +199,14 @@ class CNNClassifier(AbstractTextClassifier):
         max_doc_length = max([len(x.split(" ")) for x in x_text])
         self.__vocab_proc = preprocessing.VocabularyProcessor(max_doc_length)
         x = np.array(list(self.__vocab_proc.fit_transform(x_text)))
+
+        if len(data[0].values) > 0:
+            values = []
+
+            for instance in data:
+                values.append(instance.values)
+
+            x = hstack([x, np.array(values)]).array()
 
         np.random.seed(self.__random_state)
 
